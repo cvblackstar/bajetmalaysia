@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        if (isNaN(age) || age < 15 || age > 100) {
+        if (isNaN(age) || age < 14 || age > 100) {
             alert("Sila masukkan umur yang sah.");
             return;
         }
@@ -38,88 +38,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* =========================
            EPF / KWSP
+           Effective October 2025
         ========================= */
 
-        let epfRate = 0;
-
-        if (status === "malaysian") {
-
-            if (age < 60) {
-                epfRate = 0.11;
-            } else {
-                epfRate = 0;
-            }
-
-        } else if (status === "pr") {
-
-            if (age < 60) {
-                epfRate = 0.11;
-            } else {
-                epfRate = 0.055;
-            }
-
-        } else if (status === "nonmalaysian") {
-
-            epfRate = 0.02;
-        }
-
-
-        let epf = grossSalary * epfRate;
-
-
-        /*
-         * EPF contribution is based on the official contribution
-         * schedule rather than simply multiplying salary by a rate.
-         *
-         * This first version uses a percentage estimate.
-         */
-
-        epf = roundMoney(epf);
+        const epf = calculateEPF(
+            grossSalary,
+            age,
+            status
+        );
 
 
         /* =========================
            SOCSO / PERKESO
+           Act 4 - Employee Share
         ========================= */
 
-        let socso = 0;
-
-        if (age < 60) {
-
-            /*
-             * First Category contribution.
-             * Employee share is approximately 0.5%.
-             */
-
-            socso = Math.min(grossSalary, 6000) * 0.005;
-
-        } else {
-
-            /*
-             * Generally no employee share for Second Category.
-             */
-
-            socso = 0;
-        }
-
-        socso = roundMoney(socso);
+        const socso = calculateSOCSO(
+            grossSalary,
+            age
+        );
 
 
         /* =========================
            EIS / SIP
+           Act 800 - Employee Share
         ========================= */
 
-        let eis = 0;
-
-        if (
-            eisApplicable &&
-            age >= 18 &&
-            age <= 60
-        ) {
-
-            eis = Math.min(grossSalary, 6000) * 0.002;
-        }
-
-        eis = roundMoney(eis);
+        const eis = calculateEIS(
+            grossSalary,
+            age,
+            eisApplicable
+        );
 
 
         /* =========================
@@ -142,15 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* =========================
-           EFFECTIVE DEDUCTION
-        ========================= */
-
-        const deductionPercentage =
-            (totalDeductions / grossSalary) * 100;
-
-
-        /* =========================
-           DISPLAY RESULTS
+           DISPLAY
         ========================= */
 
         document.getElementById("resultGross").textContent =
@@ -170,33 +111,398 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("netSalary").textContent =
             formatRM(netSalary);
+    }
 
 
-        console.log(
-            "Anggaran potongan:",
-            deductionPercentage.toFixed(2) + "%"
+    /* =====================================================
+       EPF / KWSP
+       ===================================================== */
+
+    function calculateEPF(
+        salary,
+        age,
+        status
+    ) {
+
+        /*
+         * Malaysian citizen below 60:
+         * Employee 11%
+         *
+         * PR below 60:
+         * Employee 11%
+         *
+         * Malaysian citizen age 60+:
+         * Employee 0%
+         *
+         * PR age 60+:
+         * Employee 5.5%
+         *
+         * Non-Malaysian:
+         * Employee 2%
+         */
+
+
+        /* Non-Malaysian */
+        if (status === "nonmalaysian") {
+
+            return roundMoney(
+                salary * 0.02
+            );
+        }
+
+
+        /* Malaysian citizen */
+        if (status === "malaysian") {
+
+            if (age >= 60) {
+
+                return calculateEPFSchedule(
+                    salary,
+                    0.04,
+                    0
+                );
+            }
+
+            return calculateEPFSchedule(
+                salary,
+                salary <= 5000 ? 0.13 : 0.12,
+                0.11
+            );
+        }
+
+
+        /* Permanent Resident */
+        if (status === "pr") {
+
+            if (age >= 60) {
+
+                return calculateEPFSchedule(
+                    salary,
+                    salary <= 5000 ? 0.065 : 0.06,
+                    0.055
+                );
+            }
+
+            return calculateEPFSchedule(
+                salary,
+                salary <= 5000 ? 0.13 : 0.12,
+                0.11
+            );
+        }
+
+
+        return 0;
+    }
+
+
+    /*
+     * Calculates employee EPF contribution
+     * using the wage-band approach.
+     *
+     * For wages up to RM20,000:
+     * the official schedule is used through
+     * the upper boundary of the applicable band.
+     *
+     * Above RM20,000:
+     * percentage calculation applies.
+     */
+
+    function calculateEPFSchedule(
+        salary,
+        employerRate,
+        employeeRate
+    ) {
+
+        /* No contribution for extremely small wages */
+        if (salary <= 10) {
+            return 0;
+        }
+
+
+        /*
+         * Above RM20,000:
+         * official schedule permits percentage calculation.
+         */
+
+        if (salary > 20000) {
+
+            const employee =
+                salary * employeeRate;
+
+            const employer =
+                salary * employerRate;
+
+            /*
+             * EPF requires total contribution,
+             * including sen, to be rounded upward.
+             *
+             * We derive the employee portion here
+             * while keeping the employee calculation
+             * consistent with the statutory rate.
+             */
+
+            const total =
+                Math.ceil(
+                    (employee + employer) * 100
+                ) / 100;
+
+            const roundedTotal =
+                Math.ceil(total);
+
+            return roundMoney(
+                roundedTotal -
+                employer
+            );
+        }
+
+
+        /*
+         * Wage bands:
+         *
+         * RM10.01 - RM20.00
+         * then RM20 bands up to RM20,000.
+         */
+
+        let upperBand;
+
+        if (salary <= 20) {
+
+            upperBand = 20;
+
+        } else {
+
+            upperBand =
+                Math.ceil(salary / 20) * 20;
+        }
+
+
+        /*
+         * Special handling for wages
+         * above RM20,000 is already done above.
+         */
+
+        let employeeContribution =
+            Math.ceil(
+                upperBand * employeeRate
+            );
+
+
+        /*
+         * For Malaysian age 60+,
+         * employee contribution is zero.
+         */
+
+        if (employeeRate === 0) {
+
+            employeeContribution = 0;
+        }
+
+
+        return employeeContribution;
+    }
+
+
+    /* =====================================================
+       SOCSO / PERKESO
+       ===================================================== */
+
+    function calculateSOCSO(
+        salary,
+        age
+    ) {
+
+        /*
+         * Current calculator focuses on
+         * Act 4 employee contribution.
+         *
+         * Wage ceiling:
+         * RM6,000.
+         */
+
+        if (age >= 60) {
+
+            /*
+             * Second Category has no employee
+             * contribution under the traditional
+             * Act 4 employee share.
+             */
+
+            return 0;
+        }
+
+
+        if (salary <= 0) {
+            return 0;
+        }
+
+
+        /*
+         * PERKESO wage ceiling
+         */
+
+        const wage =
+            Math.min(
+                salary,
+                6000
+            );
+
+
+        /*
+         * Very low wages.
+         * These bands are rarely relevant for
+         * normal salaried employees, but we handle
+         * them separately.
+         */
+
+        if (wage <= 100) {
+
+            if (wage <= 30) {
+                return 0.15;
+            }
+
+            if (wage <= 50) {
+                return 0.25;
+            }
+
+            if (wage <= 70) {
+                return 0.35;
+            }
+
+            return 0.50;
+        }
+
+
+        /*
+         * PERKESO uses an assumed monthly wage
+         * for each RM100 wage band.
+         *
+         * Example:
+         *
+         * RM4,900.01 - RM5,000.00
+         *
+         * Assumed wage = RM4,950
+         *
+         * Employee share = 0.5%
+         * RM4,950 × 0.5% = RM24.75
+         */
+
+        const upperBand =
+            Math.ceil(wage / 100) * 100;
+
+        const lowerBand =
+            upperBand - 100;
+
+        const assumedWage =
+            (upperBand + lowerBand) / 2;
+
+
+        const employeeContribution =
+            assumedWage * 0.005;
+
+
+        return roundMoney(
+            employeeContribution
         );
     }
 
 
-    /* =========================
-       MONEY FORMAT
-    ========================= */
+    /* =====================================================
+       EIS / SIP
+       ===================================================== */
 
-    function formatRM(amount) {
+    function calculateEIS(
+        salary,
+        age,
+        applicable
+    ) {
 
-        return new Intl.NumberFormat("ms-MY", {
-            style: "currency",
-            currency: "MYR",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(amount);
+        if (!applicable) {
+            return 0;
+        }
+
+
+        /*
+         * EIS generally applies from age 18
+         * until age 60, subject to eligibility
+         * and statutory exceptions.
+         */
+
+        if (age < 18 || age > 60) {
+            return 0;
+        }
+
+
+        /*
+         * EIS wage ceiling:
+         * RM6,000
+         */
+
+        const wage =
+            Math.min(
+                salary,
+                6000
+            );
+
+
+        if (wage <= 30) {
+            return 0;
+        }
+
+
+        /*
+         * EIS uses assumed monthly wages.
+         *
+         * Example:
+         *
+         * RM4,900.01 - RM5,000
+         *
+         * Assumed wage = RM4,950
+         *
+         * Employee:
+         * RM4,950 × 0.2% = RM9.90
+         */
+
+        const upperBand =
+            Math.ceil(wage / 100) * 100;
+
+        const lowerBand =
+            upperBand - 100;
+
+        const assumedWage =
+            (upperBand + lowerBand) / 2;
+
+
+        const employeeContribution =
+            assumedWage * 0.002;
+
+
+        return roundMoney(
+            employeeContribution
+        );
     }
 
 
-    /* =========================
-       ROUND MONEY
-    ========================= */
+    /* =====================================================
+       MONEY FORMAT
+       ===================================================== */
+
+    function formatRM(amount) {
+
+        return new Intl.NumberFormat(
+            "ms-MY",
+            {
+                style: "currency",
+                currency: "MYR",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        ).format(amount);
+    }
+
+
+    /* =====================================================
+       ROUNDING
+       ===================================================== */
 
     function roundMoney(amount) {
 
