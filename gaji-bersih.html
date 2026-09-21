@@ -8,7 +8,7 @@
 
     <meta
         name="description"
-        content="Kira anggaran gaji bersih di Malaysia selepas potongan EPF, SOCSO dan EIS."
+        content="Kira anggaran gaji bersih Malaysia selepas KWSP, SOCSO, EIS dan PCB."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -34,7 +34,7 @@
     </header>
 
 
-    <!-- PAGE INTRO -->
+    <!-- MAIN -->
     <main>
 
         <section class="section">
@@ -42,24 +42,30 @@
             <div class="container">
 
                 <div class="section-heading">
-                    <span class="eyebrow">Kalkulator</span>
 
-                    <h1>Kalkulator Gaji Bersih</h1>
+                    <span class="eyebrow">
+                        Kalkulator
+                    </span>
+
+                    <h1>Kalkulator Gaji Bersih Malaysia</h1>
 
                     <p>
-                        Masukkan gaji kasar anda untuk melihat anggaran jumlah
-                        yang tinggal selepas potongan statutori utama.
+                        Masukkan maklumat gaji dan status anda untuk mendapatkan
+                        anggaran jumlah yang tinggal selepas potongan utama.
                     </p>
+
                 </div>
 
 
                 <!-- CALCULATOR -->
                 <div class="calculator-layout">
 
-                    <!-- INPUT CARD -->
+
+                    <!-- INPUT -->
                     <div class="calculator-form-card">
 
                         <h2>Maklumat Gaji</h2>
+
 
                         <div class="form-group">
 
@@ -68,6 +74,7 @@
                             </label>
 
                             <div class="input-wrapper">
+
                                 <span>RM</span>
 
                                 <input
@@ -77,11 +84,11 @@
                                     min="0"
                                     step="0.01"
                                 >
+
                             </div>
 
                             <small>
-                                Masukkan jumlah gaji kasar sebelum sebarang
-                                potongan.
+                                Gaji sebelum KWSP, SOCSO, EIS dan PCB.
                             </small>
 
                         </div>
@@ -97,7 +104,7 @@
                                 type="number"
                                 id="age"
                                 placeholder="Contoh: 35"
-                                min="15"
+                                min="14"
                                 max="100"
                             >
 
@@ -129,6 +136,143 @@
                         </div>
 
 
+                        <!-- TAX INFORMATION -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Maklumat PCB
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="maritalStatus">
+                                Status perkahwinan
+                            </label>
+
+                            <select id="maritalStatus">
+
+                                <option value="single">
+                                    Bujang
+                                </option>
+
+                                <option value="marriedWorking">
+                                    Berkahwin — pasangan bekerja
+                                </option>
+
+                                <option value="marriedNotWorking">
+                                    Berkahwin — pasangan tidak bekerja
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="children">
+                                Bilangan anak yang layak mendapat pelepasan
+                            </label>
+
+                            <input
+                                type="number"
+                                id="children"
+                                value="0"
+                                min="0"
+                                max="20"
+                            >
+
+                            <small>
+                                Buat masa ini masukkan jumlah anak yang
+                                memenuhi syarat pelepasan cukai.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="zakat">
+                                Zakat bulanan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="zakat"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Jika tiada bayaran zakat bulanan, masukkan RM0.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="month">
+                                Bulan pengiraan
+                            </label>
+
+                            <select id="month">
+
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Mac</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Jun</option>
+                                <option value="7">Julai</option>
+                                <option value="8">Ogos</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bonus">
+                                Bonus / pendapatan tambahan bulan ini
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bonus"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Jika tiada bonus atau pendapatan tambahan,
+                                masukkan RM0.
+                            </small>
+
+                        </div>
+
+
                         <div class="form-group">
 
                             <label class="checkbox-label">
@@ -145,12 +289,6 @@
 
                             </label>
 
-                            <small>
-                                Sesetengah pekerja mungkin dikecualikan
-                                daripada EIS bergantung kepada umur dan
-                                sejarah caruman.
-                            </small>
-
                         </div>
 
 
@@ -165,14 +303,17 @@
                     </div>
 
 
-                    <!-- RESULT CARD -->
+                    <!-- RESULT -->
                     <div class="calculator-result-card">
 
                         <h2>Anggaran Gaji Bersih</h2>
 
+
                         <div class="take-home">
 
-                            <span>Gaji bersih</span>
+                            <span>
+                                Gaji bersih
+                            </span>
 
                             <strong id="netSalary">
                                 RM0.00
@@ -185,7 +326,9 @@
 
                             <div class="result-row">
 
-                                <span>Gaji kasar</span>
+                                <span>
+                                    Gaji kasar
+                                </span>
 
                                 <strong id="resultGross">
                                     RM0.00
@@ -196,7 +339,9 @@
 
                             <div class="result-row">
 
-                                <span>EPF / KWSP</span>
+                                <span>
+                                    EPF / KWSP
+                                </span>
 
                                 <strong id="resultEpf">
                                     RM0.00
@@ -207,7 +352,9 @@
 
                             <div class="result-row">
 
-                                <span>SOCSO / PERKESO</span>
+                                <span>
+                                    SOCSO / PERKESO
+                                </span>
 
                                 <strong id="resultSocso">
                                     RM0.00
@@ -218,7 +365,9 @@
 
                             <div class="result-row">
 
-                                <span>EIS / SIP</span>
+                                <span>
+                                    EIS / SIP
+                                </span>
 
                                 <strong id="resultEis">
                                     RM0.00
@@ -227,9 +376,24 @@
                             </div>
 
 
+                            <div class="result-row">
+
+                                <span>
+                                    PCB
+                                </span>
+
+                                <strong id="resultPcb">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
                             <div class="result-row total-row">
 
-                                <span>Jumlah potongan</span>
+                                <span>
+                                    Jumlah potongan
+                                </span>
 
                                 <strong id="resultTotal">
                                     RM0.00
@@ -244,11 +408,9 @@
 
                             <strong>Nota PCB</strong>
 
-                            <p>
-                                Anggaran ini belum memasukkan Potongan Cukai
-                                Bulanan (PCB). Jumlah sebenar gaji bersih
-                                mungkin berbeza selepas mengambil kira PCB,
-                                pelepasan cukai dan keadaan individu.
+                            <p id="pcbNote">
+                                PCB akan dikira berdasarkan maklumat yang
+                                dimasukkan dan kaedah pengiraan PCB 2026.
                             </p>
 
                         </div>
@@ -277,7 +439,7 @@
 
                     <p>
                         Gaji kasar bukan semestinya jumlah yang masuk ke akaun
-                        bank. Beberapa caruman dan potongan statutori boleh
+                        bank. Beberapa caruman dan potongan cukai boleh
                         mengurangkan jumlah tersebut.
                     </p>
 
@@ -288,9 +450,13 @@
 
                     <article class="topic">
 
-                        <div class="topic-icon">🏦</div>
+                        <div class="topic-icon">
+                            🏦
+                        </div>
 
-                        <h3>EPF / KWSP</h3>
+                        <h3>
+                            EPF / KWSP
+                        </h3>
 
                         <p>
                             Caruman kepada Kumpulan Wang Simpanan Pekerja
@@ -302,9 +468,13 @@
 
                     <article class="topic">
 
-                        <div class="topic-icon">🛡️</div>
+                        <div class="topic-icon">
+                            🛡️
+                        </div>
 
-                        <h3>SOCSO / PERKESO</h3>
+                        <h3>
+                            SOCSO / PERKESO
+                        </h3>
 
                         <p>
                             Perlindungan keselamatan sosial untuk pekerja
@@ -316,13 +486,35 @@
 
                     <article class="topic">
 
-                        <div class="topic-icon">💼</div>
+                        <div class="topic-icon">
+                            💼
+                        </div>
 
-                        <h3>EIS / SIP</h3>
+                        <h3>
+                            EIS / SIP
+                        </h3>
 
                         <p>
                             Caruman Sistem Insurans Pekerjaan bagi pekerja
                             yang tertakluk kepada skim tersebut.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🧾
+                        </div>
+
+                        <h3>
+                            PCB
+                        </h3>
+
+                        <p>
+                            Potongan cukai pendapatan bulanan yang dibuat
+                            oleh majikan untuk dihantar kepada HASiL.
                         </p>
 
                     </article>
@@ -334,7 +526,7 @@
         </section>
 
 
-        <!-- IMPORTANT NOTE -->
+        <!-- DISCLAIMER -->
         <section class="section">
 
             <div class="container">
@@ -345,12 +537,14 @@
                         Penting
                     </span>
 
-                    <h2>Ini ialah anggaran, bukan slip gaji sebenar</h2>
+                    <h2>
+                        Ini ialah anggaran, bukan slip gaji sebenar
+                    </h2>
 
                     <p>
-                        Pengiraan sebenar boleh berbeza berdasarkan jadual
-                        caruman rasmi, status pekerja, umur, PCB, manfaat
-                        pekerjaan dan keadaan individu.
+                        Pengiraan sebenar boleh berbeza berdasarkan status
+                        cukai, maklumat gaji terkumpul, pelepasan, rebat,
+                        zakat, bonus, manfaat pekerjaan dan keadaan individu.
                     </p>
 
                 </div>
@@ -389,7 +583,6 @@
     </footer>
 
 
-    <!-- JAVASCRIPT -->
     <script src="gaji-bersih.js"></script>
 
 </body>
