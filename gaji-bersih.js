@@ -36,6 +36,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("bonus").value
             ) || 0;
 
+        /*
+         * IMPORTANT:
+         * HTML kita menggunakan id "eisApplicable".
+         */
         const includeEis =
             document.getElementById("eisApplicable").checked;
 
@@ -125,20 +129,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /*
          * ==========================================
-         * PCB (ANGGARAN)
+         * PCB ANGARAN 2026
          * ==========================================
          */
 
-        let pcb = calculatePCB(
-            grossSalary,
-            bonus,
-            epf,
-            socso,
-            eis,
-            maritalStatus,
-            children,
-            zakat
-        );
+        const pcb =
+            calculatePCB2026(
+                grossSalary,
+                bonus,
+                epf,
+                socso,
+                eis,
+                maritalStatus,
+                children,
+                zakat
+            );
 
 
         /*
@@ -161,7 +166,11 @@ document.addEventListener("DOMContentLoaded", function () {
          */
 
         const net =
-            grossSalary - epf - socso - eis - pcb;
+            grossSalary -
+            epf -
+            socso -
+            eis -
+            pcb;
 
 
         /*
@@ -196,11 +205,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /*
      * ==========================================
-     * PCB ESTIMATE
+     * PCB 2026 - ANGGARAN
      * ==========================================
+     *
+     * Based on the structure of HASiL's
+     * computerized PCB calculation.
+     *
+     * This is NOT an official payroll engine.
      */
 
-    function calculatePCB(
+    function calculatePCB2026(
         monthlySalary,
         bonus,
         monthlyEpf,
@@ -212,21 +226,25 @@ document.addEventListener("DOMContentLoaded", function () {
     ) {
 
         /*
-         * Annual income
+         * ------------------------------------------
+         * Annual remuneration
+         * ------------------------------------------
          */
 
         const annualSalary =
             monthlySalary * 12;
 
         const annualBonus =
-            Math.max(bonus, 0);
+            Math.max(0, bonus);
 
-        const annualIncome =
+        const annualGross =
             annualSalary + annualBonus;
 
 
         /*
-         * Personal relief
+         * ------------------------------------------
+         * Individual relief
+         * ------------------------------------------
          */
 
         let relief =
@@ -234,10 +252,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
+         * ------------------------------------------
          * Spouse relief
-         *
-         * This calculator assumes:
-         * marriedNonWorking = spouse has no income
+         * ------------------------------------------
          */
 
         if (
@@ -250,57 +267,85 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
+         * ------------------------------------------
          * Child relief
+         * ------------------------------------------
          *
-         * Basic estimate:
-         * RM2,000 per child
+         * Basic assumption:
+         * all children entered are eligible
+         * for RM2,000 each.
          */
 
+        const childCount =
+            Math.max(0, children);
+
         relief +=
-            Math.max(children, 0) * 2000;
+            childCount * 2000;
 
 
         /*
+         * ------------------------------------------
          * EPF relief
+         * ------------------------------------------
          *
-         * Estimated annual maximum RM4,000
+         * Employee EPF contribution eligible
+         * for this simplified calculation is
+         * capped at RM4,000 annually.
          */
 
         const annualEpf =
             monthlyEpf * 12;
 
-        relief +=
-            Math.min(annualEpf, 4000);
+        const epfRelief =
+            Math.min(
+                annualEpf,
+                4000
+            );
+
+        relief += epfRelief;
 
 
         /*
-         * SOCSO + EIS relief
+         * ------------------------------------------
+         * PERKESO relief
+         * ------------------------------------------
          *
-         * Estimated maximum RM350
+         * HASiL lists PERKESO contribution relief
+         * at a maximum of RM350.
          */
 
-        const annualSocsoEis =
-            (monthlySocso + monthlyEis) * 12;
+        const annualSocso =
+            monthlySocso * 12;
 
-        relief +=
-            Math.min(annualSocsoEis, 350);
+        const socsoRelief =
+            Math.min(
+                annualSocso,
+                350
+            );
+
+        relief += socsoRelief;
 
 
         /*
+         * ------------------------------------------
          * Chargeable income
+         * ------------------------------------------
          */
 
         const chargeableIncome =
             Math.max(
                 0,
-                annualIncome - relief
+                annualGross - relief
             );
 
 
         /*
-         * ======================================
-         * MALAYSIA INDIVIDUAL TAX ESTIMATE
-         * ======================================
+         * ------------------------------------------
+         * Income tax calculation
+         * ------------------------------------------
+         *
+         * Progressive resident individual
+         * tax rates.
          */
 
         let tax = 0;
@@ -313,81 +358,111 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (chargeableIncome <= 20000) {
 
             tax =
-                (chargeableIncome - 5000) * 0.01;
+                (chargeableIncome - 5000) *
+                0.01;
 
         } else if (chargeableIncome <= 35000) {
 
             tax =
                 150 +
-                (chargeableIncome - 20000) * 0.03;
+                (chargeableIncome - 20000) *
+                0.03;
 
         } else if (chargeableIncome <= 50000) {
 
             tax =
                 600 +
-                (chargeableIncome - 35000) * 0.06;
+                (chargeableIncome - 35000) *
+                0.06;
 
         } else if (chargeableIncome <= 70000) {
 
             tax =
                 1500 +
-                (chargeableIncome - 50000) * 0.11;
+                (chargeableIncome - 50000) *
+                0.11;
 
         } else if (chargeableIncome <= 100000) {
 
             tax =
                 3700 +
-                (chargeableIncome - 70000) * 0.19;
+                (chargeableIncome - 70000) *
+                0.19;
 
         } else if (chargeableIncome <= 400000) {
 
             tax =
                 9400 +
-                (chargeableIncome - 100000) * 0.25;
+                (chargeableIncome - 100000) *
+                0.25;
 
         } else if (chargeableIncome <= 600000) {
 
             tax =
                 84400 +
-                (chargeableIncome - 400000) * 0.26;
+                (chargeableIncome - 400000) *
+                0.26;
 
         } else if (chargeableIncome <= 2000000) {
 
             tax =
                 136400 +
-                (chargeableIncome - 600000) * 0.28;
+                (chargeableIncome - 600000) *
+                0.28;
 
         } else {
 
             tax =
                 528400 +
-                (chargeableIncome - 2000000) * 0.30;
+                (chargeableIncome - 2000000) *
+                0.30;
 
         }
 
 
         /*
-         * Individual rebate
+         * ------------------------------------------
+         * Individual / spouse rebate
+         * ------------------------------------------
          *
-         * Basic estimate for lower chargeable income.
+         * Basic estimate:
+         *
+         * Individual rebate RM400 if chargeable
+         * income <= RM35,000.
+         *
+         * Additional spouse rebate may apply
+         * where spouse has no income.
          */
 
         if (chargeableIncome <= 35000) {
 
             tax -= 400;
 
+
+            if (
+                maritalStatus ===
+                "marriedNotWorking"
+            ) {
+
+                tax -= 400;
+
+            }
+
         }
 
 
         /*
+         * ------------------------------------------
          * Zakat rebate
-         *
-         * Zakat can reduce tax payable,
-         * but cannot reduce it below zero.
+         * ------------------------------------------
          */
 
         const annualZakat =
-            Math.max(monthlyZakat, 0) * 12;
+            Math.max(
+                0,
+                monthlyZakat
+            ) * 12;
+
 
         tax =
             Math.max(
@@ -397,8 +472,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Convert annual estimate
-         * into monthly PCB estimate.
+         * ------------------------------------------
+         * Monthly estimate
+         * ------------------------------------------
          */
 
         let monthlyPCB =
@@ -406,7 +482,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * PCB below RM10 is generally not deducted.
+         * Round to sen
+         */
+
+        monthlyPCB =
+            Math.round(
+                monthlyPCB * 100
+            ) / 100;
+
+
+        /*
+         * PCB below RM10
          */
 
         if (monthlyPCB < 10) {
