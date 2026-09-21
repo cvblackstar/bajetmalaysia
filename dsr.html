@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kalkulator DSR (Debt Service Ratio) Malaysia | Bajet Malaysia</title>
+
+    <meta
+        name="description"
+        content="Kira nisbah khidmat hutang (DSR) anda berdasarkan pendapatan dan komitmen bulanan, dan fahami had DSR yang biasa digunakan bank di Malaysia."
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+
+            <a href="index.html" class="logo">
+                BAJET MALAYSIA
+            </a>
+
+            <nav class="main-nav">
+                <a href="index.html">Utama</a>
+                <a href="index.html#kalkulator">Kalkulator</a>
+                <a href="index.html#panduan">Panduan</a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <!-- MAIN -->
+    <main>
+
+        <section class="section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="eyebrow">
+                        Kalkulator
+                    </span>
+
+                    <h1>Kalkulator DSR Malaysia</h1>
+
+                    <p>
+                        Masukkan pendapatan dan komitmen bulanan anda untuk
+                        mendapatkan anggaran nisbah khidmat hutang (DSR) anda.
+                    </p>
+
+                </div>
+
+
+                <!-- CALCULATOR -->
+                <div class="calculator-layout">
+
+
+                    <!-- INPUT -->
+                    <div class="calculator-form-card">
+
+                        <h2>Pendapatan Bulanan</h2>
+
+
+                        <div class="form-group">
+
+                            <label for="grossIncome">
+                                Gaji kasar bulanan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="grossIncome"
+                                    placeholder="Contoh: 5000"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Pendapatan tetap sebelum sebarang potongan.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="otherIncome">
+                                Pendapatan lain (jika ada)
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="otherIncome"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Cth. sewa, komisen atau kerja sampingan. Sesetengah
+                                bank hanya kira sebahagian sahaja daripada
+                                pendapatan tidak tetap.
+                            </small>
+
+                        </div>
+
+
+                        <!-- COMMITMENTS -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Komitmen Bulanan Sedia Ada
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="homeLoan">
+                                Ansuran pinjaman perumahan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="homeLoan"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="carLoan">
+                                Ansuran pinjaman kereta
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="carLoan"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="personalLoan">
+                                Ansuran pinjaman peribadi
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="personalLoan"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="creditCard">
+                                Bayaran bulanan kad kredit
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="creditCard"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Biasanya dianggarkan sebagai 5% daripada baki
+                                tertunggak, atau bayaran minimum sebenar.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="ptptn">
+                                Ansuran PTPTN / pinjaman pendidikan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="ptptn"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="otherCommitment">
+                                Lain-lain komitmen bulanan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="otherCommitment"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Cth. sewa beli, insurans/takaful berjadual atau
+                                komitmen penjamin.
+                            </small>
+
+                        </div>
+
+
+                        <!-- NEW LOAN -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Pinjaman Baharu (Pilihan)
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="newLoan">
+                                Ansuran bulanan pinjaman baharu dicadangkan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="newLoan"
+                                    value="0"
+                                    min="0"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+                            <small>
+                                Isi jika anda ingin lihat kesan pinjaman baharu
+                                (cth. rumah atau kereta) terhadap DSR anda.
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="calculateDsrButton"
+                            class="button primary calculate-button"
+                        >
+                            Kira DSR
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULT -->
+                    <div class="calculator-result-card">
+
+                        <h2>Anggaran DSR Anda</h2>
+
+
+                        <div class="take-home">
+
+                            <span>
+                                Nisbah Khidmat Hutang (DSR)
+                            </span>
+
+                            <strong id="dsrPercentage">
+                                0%
+                            </strong>
+
+                            <span
+                                id="dsrBadge"
+                                class="dsr-badge good"
+                            >
+                                Masukkan maklumat anda
+                            </span>
+
+                        </div>
+
+
+                        <div class="dsr-gauge">
+
+                            <div
+                                id="dsrMarker"
+                                class="dsr-gauge-marker"
+                                style="left: 0%;"
+                            ></div>
+
+                        </div>
+
+                        <div class="dsr-gauge-labels">
+                            <span>0%</span>
+                            <span>30%</span>
+                            <span>60%</span>
+                            <span>70%</span>
+                            <span>100%</span>
+                        </div>
+
+
+                        <div class="result-list">
+
+                            <div class="result-row">
+
+                                <span>
+                                    Jumlah pendapatan
+                                </span>
+
+                                <strong id="resultIncome">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row">
+
+                                <span>
+                                    Komitmen sedia ada
+                                </span>
+
+                                <strong id="resultExisting">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row">
+
+                                <span>
+                                    Pinjaman baharu (jika ada)
+                                </span>
+
+                                <strong id="resultNewLoan">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row total-row">
+
+                                <span>
+                                    Jumlah keseluruhan komitmen
+                                </span>
+
+                                <strong id="resultTotalCommitment">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="pcb-notice">
+
+                            <strong id="dsrCapacityTitle">
+                                Ruang komitmen berbaki
+                            </strong>
+
+                            <p id="dsrCapacityNote">
+                                Masukkan pendapatan dan komitmen anda untuk
+                                melihat berapa banyak lagi ruang komitmen
+                                bulanan yang anda ada sebelum mencapai paras
+                                DSR 70%.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPLANATION -->
+        <section class="section light-section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="eyebrow">
+                        Faham DSR Anda
+                    </span>
+
+                    <h2>Apa itu DSR dan kenapa ia penting?</h2>
+
+                    <p>
+                        DSR (Debt Service Ratio) ialah nisbah yang digunakan
+                        bank untuk menilai berapa peratus pendapatan anda
+                        yang sudah terikat dengan komitmen hutang bulanan,
+                        sebelum meluluskan pinjaman baharu.
+                    </p>
+
+                </div>
+
+
+                <div class="topic-grid">
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🧮
+                        </div>
+
+                        <h3>
+                            Formula DSR
+                        </h3>
+
+                        <p>
+                            DSR = (Jumlah komitmen hutang bulanan ÷
+                            pendapatan kasar bulanan) × 100%.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🟢
+                        </div>
+
+                        <h3>
+                            DSR di bawah 60%
+                        </h3>
+
+                        <p>
+                            Biasanya dianggap sihat dan berada dalam julat
+                            yang selesa diterima kebanyakan bank.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🟠
+                        </div>
+
+                        <h3>
+                            DSR 60% – 70%
+                        </h3>
+
+                        <p>
+                            Dianggap tinggi. Kelulusan pinjaman baharu
+                            menjadi lebih sukar dan bergantung kepada
+                            dasar bank.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🔴
+                        </div>
+
+                        <h3>
+                            DSR melebihi 70%
+                        </h3>
+
+                        <p>
+                            Sangat tinggi. Kebanyakan bank menganggap ini
+                            berisiko dan permohonan pinjaman baharu
+                            berkemungkinan ditolak.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            💳
+                        </div>
+
+                        <h3>
+                            Apa dikira sebagai komitmen?
+                        </h3>
+
+                        <p>
+                            Ansuran pinjaman perumahan, kereta, peribadi,
+                            PTPTN, bayaran kad kredit dan sewa beli.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            📉
+                        </div>
+
+                        <h3>
+                            Cara kurangkan DSR
+                        </h3>
+
+                        <p>
+                            Selesaikan hutang kecil dahulu, elakkan
+                            komitmen baharu, atau tingkatkan pendapatan
+                            tetap anda.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DISCLAIMER -->
+        <section class="section">
+
+            <div class="container">
+
+                <div class="principle-box">
+
+                    <span class="eyebrow">
+                        Penting
+                    </span>
+
+                    <h2>
+                        Ini ialah anggaran, bukan keputusan bank sebenar
+                    </h2>
+
+                    <p>
+                        Setiap bank di Malaysia mempunyai had DSR dan kaedah
+                        pengiraan tersendiri, dan boleh berbeza mengikut
+                        tahap pendapatan, jenis pinjaman serta profil kredit
+                        pemohon. Gunakan kalkulator ini sebagai panduan
+                        awal sahaja, bukan jaminan kelulusan pinjaman.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <p class="footer-brand">
+                BAJET MALAYSIA
+            </p>
+
+            <p>
+                Faham Duit. Urus Duit. Rancang Hidup.
+            </p>
+
+            <p>
+                Maklumat di laman ini adalah untuk tujuan pendidikan dan
+                rujukan umum sahaja.
+            </p>
+
+            <p>
+                © 2026 Bajet Malaysia
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <script src="dsr.js"></script>
+
+</body>
+</html>
