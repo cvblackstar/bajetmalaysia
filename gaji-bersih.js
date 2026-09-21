@@ -1,92 +1,141 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const calculateButton = document.getElementById("calculateButton");
+    const calculateButton =
+        document.getElementById("calculateButton");
 
-    calculateButton.addEventListener("click", calculateSalary);
+    calculateButton.addEventListener(
+        "click",
+        calculateSalary
+    );
 
 
     function calculateSalary() {
 
-        const grossSalary = parseFloat(
-            document.getElementById("grossSalary").value
-        );
+        const grossSalary =
+            parseFloat(
+                document.getElementById("grossSalary").value
+            );
 
-        const age = parseInt(
-            document.getElementById("age").value
-        );
+        const age =
+            parseInt(
+                document.getElementById("age").value
+            );
 
-        const status = document.getElementById("status").value;
+        const status =
+            document.getElementById("status").value;
+
+        const maritalStatus =
+            document.getElementById("maritalStatus").value;
+
+        const children =
+            parseInt(
+                document.getElementById("children").value
+            ) || 0;
+
+        const zakat =
+            parseFloat(
+                document.getElementById("zakat").value
+            ) || 0;
+
+        const month =
+            parseInt(
+                document.getElementById("month").value
+            );
+
+        const bonus =
+            parseFloat(
+                document.getElementById("bonus").value
+            ) || 0;
 
         const eisApplicable =
-            document.getElementById("eisApplicable").checked;
+            document.getElementById(
+                "eisApplicable"
+            ).checked;
 
 
         /* =========================
            VALIDATION
         ========================= */
 
-        if (isNaN(grossSalary) || grossSalary <= 0) {
-            alert("Sila masukkan gaji kasar yang sah.");
+        if (
+            isNaN(grossSalary) ||
+            grossSalary <= 0
+        ) {
+            alert(
+                "Sila masukkan gaji kasar yang sah."
+            );
             return;
         }
 
-        if (isNaN(age) || age < 14 || age > 100) {
-            alert("Sila masukkan umur yang sah.");
+        if (
+            isNaN(age) ||
+            age < 14 ||
+            age > 100
+        ) {
+            alert(
+                "Sila masukkan umur yang sah."
+            );
             return;
         }
 
 
         /* =========================
-           EPF / KWSP
-           Effective October 2025
+           STATUTORY CONTRIBUTIONS
         ========================= */
 
-        const epf = calculateEPF(
-            grossSalary,
-            age,
-            status
-        );
+        const epf =
+            calculateEPF(
+                grossSalary,
+                age,
+                status
+            );
+
+        const socso =
+            calculateSOCSO(
+                grossSalary,
+                age
+            );
+
+        const eis =
+            calculateEIS(
+                grossSalary,
+                age,
+                eisApplicable
+            );
 
 
         /* =========================
-           SOCSO / PERKESO
-           Act 4 - Employee Share
+           PCB ESTIMATE
         ========================= */
 
-        const socso = calculateSOCSO(
-            grossSalary,
-            age
-        );
+        const pcb =
+            calculatePBCEstimate({
+                salary: grossSalary,
+                bonus: bonus,
+                age: age,
+                status: status,
+                maritalStatus: maritalStatus,
+                children: children,
+                zakat: zakat,
+                month: month,
+                epf: epf
+            });
 
 
         /* =========================
-           EIS / SIP
-           Act 800 - Employee Share
-        ========================= */
-
-        const eis = calculateEIS(
-            grossSalary,
-            age,
-            eisApplicable
-        );
-
-
-        /* =========================
-           TOTAL DEDUCTIONS
+           TOTAL
         ========================= */
 
         const totalDeductions =
             epf +
             socso +
-            eis;
+            eis +
+            pcb;
 
-
-        /* =========================
-           NET SALARY
-        ========================= */
 
         const netSalary =
-            grossSalary -
+            grossSalary +
+            bonus -
             totalDeductions;
 
 
@@ -94,23 +143,55 @@ document.addEventListener("DOMContentLoaded", function () {
            DISPLAY
         ========================= */
 
-        document.getElementById("resultGross").textContent =
-            formatRM(grossSalary);
+        document.getElementById(
+            "resultGross"
+        ).textContent =
+            formatRM(
+                grossSalary + bonus
+            );
 
-        document.getElementById("resultEpf").textContent =
+        document.getElementById(
+            "resultEpf"
+        ).textContent =
             formatRM(epf);
 
-        document.getElementById("resultSocso").textContent =
+        document.getElementById(
+            "resultSocso"
+        ).textContent =
             formatRM(socso);
 
-        document.getElementById("resultEis").textContent =
+        document.getElementById(
+            "resultEis"
+        ).textContent =
             formatRM(eis);
 
-        document.getElementById("resultTotal").textContent =
+        document.getElementById(
+            "resultPcb"
+        ).textContent =
+            formatRM(pcb);
+
+        document.getElementById(
+            "resultTotal"
+        ).textContent =
             formatRM(totalDeductions);
 
-        document.getElementById("netSalary").textContent =
+        document.getElementById(
+            "netSalary"
+        ).textContent =
             formatRM(netSalary);
+
+
+        const pcbNote =
+            document.getElementById(
+                "pcbNote"
+            );
+
+        pcbNote.textContent =
+            "PCB yang dipaparkan ialah anggaran berdasarkan " +
+            "pendapatan tahunan yang diunjurkan. Jumlah PCB " +
+            "sebenar majikan boleh berbeza kerana HASiL " +
+            "menggunakan rekod saraan dan caruman terkumpul " +
+            "serta keadaan cukai individu.";
     }
 
 
@@ -125,24 +206,20 @@ document.addEventListener("DOMContentLoaded", function () {
     ) {
 
         /*
-         * Malaysian citizen below 60:
-         * Employee 11%
+         * Current statutory employee rates:
          *
-         * PR below 60:
-         * Employee 11%
+         * Malaysian below 60: 11%
+         * Malaysian 60+: 0%
+         * PR below 60: 11%
+         * PR 60+: 5.5%
+         * Certain non-Malaysian members: 2%
          *
-         * Malaysian citizen age 60+:
-         * Employee 0%
-         *
-         * PR age 60+:
-         * Employee 5.5%
-         *
-         * Non-Malaysian:
-         * Employee 2%
+         * NOTE:
+         * Official EPF contributions use wage ranges
+         * and statutory rounding. This calculator therefore
+         * treats the result as an estimate.
          */
 
-
-        /* Non-Malaysian */
         if (status === "nonmalaysian") {
 
             return roundMoney(
@@ -151,41 +228,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Malaysian citizen */
         if (status === "malaysian") {
 
             if (age >= 60) {
-
-                return calculateEPFSchedule(
-                    salary,
-                    0.04,
-                    0
-                );
+                return 0;
             }
 
-            return calculateEPFSchedule(
+            return estimateEPF(
                 salary,
-                salary <= 5000 ? 0.13 : 0.12,
                 0.11
             );
         }
 
 
-        /* Permanent Resident */
         if (status === "pr") {
 
             if (age >= 60) {
 
-                return calculateEPFSchedule(
+                return estimateEPF(
                     salary,
-                    salary <= 5000 ? 0.065 : 0.06,
                     0.055
                 );
             }
 
-            return calculateEPFSchedule(
+            return estimateEPF(
                 salary,
-                salary <= 5000 ? 0.13 : 0.12,
                 0.11
             );
         }
@@ -195,110 +262,34 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    /*
-     * Calculates employee EPF contribution
-     * using the wage-band approach.
-     *
-     * For wages up to RM20,000:
-     * the official schedule is used through
-     * the upper boundary of the applicable band.
-     *
-     * Above RM20,000:
-     * percentage calculation applies.
-     */
-
-    function calculateEPFSchedule(
+    function estimateEPF(
         salary,
-        employerRate,
-        employeeRate
+        rate
     ) {
 
-        /* No contribution for extremely small wages */
-        if (salary <= 10) {
+        /*
+         * For common salaries this gives the expected
+         * employee contribution very closely.
+         *
+         * The official schedule should be used for
+         * payroll-level precision.
+         */
+
+        if (salary <= 0) {
             return 0;
         }
 
-
-        /*
-         * Above RM20,000:
-         * official schedule permits percentage calculation.
-         */
-
         if (salary > 20000) {
 
-            const employee =
-                salary * employeeRate;
-
-            const employer =
-                salary * employerRate;
-
-            /*
-             * EPF requires total contribution,
-             * including sen, to be rounded upward.
-             *
-             * We derive the employee portion here
-             * while keeping the employee calculation
-             * consistent with the statutory rate.
-             */
-
-            const total =
-                Math.ceil(
-                    (employee + employer) * 100
-                ) / 100;
-
-            const roundedTotal =
-                Math.ceil(total);
-
             return roundMoney(
-                roundedTotal -
-                employer
+                salary * rate
             );
         }
 
 
-        /*
-         * Wage bands:
-         *
-         * RM10.01 - RM20.00
-         * then RM20 bands up to RM20,000.
-         */
-
-        let upperBand;
-
-        if (salary <= 20) {
-
-            upperBand = 20;
-
-        } else {
-
-            upperBand =
-                Math.ceil(salary / 20) * 20;
-        }
-
-
-        /*
-         * Special handling for wages
-         * above RM20,000 is already done above.
-         */
-
-        let employeeContribution =
-            Math.ceil(
-                upperBand * employeeRate
-            );
-
-
-        /*
-         * For Malaysian age 60+,
-         * employee contribution is zero.
-         */
-
-        if (employeeRate === 0) {
-
-            employeeContribution = 0;
-        }
-
-
-        return employeeContribution;
+        return Math.ceil(
+            salary * rate
+        );
     }
 
 
@@ -311,25 +302,9 @@ document.addEventListener("DOMContentLoaded", function () {
         age
     ) {
 
-        /*
-         * Current calculator focuses on
-         * Act 4 employee contribution.
-         *
-         * Wage ceiling:
-         * RM6,000.
-         */
-
         if (age >= 60) {
-
-            /*
-             * Second Category has no employee
-             * contribution under the traditional
-             * Act 4 employee share.
-             */
-
             return 0;
         }
-
 
         if (salary <= 0) {
             return 0;
@@ -337,7 +312,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * PERKESO wage ceiling
+         * PERKESO wage ceiling:
+         * RM6,000
          */
 
         const wage =
@@ -348,60 +324,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Very low wages.
-         * These bands are rarely relevant for
-         * normal salaried employees, but we handle
-         * them separately.
+         * Simplified statutory wage-band estimate.
          */
 
+        if (wage <= 30) {
+            return 0.15;
+        }
+
+        if (wage <= 50) {
+            return 0.25;
+        }
+
+        if (wage <= 70) {
+            return 0.35;
+        }
+
         if (wage <= 100) {
-
-            if (wage <= 30) {
-                return 0.15;
-            }
-
-            if (wage <= 50) {
-                return 0.25;
-            }
-
-            if (wage <= 70) {
-                return 0.35;
-            }
-
             return 0.50;
         }
 
 
-        /*
-         * PERKESO uses an assumed monthly wage
-         * for each RM100 wage band.
-         *
-         * Example:
-         *
-         * RM4,900.01 - RM5,000.00
-         *
-         * Assumed wage = RM4,950
-         *
-         * Employee share = 0.5%
-         * RM4,950 × 0.5% = RM24.75
-         */
-
         const upperBand =
-            Math.ceil(wage / 100) * 100;
+            Math.ceil(
+                wage / 100
+            ) * 100;
 
         const lowerBand =
             upperBand - 100;
 
         const assumedWage =
-            (upperBand + lowerBand) / 2;
-
-
-        const employeeContribution =
-            assumedWage * 0.005;
+            (
+                upperBand +
+                lowerBand
+            ) / 2;
 
 
         return roundMoney(
-            employeeContribution
+            assumedWage * 0.005
         );
     }
 
@@ -420,22 +379,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return 0;
         }
 
-
-        /*
-         * EIS generally applies from age 18
-         * until age 60, subject to eligibility
-         * and statutory exceptions.
-         */
-
-        if (age < 18 || age > 60) {
+        if (
+            age < 18 ||
+            age > 60
+        ) {
             return 0;
         }
 
-
-        /*
-         * EIS wage ceiling:
-         * RM6,000
-         */
 
         const wage =
             Math.min(
@@ -449,44 +399,442 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-         * EIS uses assumed monthly wages.
-         *
-         * Example:
-         *
-         * RM4,900.01 - RM5,000
-         *
-         * Assumed wage = RM4,950
-         *
-         * Employee:
-         * RM4,950 × 0.2% = RM9.90
-         */
-
         const upperBand =
-            Math.ceil(wage / 100) * 100;
+            Math.ceil(
+                wage / 100
+            ) * 100;
 
         const lowerBand =
             upperBand - 100;
 
         const assumedWage =
-            (upperBand + lowerBand) / 2;
-
-
-        const employeeContribution =
-            assumedWage * 0.002;
+            (
+                upperBand +
+                lowerBand
+            ) / 2;
 
 
         return roundMoney(
-            employeeContribution
+            assumedWage * 0.002
         );
     }
 
 
     /* =====================================================
-       MONEY FORMAT
+       PCB ESTIMATE
        ===================================================== */
 
-    function formatRM(amount) {
+    function calculatePBCEstimate(data) {
+
+        const salary =
+            data.salary;
+
+        const bonus =
+            data.bonus;
+
+        const age =
+            data.age;
+
+        const status =
+            data.status;
+
+        const maritalStatus =
+            data.maritalStatus;
+
+        const children =
+            Math.max(
+                0,
+                data.children
+            );
+
+        const monthlyZakat =
+            Math.max(
+                0,
+                data.zakat
+            );
+
+
+        /*
+         * Annual employment income.
+         */
+
+        const annualSalary =
+            salary * 12;
+
+        const annualBonus =
+            bonus;
+
+        const annualGross =
+            annualSalary +
+            annualBonus;
+
+
+        /*
+         * EPF annual contribution.
+         *
+         * Tax relief for compulsory EPF is capped
+         * within the relevant statutory relief.
+         *
+         * For this estimate we use RM4,000 as the
+         * EPF component.
+         */
+
+        const annualEPF =
+            Math.min(
+                data.epf * 12,
+                4000
+            );
+
+
+        /*
+         * Individual relief.
+         */
+
+        let relief =
+            9000;
+
+
+        /*
+         * Spouse relief.
+         *
+         * Only spouse without income receives
+         * the RM4,000 basic spouse relief.
+         */
+
+        if (
+            maritalStatus ===
+            "marriedNotWorking"
+        ) {
+
+            relief += 4000;
+        }
+
+
+        /*
+         * Child relief.
+         *
+         * Basic estimate:
+         * RM2,000 per qualifying child.
+         */
+
+        relief +=
+            children * 2000;
+
+
+        /*
+         * EPF relief.
+         */
+
+        relief +=
+            annualEPF;
+
+
+        /*
+         * SOCSO/EIS relief.
+         *
+         * Current relief is capped at RM350.
+         */
+
+        relief += 350;
+
+
+        /*
+         * Estimated chargeable income.
+         */
+
+        let chargeableIncome =
+            annualGross -
+            relief;
+
+
+        if (
+            chargeableIncome < 0
+        ) {
+            chargeableIncome = 0;
+        }
+
+
+        /*
+         * Calculate annual income tax.
+         */
+
+        let annualTax =
+            calculateIncomeTax(
+                chargeableIncome
+            );
+
+
+        /*
+         * Individual rebate.
+         *
+         * Basic RM400 rebate when
+         * chargeable income does not
+         * exceed RM35,000.
+         */
+
+        if (
+            chargeableIncome <= 35000
+        ) {
+
+            annualTax =
+                Math.max(
+                    0,
+                    annualTax - 400
+                );
+
+
+            /*
+             * Spouse rebate when spouse has
+             * no income and conditions apply.
+             */
+
+            if (
+                maritalStatus ===
+                "marriedNotWorking"
+            ) {
+
+                annualTax =
+                    Math.max(
+                        0,
+                        annualTax - 400
+                    );
+            }
+        }
+
+
+        /*
+         * Zakat is a tax rebate.
+         */
+
+        const annualZakat =
+            monthlyZakat * 12;
+
+
+        annualTax =
+            Math.max(
+                0,
+                annualTax -
+                annualZakat
+            );
+
+
+        /*
+         * Convert annual estimated tax
+         * into a monthly estimate.
+         *
+         * This is NOT the exact HASiL
+         * cumulative PCB formula.
+         */
+
+        let monthlyPCB =
+            annualTax / 12;
+
+
+        /*
+         * PCB below RM10 is generally not
+         * collected for the month.
+         */
+
+        if (
+            monthlyPCB < 10
+        ) {
+
+            monthlyPCB = 0;
+        }
+
+
+        return roundMoney(
+            monthlyPCB
+        );
+    }
+
+
+    /* =====================================================
+       MALAYSIA RESIDENT TAX RATES
+       ===================================================== */
+
+    function calculateIncomeTax(
+        chargeableIncome
+    ) {
+
+        let tax = 0;
+
+
+        /*
+         * RM0 - RM5,000
+         * 0%
+         */
+
+        if (
+            chargeableIncome <= 5000
+        ) {
+
+            return 0;
+        }
+
+
+        /*
+         * RM5,001 - RM20,000
+         * 1%
+         */
+
+        tax +=
+            Math.min(
+                Math.max(
+                    chargeableIncome - 5000,
+                    0
+                ),
+                15000
+            ) * 0.01;
+
+
+        /*
+         * RM20,001 - RM35,000
+         * 3%
+         */
+
+        if (
+            chargeableIncome > 20000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 20000,
+                    15000
+                ) * 0.03;
+        }
+
+
+        /*
+         * RM35,001 - RM50,000
+         * 6%
+         */
+
+        if (
+            chargeableIncome > 35000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 35000,
+                    15000
+                ) * 0.06;
+        }
+
+
+        /*
+         * RM50,001 - RM70,000
+         * 11%
+         */
+
+        if (
+            chargeableIncome > 50000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 50000,
+                    20000
+                ) * 0.11;
+        }
+
+
+        /*
+         * RM70,001 - RM100,000
+         * 19%
+         */
+
+        if (
+            chargeableIncome > 70000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 70000,
+                    30000
+                ) * 0.19;
+        }
+
+
+        /*
+         * RM100,001 - RM400,000
+         * 25%
+         */
+
+        if (
+            chargeableIncome > 100000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 100000,
+                    300000
+                ) * 0.25;
+        }
+
+
+        /*
+         * RM400,001 - RM600,000
+         * 26%
+         */
+
+        if (
+            chargeableIncome > 400000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 400000,
+                    200000
+                ) * 0.26;
+        }
+
+
+        /*
+         * RM600,001 - RM2,000,000
+         * 28%
+         */
+
+        if (
+            chargeableIncome > 600000
+        ) {
+
+            tax +=
+                Math.min(
+                    chargeableIncome - 600000,
+                    1400000
+                ) * 0.28;
+        }
+
+
+        /*
+         * Above RM2 million
+         * 30%
+         */
+
+        if (
+            chargeableIncome > 2000000
+        ) {
+
+            tax +=
+                (
+                    chargeableIncome -
+                    2000000
+                ) * 0.30;
+        }
+
+
+        return tax;
+    }
+
+
+    /* =====================================================
+       FORMAT MONEY
+       ===================================================== */
+
+    function formatRM(
+        amount
+    ) {
 
         return new Intl.NumberFormat(
             "ms-MY",
@@ -496,19 +844,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }
-        ).format(amount);
-    }
-
-
-    /* =====================================================
-       ROUNDING
-       ===================================================== */
-
-    function roundMoney(amount) {
-
-        return Math.round(
-            (amount + Number.EPSILON) * 100
-        ) / 100;
+        ).format(
+            amount
+        );
     }
 
 });
