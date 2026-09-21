@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ) || 0;
 
         const includeEis =
-            document.getElementById("includeEis").checked;
+            document.getElementById("eisApplicable").checked;
 
 
         if (!grossSalary || grossSalary <= 0 || !age || age <= 0) {
@@ -241,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
          */
 
         if (
-            maritalStatus === "marriedNonWorking"
+            maritalStatus === "marriedNotWorking"
         ) {
 
             relief += 4000;
