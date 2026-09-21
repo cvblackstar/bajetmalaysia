@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kalkulator Gaji Bersih Malaysia | Bajet Malaysia</title>
+
+    <meta
+        name="description"
+        content="Kira anggaran gaji bersih di Malaysia selepas potongan EPF, SOCSO dan EIS."
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+
+            <a href="index.html" class="logo">
+                BAJET MALAYSIA
+            </a>
+
+            <nav class="main-nav">
+                <a href="index.html">Utama</a>
+                <a href="index.html#kalkulator">Kalkulator</a>
+                <a href="index.html#panduan">Panduan</a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <!-- PAGE INTRO -->
+    <main>
+
+        <section class="section">
+
+            <div class="container">
+
+                <div class="section-heading">
+                    <span class="eyebrow">Kalkulator</span>
+
+                    <h1>Kalkulator Gaji Bersih</h1>
+
+                    <p>
+                        Masukkan gaji kasar anda untuk melihat anggaran jumlah
+                        yang tinggal selepas potongan statutori utama.
+                    </p>
+                </div>
+
+
+                <!-- CALCULATOR -->
+                <div class="calculator-layout">
+
+                    <!-- INPUT CARD -->
+                    <div class="calculator-form-card">
+
+                        <h2>Maklumat Gaji</h2>
+
+                        <div class="form-group">
+
+                            <label for="grossSalary">
+                                Gaji kasar bulanan
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="grossSalary"
+                                    placeholder="Contoh: 5000"
+                                    min="0"
+                                    step="0.01"
+                                >
+                            </div>
+
+                            <small>
+                                Masukkan jumlah gaji kasar sebelum sebarang
+                                potongan.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="age">
+                                Umur
+                            </label>
+
+                            <input
+                                type="number"
+                                id="age"
+                                placeholder="Contoh: 35"
+                                min="15"
+                                max="100"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="status">
+                                Status pekerja
+                            </label>
+
+                            <select id="status">
+
+                                <option value="malaysian">
+                                    Warganegara Malaysia
+                                </option>
+
+                                <option value="pr">
+                                    Pemastautin Tetap (PR)
+                                </option>
+
+                                <option value="nonmalaysian">
+                                    Bukan warganegara Malaysia
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label class="checkbox-label">
+
+                                <input
+                                    type="checkbox"
+                                    id="eisApplicable"
+                                    checked
+                                >
+
+                                <span>
+                                    Saya diandaikan layak mencarum EIS
+                                </span>
+
+                            </label>
+
+                            <small>
+                                Sesetengah pekerja mungkin dikecualikan
+                                daripada EIS bergantung kepada umur dan
+                                sejarah caruman.
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="calculateButton"
+                            class="button primary calculate-button"
+                        >
+                            Kira Gaji Bersih
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULT CARD -->
+                    <div class="calculator-result-card">
+
+                        <h2>Anggaran Gaji Bersih</h2>
+
+                        <div class="take-home">
+
+                            <span>Gaji bersih</span>
+
+                            <strong id="netSalary">
+                                RM0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="result-list">
+
+                            <div class="result-row">
+
+                                <span>Gaji kasar</span>
+
+                                <strong id="resultGross">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row">
+
+                                <span>EPF / KWSP</span>
+
+                                <strong id="resultEpf">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row">
+
+                                <span>SOCSO / PERKESO</span>
+
+                                <strong id="resultSocso">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row">
+
+                                <span>EIS / SIP</span>
+
+                                <strong id="resultEis">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="result-row total-row">
+
+                                <span>Jumlah potongan</span>
+
+                                <strong id="resultTotal">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="pcb-notice">
+
+                            <strong>Nota PCB</strong>
+
+                            <p>
+                                Anggaran ini belum memasukkan Potongan Cukai
+                                Bulanan (PCB). Jumlah sebenar gaji bersih
+                                mungkin berbeza selepas mengambil kira PCB,
+                                pelepasan cukai dan keadaan individu.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPLANATION -->
+        <section class="section light-section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="eyebrow">
+                        Faham Gaji Anda
+                    </span>
+
+                    <h2>Apa yang dipotong daripada gaji?</h2>
+
+                    <p>
+                        Gaji kasar bukan semestinya jumlah yang masuk ke akaun
+                        bank. Beberapa caruman dan potongan statutori boleh
+                        mengurangkan jumlah tersebut.
+                    </p>
+
+                </div>
+
+
+                <div class="topic-grid">
+
+                    <article class="topic">
+
+                        <div class="topic-icon">🏦</div>
+
+                        <h3>EPF / KWSP</h3>
+
+                        <p>
+                            Caruman kepada Kumpulan Wang Simpanan Pekerja
+                            untuk simpanan persaraan.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">🛡️</div>
+
+                        <h3>SOCSO / PERKESO</h3>
+
+                        <p>
+                            Perlindungan keselamatan sosial untuk pekerja
+                            yang memenuhi syarat.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">💼</div>
+
+                        <h3>EIS / SIP</h3>
+
+                        <p>
+                            Caruman Sistem Insurans Pekerjaan bagi pekerja
+                            yang tertakluk kepada skim tersebut.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- IMPORTANT NOTE -->
+        <section class="section">
+
+            <div class="container">
+
+                <div class="principle-box">
+
+                    <span class="eyebrow">
+                        Penting
+                    </span>
+
+                    <h2>Ini ialah anggaran, bukan slip gaji sebenar</h2>
+
+                    <p>
+                        Pengiraan sebenar boleh berbeza berdasarkan jadual
+                        caruman rasmi, status pekerja, umur, PCB, manfaat
+                        pekerjaan dan keadaan individu.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <p class="footer-brand">
+                BAJET MALAYSIA
+            </p>
+
+            <p>
+                Faham Duit. Urus Duit. Rancang Hidup.
+            </p>
+
+            <p>
+                Maklumat di laman ini adalah untuk tujuan pendidikan dan
+                rujukan umum sahaja.
+            </p>
+
+            <p>
+                © 2026 Bajet Malaysia
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="gaji-bersih.js"></script>
+
+</body>
+</html>
