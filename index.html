@@ -7,265 +7,398 @@
     <title>Bajet Malaysia — Faham Duit. Urus Duit. Rancang Hidup.</title>
 
     <meta name="description"
-          content="Bajet Malaysia membantu rakyat Malaysia memahami bajet, hutang, rumah, kereta, simpanan dan kewangan melalui panduan dan kalkulator mudah.">
+        content="Bajet Malaysia membantu rakyat Malaysia memahami bajet, hutang, rumah, kereta, simpanan dan kewangan melalui panduan dan kalkulator mudah.">
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fa;
-            color: #222;
-            line-height: 1.6;
-        }
-
-        header {
-            background: #123c69;
-            color: white;
-            padding: 22px 20px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 0 20px;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .tagline {
-            opacity: 0.9;
-            margin-top: 3px;
-        }
-
-        .hero {
-            background: white;
-            padding: 55px 20px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 38px;
-            margin-bottom: 12px;
-        }
-
-        .hero p {
-            font-size: 18px;
-            color: #555;
-            max-width: 650px;
-            margin: auto;
-        }
-
-        section {
-            padding: 45px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 28px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-        }
-
-        .card h3 {
-            margin-bottom: 8px;
-        }
-
-        .card p {
-            color: #666;
-        }
-
-        .calculator {
-            background: #eaf2f8;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .calculator h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .button {
-            display: inline-block;
-            margin-top: 18px;
-            padding: 12px 22px;
-            background: #123c69;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-        }
-
-        footer {
-            background: #123c69;
-            color: white;
-            text-align: center;
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        footer p {
-            font-size: 14px;
-            opacity: 0.85;
-        }
-
-        @media (max-width: 600px) {
-            .hero h1 {
-                font-size: 30px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-    <div class="container">
-        <div class="logo">BAJET MALAYSIA</div>
-        <div class="tagline">Faham Duit. Urus Duit. Rancang Hidup.</div>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            BAJET MALAYSIA
+        </a>
+
+        <nav>
+            <a href="index.html">Utama</a>
+            <a href="#kalkulator">Kalkulator</a>
+            <a href="#panduan">Panduan</a>
+        </nav>
     </div>
 </header>
 
-<div class="hero">
-    <h1>Urus Duit Dengan Lebih Bijak</h1>
-    <p>
-        Panduan kewangan mudah untuk rakyat Malaysia —
-        daripada bajet harian hingga rumah, kereta, hutang dan simpanan.
-    </p>
-</div>
 
-<section>
-    <div class="container">
+<main>
 
-        <h2 class="section-title">🧮 Kalkulator Kewangan</h2>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
 
-        <div class="cards">
-
-            <div class="card">
-                <h3>💰 Gaji Bersih</h3>
-                <p>
-                    Berapa sebenarnya gaji yang masuk ke akaun selepas potongan?
-                </p>
+            <div class="hero-badge">
+                🇲🇾 Untuk rakyat Malaysia
             </div>
 
-            <div class="card">
-                <h3>🏠 Loan Rumah</h3>
-                <p>
-                    Anggarkan bayaran bulanan dan jumlah bayaran pinjaman.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>💳 DSR</h3>
-                <p>
-                    Kira nisbah komitmen hutang berbanding pendapatan.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>🚗 Loan Kereta</h3>
-                <p>
-                    Kira anggaran bayaran bulanan pinjaman kereta.
-                </p>
-            </div>
-
-        </div>
-
-    </div>
-</section>
-
-<section>
-    <div class="container">
-
-        <h2 class="section-title">📚 Belajar Tentang Duit</h2>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3>💰 Bajet</h3>
-                <p>
-                    Cara mengurus pendapatan dan perbelanjaan setiap bulan.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>💳 Hutang</h3>
-                <p>
-                    Fahami loan rumah, loan kereta, kad kredit dan DSR.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>🏠 Rumah</h3>
-                <p>
-                    Fahami kos sebenar membeli dan memiliki rumah.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>📈 Simpanan & Pelaburan</h3>
-                <p>
-                    Fahami EPF, ASB, FD, emas, pelaburan dan risiko.
-                </p>
-            </div>
-
-        </div>
-
-    </div>
-</section>
-
-<section>
-    <div class="container">
-
-        <div class="calculator">
-            <h3>🚧 Kalkulator Pertama Sedang Dibina</h3>
+            <h1>
+                Faham Duit.<br>
+                Urus Duit.<br>
+                <span>Rancang Hidup.</span>
+            </h1>
 
             <p>
-                Kami sedang membina kalkulator kewangan
-                yang mudah digunakan oleh rakyat Malaysia.
+                Panduan kewangan dan kalkulator mudah untuk membantu
+                anda memahami bagaimana duit anda digunakan.
             </p>
 
-            <a href="#" class="button">
-                Akan Datang
-            </a>
+            <div class="hero-buttons">
+                <a href="gaji-bersih.html" class="button primary">
+                    🧮 Kira Gaji Bersih
+                </a>
+
+                <a href="#panduan" class="button secondary">
+                    📚 Belajar Tentang Duit
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- CALCULATORS -->
+    <section id="kalkulator" class="section">
+
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">KALKULATOR</span>
+
+                <h2>
+                    Kira Sebelum Buat Keputusan
+                </h2>
+
+                <p>
+                    Gunakan kalkulator kami untuk memahami angka
+                    kewangan anda dengan lebih mudah.
+                </p>
+            </div>
+
+
+            <div class="cards">
+
+                <!-- Salary -->
+                <a href="gaji-bersih.html" class="card calculator-card">
+
+                    <div class="card-icon">
+                        💰
+                    </div>
+
+                    <h3>
+                        Gaji Bersih
+                    </h3>
+
+                    <p>
+                        Berapa sebenarnya gaji yang tinggal
+                        selepas potongan wajib?
+                    </p>
+
+                    <span class="card-link">
+                        Kira sekarang →
+                    </span>
+
+                </a>
+
+
+                <!-- DSR -->
+                <div class="card calculator-card disabled">
+
+                    <div class="card-icon">
+                        💳
+                    </div>
+
+                    <h3>
+                        DSR
+                    </h3>
+
+                    <p>
+                        Kira nisbah komitmen hutang
+                        berbanding pendapatan.
+                    </p>
+
+                    <span class="coming-soon">
+                        Akan datang
+                    </span>
+
+                </div>
+
+
+                <!-- Housing -->
+                <div class="card calculator-card disabled">
+
+                    <div class="card-icon">
+                        🏠
+                    </div>
+
+                    <h3>
+                        Loan Rumah
+                    </h3>
+
+                    <p>
+                        Anggarkan bayaran bulanan
+                        dan jumlah faedah/profit.
+                    </p>
+
+                    <span class="coming-soon">
+                        Akan datang
+                    </span>
+
+                </div>
+
+
+                <!-- Car -->
+                <div class="card calculator-card disabled">
+
+                    <div class="card-icon">
+                        🚗
+                    </div>
+
+                    <h3>
+                        Loan Kereta
+                    </h3>
+
+                    <p>
+                        Lihat anggaran bayaran bulanan
+                        sebelum membeli kereta.
+                    </p>
+
+                    <span class="coming-soon">
+                        Akan datang
+                    </span>
+
+                </div>
+
+
+                <!-- Emergency -->
+                <div class="card calculator-card disabled">
+
+                    <div class="card-icon">
+                        🛟
+                    </div>
+
+                    <h3>
+                        Emergency Fund
+                    </h3>
+
+                    <p>
+                        Berapa banyak simpanan kecemasan
+                        yang patut anda ada?
+                    </p>
+
+                    <span class="coming-soon">
+                        Akan datang
+                    </span>
+
+                </div>
+
+
+                <!-- Budget -->
+                <div class="card calculator-card disabled">
+
+                    <div class="card-icon">
+                        📊
+                    </div>
+
+                    <h3>
+                        Monthly Budget
+                    </h3>
+
+                    <p>
+                        Lihat ke mana duit anda pergi
+                        setiap bulan.
+                    </p>
+
+                    <span class="coming-soon">
+                        Akan datang
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FINANCIAL TOPICS -->
+    <section id="panduan" class="section light-section">
+
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">PANDUAN</span>
+
+                <h2>
+                    Belajar Tentang Duit
+                </h2>
+
+                <p>
+                    Kewangan tak semestinya susah.
+                    Kita pecahkan kepada perkara yang mudah difahami.
+                </p>
+            </div>
+
+
+            <div class="topic-grid">
+
+                <div class="topic">
+                    <div class="topic-icon">💰</div>
+
+                    <div>
+                        <h3>Bajet</h3>
+
+                        <p>
+                            Cara merancang pendapatan dan
+                            perbelanjaan bulanan.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="topic">
+                    <div class="topic-icon">💳</div>
+
+                    <div>
+                        <h3>Hutang</h3>
+
+                        <p>
+                            Fahami loan rumah, kereta,
+                            kad kredit dan DSR.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="topic">
+                    <div class="topic-icon">🏠</div>
+
+                    <div>
+                        <h3>Rumah</h3>
+
+                        <p>
+                            Fahami kos sebenar membeli
+                            dan memiliki rumah.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="topic">
+                    <div class="topic-icon">🚗</div>
+
+                    <div>
+                        <h3>Kereta</h3>
+
+                        <p>
+                            Bukan sekadar ansuran —
+                            fahami kos sebenar memiliki kereta.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="topic">
+                    <div class="topic-icon">📈</div>
+
+                    <div>
+                        <h3>Simpanan</h3>
+
+                        <p>
+                            Fahami emergency fund,
+                            EPF dan cara membina simpanan.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="topic">
+                    <div class="topic-icon">📊</div>
+
+                    <div>
+                        <h3>Pelaburan</h3>
+
+                        <p>
+                            Kenali risiko, pulangan,
+                            compounding dan asas pelaburan.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PRINCIPLE -->
+    <section class="principle">
+
+        <div class="container">
+
+            <div class="principle-box">
+
+                <div class="principle-icon">
+                    💡
+                </div>
+
+                <h2>
+                    Kami terangkan.<br>
+                    Anda buat keputusan.
+                </h2>
+
+                <p>
+                    Bajet Malaysia menyediakan maklumat kewangan
+                    untuk tujuan pendidikan dan rujukan umum.
+                    Kami membantu anda memahami angka supaya
+                    anda boleh membuat keputusan sendiri.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <div class="container footer-content">
+
+        <div>
+            <strong>BAJET MALAYSIA</strong>
+
+            <p>
+                Faham Duit. Urus Duit. Rancang Hidup.
+            </p>
+        </div>
+
+        <div class="footer-note">
+
+            <p>
+                Maklumat di laman ini adalah untuk tujuan
+                pendidikan dan rujukan umum sahaja.
+            </p>
+
+            <p>
+                © 2026 Bajet Malaysia
+            </p>
+
         </div>
 
     </div>
-</section>
 
-<footer>
-    <div class="container">
-
-        <p>
-            Bajet Malaysia menyediakan maklumat untuk tujuan pendidikan
-            dan rujukan umum sahaja.
-        </p>
-
-        <p style="margin-top:8px;">
-            © 2026 Bajet Malaysia
-        </p>
-
-    </div>
 </footer>
 
 </body>
