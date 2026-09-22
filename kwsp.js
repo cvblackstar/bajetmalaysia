@@ -36,9 +36,47 @@ document.addEventListener("DOMContentLoaded", function () {
         individualBalanceTotal.textContent = formatRM(b.persaraan + b.sejahtera + b.fleksibel);
     }
 
+    function buildRetirementPlannerUrl() {
+        const params = new URLSearchParams({
+            currentAge: $("currentAge").value || "",
+            retireAge: $("retireAge").value || "60",
+            balanceMode: getBalanceMode(),
+            currentBalance: $("currentBalance").value || "0",
+            currentPersaraan: $("currentPersaraan").value || "0",
+            currentSejahtera: $("currentSejahtera").value || "0",
+            currentFleksibel: $("currentFleksibel").value || "0",
+            salary: $("grossSalary").value || "",
+            salaryGrowth: $("salaryIncrement").value || "3",
+            dividend: $("dividendRate").value || "5.5",
+            spending: $("retirementSpending").value || "4000",
+            inflation: $("inflationRate").value || "3",
+            endAge: $("retirementEndAge").value || "85",
+            voluntary: $("voluntaryContribution").value || "0"
+        });
+        return `kwsp-retirement.html?${params.toString()}`;
+    }
+
+    function addRetirementPlannerLink() {
+        let link = $("retirementPlannerLink");
+        if (!link) {
+            link = document.createElement("a");
+            link.id = "retirementPlannerLink";
+            link.className = "button secondary";
+            link.textContent = "🎯 Buka Perancang Persaraan ‘What If?’";
+            calculateButton.insertAdjacentElement("afterend", link);
+        }
+        link.href = buildRetirementPlannerUrl();
+    }
+
     balanceModeInputs.forEach(input => input.addEventListener("change", updateBalanceInputMode));
     individualBalanceInputs.forEach(input => input.addEventListener("input", updateIndividualBalanceTotal));
+    ["currentAge", "retireAge", "currentBalance", "currentPersaraan", "currentSejahtera", "currentFleksibel", "grossSalary", "salaryIncrement", "dividendRate", "retirementSpending", "inflationRate", "retirementEndAge", "voluntaryContribution"].forEach(id => {
+        const input = $(id);
+        if (input) input.addEventListener("input", addRetirementPlannerLink);
+        if (input) input.addEventListener("change", addRetirementPlannerLink);
+    });
     updateBalanceInputMode();
+    addRetirementPlannerLink();
 
     calculateButton.addEventListener("click", function () {
         const currentAge = parseInt($("currentAge").value, 10);
@@ -93,7 +131,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let firstMonth = null;
         const timeline = [{ age: currentAge, phase: "Simpanan", balance: startingTotal, spending: 0 }];
 
-        // Accumulation phase. This remains an estimate; actual EPF dividends use the official dividend calculation method.
         for (let age = currentAge; age < retireAge; age++) {
             const employeeRate = age < 60 ? 0.11 : 0;
             const employerRate = age < 60 ? (salary <= 5000 ? 0.13 : 0.12) : 0.04;
@@ -121,32 +158,28 @@ document.addEventListener("DOMContentLoaded", function () {
         const retirementStartSpending = retirementSpendingToday * Math.pow(1 + inflationDecimal, retireAge - currentAge);
         let retirementBalance = retirementStartingBalance;
         let depletionAge = null;
-        let firstRetirementYearSpending = retirementStartSpending;
         let finalRetirementSpending = 0;
-        let retirementDividend = 0;
-
-        // Retirement phase: annual withdrawal is based on today's-money spending and grows with inflation.
+        const retirementTimelineStart = timeline.length;
+        const retirementWithdrawalTimeline = [];
+        
         for (let age = retireAge; age < retirementEndAge; age++) {
             const yearsIntoRetirement = age - retireAge;
             const annualSpending = retirementStartSpending * Math.pow(1 + inflationDecimal, yearsIntoRetirement);
             const dividendBase = Math.max(0, retirementBalance - annualSpending / 2);
             const dividend = dividendBase * dividendDecimal;
-            retirementDividend += dividend;
             retirementBalance = Math.max(0, retirementBalance + dividend - annualSpending);
             finalRetirementSpending = annualSpending;
-            timeline.push({ age: age + 1, phase: "Bersara", balance: retirementBalance, spending: annualSpending });
+            retirementWithdrawalTimeline.push({ age: age + 1, phase: "Bersara", balance: retirementBalance, spending: annualSpending });
             if (retirementBalance <= 0 && depletionAge === null) {
                 depletionAge = age + 1;
                 break;
             }
         }
+        timeline.push(...retirementWithdrawalTimeline);
 
         const totalSavings = retirementStartingBalance;
-        const totalRetirementWithdrawals = timeline.filter(p => p.phase === "Bersara").reduce((sum, p) => sum + (p.spending || 0), 0);
-        const sustainableMonthlyAtRetirement = retirementBalance > 0
-            ? (retirementSpendingToday > 0 ? retirementStartSpending / 12 : 0)
-            : (depletionAge ? retirementStartSpending / 12 : 0);
-        const targetEndBalance = retirementEndAge <= (depletionAge || Infinity) && retirementBalance > 0;
+        const totalRetirementWithdrawals = retirementWithdrawalTimeline.reduce((sum, p) => sum + (p.spending || 0), 0);
+        const targetEndBalance = !depletionAge && retirementBalance > 0;
 
         $("kwspTotal").textContent = formatRM(totalSavings);
         $("resultLegacy").textContent = formatRM(startingTotal * Math.pow(1 + dividendDecimal, retireAge - currentAge));
@@ -186,6 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         renderRetirementChart(timeline, currentAge, retireAge);
         $("retirementResults").hidden = false;
+        addRetirementPlannerLink();
     });
 
     function renderRetirementChart(timeline, currentAge, retireAge) {
