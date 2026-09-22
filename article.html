@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panduan Kewangan | Bajet Malaysia</title>
+<meta name="description" content="Panduan kewangan peribadi untuk rakyat Malaysia.">
+<link rel="stylesheet" href="style.css">
+<style>
+.article-page{max-width:860px;margin:0 auto;padding:3rem 1rem 5rem}.article-meta{opacity:.72;font-size:.9rem;margin:.75rem 0 2rem}.article-content{line-height:1.8}.article-content h2{margin-top:2.5rem}.article-content h3{margin-top:2rem}.article-content table{width:100%;border-collapse:collapse;margin:1.25rem 0}.article-content th,.article-content td{padding:.65rem;border-bottom:1px solid rgba(0,0,0,.12);text-align:left}.article-content blockquote{margin:1.5rem 0;padding:1rem 1.25rem;border-left:4px solid currentColor;background:rgba(0,0,0,.035)}.article-cta{margin:2.5rem 0;padding:1.5rem;border-radius:16px;background:rgba(46,125,50,.08);border:1px solid rgba(46,125,50,.18)}.article-cta a{display:inline-block;margin-top:.75rem;padding:.75rem 1rem;border-radius:9px;background:#2e7d32;color:#fff;text-decoration:none;font-weight:700}.article-sources{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(0,0,0,.12);font-size:.92rem}.article-error{padding:2rem;background:rgba(0,0,0,.04);border-radius:12px}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner"><a href="index.html" class="logo">BAJET MALAYSIA</a><nav class="main-nav"><a href="index.html">Utama</a><a href="index.html#kalkulator">Kalkulator</a><a href="index.html#panduan">Panduan</a></nav></div></header>
+<main class="article-page"><div id="article"></div></main>
+<footer class="site-footer"><div class="footer-inner"><p class="footer-brand">BAJET MALAYSIA</p><p>Faham Duit. Urus Duit. Rancang Hidup.</p><p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p><p>© 2026 Bajet Malaysia</p></div></footer>
+<script>
+const slug=new URLSearchParams(location.search).get('slug');
+const article=document.getElementById('article');
+async function load(){
+  try{
+    const index=await fetch('data/articles.json').then(r=>r.json());
+    const meta=index.find(a=>a.slug===slug && a.status==='published');
+    if(!meta) throw new Error('Artikel tidak ditemui.');
+    const md=await fetch(meta.path).then(r=>r.text());
+    const body=md.replace(/^---[\s\S]*?---\s*/,'');
+    article.innerHTML=`<div class="eyebrow">${meta.category}</div><h1>${meta.title}</h1><div class="article-meta">Diterbitkan ${meta.published} · Dikemas kini ${meta.updated}</div><div class="article-content">${markdown(body)}</div>${meta.calculator?`<div class="article-cta"><strong>🧮 Cuba kalkulator Bajet Malaysia</strong><p>Gunakan alat berkaitan untuk memasukkan angka anda sendiri.</p><a href="${meta.calculator==='dsr'?'dsr.html':'emergency-fund.html'}">Buka Kalkulator →</a></div>`:''}`;
+  }catch(e){article.innerHTML=`<div class="article-error"><h1>Artikel tidak ditemui</h1><p>${e.message}</p><p><a href="index.html">Kembali ke Bajet Malaysia</a></p></div>`}
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>')}
+function markdown(md){
+ const lines=md.split(/\r?\n/),out=[];let i=0,inList=false,inTable=false;
+ while(i<lines.length){let l=lines[i];if(!l.trim()){if(inList){out.push('</ul>');inList=false}if(inTable){out.push('</tbody></table>');inTable=false}i++;continue}
+  if(l.startsWith('# ')){out.push(`<h1>${inline(l.slice(2))}</h1>`);i++;continue}
+  if(l.startsWith('## ')){out.push(`<h2>${inline(l.slice(3))}</h2>`);i++;continue}
+  if(l.startsWith('### ')){out.push(`<h3>${inline(l.slice(4))}</h3>`);i++;continue}
+  if(l.startsWith('> ')){out.push(`<blockquote>${inline(l.slice(2))}</blockquote>`);i++;continue}
+  if(/^\|.*\|$/.test(l)){if(!inTable){out.push('<table><thead><tr>'+l.split('|').slice(1,-1).map(x=>`<th>${inline(x.trim())}</th>`).join('')+'</tr></thead><tbody>');inTable=true;i+=2;continue}out.push('<tr>'+l.split('|').slice(1,-1).map(x=>`<td>${inline(x.trim())}</td>`).join('')+'</tr>');i++;continue}
+  if(/^[-*] /.test(l)){if(!inList){out.push('<ul>');inList=true}out.push(`<li>${inline(l.slice(2))}</li>`);i++;continue}
+  if(/^\*\*.*\*\*$/.test(l)){out.push(`<p>${inline(l)}</p>`);i++;continue}
+  out.push(`<p>${inline(l)}</p>`);i++;
+ }
+ if(inList)out.push('</ul>');if(inTable)out.push('</tbody></table>');return out.join('');
+}
+load();
+</script>
+</body>
+</html>
