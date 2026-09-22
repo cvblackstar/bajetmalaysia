@@ -1,5 +1,6 @@
-const slug = new URLSearchParams(window.location.search).get('slug');
 const root = document.getElementById('article');
+const params = new URLSearchParams(window.location.search);
+const slug = params.get('slug') || new URL(window.location.href).hash.replace(/^#/, '') || '';
 const calculatorLinks = {
   dsr: { href: 'dsr.html', label: 'Kira DSR Anda' },
   'emergency-fund': { href: 'emergency.html', label: 'Kira Emergency Fund Anda' }
@@ -35,22 +36,24 @@ function renderMarkdown(markdown) {
   }
   return out.join('');
 }
+
 async function loadArticle() {
   try {
     if (!slug) throw new Error('Pautan artikel tidak lengkap.');
-    const indexResponse = await fetch('data/articles.json', { cache: 'no-store' });
+    const indexResponse = await fetch(new URL('data/articles.json', document.baseURI).href, { cache: 'no-store' });
     if (!indexResponse.ok) throw new Error('Senarai artikel tidak dapat dimuatkan.');
     const index = await indexResponse.json();
     const meta = index.find(article => article.slug === slug && article.status === 'published');
-    if (!meta) throw new Error('Artikel tidak ditemui.');
-    const articleResponse = await fetch(meta.path, { cache: 'no-store' });
+    if (!meta) throw new Error(`Artikel "${slug}" tidak ditemui.`);
+    const articleResponse = await fetch(new URL(meta.path, document.baseURI).href, { cache: 'no-store' });
     if (!articleResponse.ok) throw new Error('Kandungan artikel tidak dapat dimuatkan.');
     const raw = await articleResponse.text();
     const body = raw.replace(/^---[\s\S]*?---\s*/, '').trim();
     const calc = calculatorLinks[meta.calculator];
     root.innerHTML = `<div class="eyebrow">${esc(meta.category)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet Malaysia yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
   } catch (error) {
-    root.innerHTML = `<div class="article-error"><h1>Artikel tidak ditemui</h1><p>${esc(error.message)}</p><p><a href="panduan.html">Kembali ke Panduan</a></p></div>`;
+    root.innerHTML = `<div class="article-error"><h1>Artikel tidak dapat dimuatkan</h1><p>${esc(error.message)}</p><p><a href="panduan.html">Kembali ke Panduan</a></p></div>`;
   }
 }
+
 loadArticle();
