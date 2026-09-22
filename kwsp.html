@@ -15,595 +15,267 @@
 </head>
 
 <body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MALAYSIA</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="index.html#panduan">Panduan</a>
+        </nav>
+    </div>
+</header>
 
-    <!-- HEADER -->
-    <header class="site-header">
-        <div class="header-inner">
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">Kalkulator</span>
+        <h1>Kalkulator Simpanan KWSP</h1>
+        <p>
+            Anggarkan berapa banyak simpanan KWSP anda pada umur
+            persaraan berdasarkan gaji, caruman bulanan dan
+            jangkaan kadar dividen.
+        </p>
+    </div>
 
-            <a href="index.html" class="logo">
-                BAJET MALAYSIA
-            </a>
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Semasa</h2>
 
-            <nav class="main-nav">
-                <a href="index.html">Utama</a>
-                <a href="index.html#kalkulator">Kalkulator</a>
-                <a href="index.html#panduan">Panduan</a>
-            </nav>
+            <div class="form-group">
+                <label for="currentAge">Umur semasa</label>
+                <input type="number" id="currentAge" placeholder="Contoh: 30" min="16" max="74">
+            </div>
 
-        </div>
-    </header>
+            <div class="form-group">
+                <label for="retireAge">Umur ingin bersara</label>
+                <select id="retireAge">
+                    <option value="60">60 tahun (umur persaraan wajib)</option>
+                    <option value="55">55 tahun</option>
+                </select>
+                <small>
+                    Akaun Persaraan hanya boleh dikeluarkan sepenuhnya pada umur 55,
+                    tetapi anda boleh terus mencarum sehingga 60.
+                </small>
+            </div>
 
-
-    <!-- MAIN -->
-    <main>
-
-        <section class="section">
-
-            <div class="container">
-
-                <div class="section-heading">
-
-                    <span class="eyebrow">
-                        Kalkulator
-                    </span>
-
-                    <h1>Kalkulator Simpanan KWSP</h1>
-
-                    <p>
-                        Anggarkan berapa banyak simpanan KWSP anda pada umur
-                        persaraan berdasarkan gaji, caruman bulanan dan
-                        jangkaan kadar dividen.
-                    </p>
-
+            <div class="form-group">
+                <label>Kaedah masukkan baki KWSP semasa</label>
+                <div class="input-mode-options">
+                    <label>
+                        <input type="radio" name="balanceMode" value="total" checked>
+                        Baki keseluruhan KWSP
+                    </label>
+                    <label>
+                        <input type="radio" name="balanceMode" value="individual">
+                        Baki setiap akaun
+                    </label>
                 </div>
-
-
-                <!-- CALCULATOR -->
-                <div class="calculator-layout">
-
-
-                    <!-- INPUT -->
-                    <div class="calculator-form-card">
-
-                        <h2>Maklumat Semasa</h2>
-
-
-                        <div class="form-group">
-
-                            <label for="currentAge">
-                                Umur semasa
-                            </label>
-
-                            <input
-                                type="number"
-                                id="currentAge"
-                                placeholder="Contoh: 30"
-                                min="16"
-                                max="74"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="retireAge">
-                                Umur ingin bersara
-                            </label>
-
-                            <select id="retireAge">
-
-                                <option value="60">
-                                    60 tahun (umur persaraan wajib)
-                                </option>
-
-                                <option value="55">
-                                    55 tahun
-                                </option>
-
-                            </select>
-
-                            <small>
-                                Akaun Persaraan hanya boleh dikeluarkan
-                                sepenuhnya pada umur 55, tetapi anda boleh
-                                terus mencarum sehingga 60.
-                            </small>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="currentBalance">
-                                Baki simpanan KWSP semasa
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <span>RM</span>
-
-                                <input
-                                    type="number"
-                                    id="currentBalance"
-                                    value="0"
-                                    min="0"
-                                    step="0.01"
-                                >
-
-                            </div>
-
-                            <small>
-                                Jumlah kesemua akaun (Akaun Persaraan,
-                                Sejahtera dan Fleksibel) mengikut penyata
-                                KWSP terkini anda.
-                            </small>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="grossSalary">
-                                Gaji kasar bulanan semasa
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <span>RM</span>
-
-                                <input
-                                    type="number"
-                                    id="grossSalary"
-                                    placeholder="Contoh: 5000"
-                                    min="0"
-                                    step="0.01"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="salaryIncrement">
-                                Anggaran kenaikan gaji tahunan
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <input
-                                    type="number"
-                                    id="salaryIncrement"
-                                    value="3"
-                                    min="0"
-                                    max="20"
-                                    step="0.1"
-                                >
-
-                                <span class="suffix">%</span>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- VOLUNTARY -->
-
-                        <div class="form-divider"></div>
-
-                        <h3 class="form-section-title">
-                            Caruman Tambahan (Pilihan)
-                        </h3>
-
-
-                        <div class="form-group">
-
-                            <label for="voluntaryContribution">
-                                Caruman tambahan bulanan (i-Simpan / i-Saraan)
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <span>RM</span>
-
-                                <input
-                                    type="number"
-                                    id="voluntaryContribution"
-                                    value="0"
-                                    min="0"
-                                    step="0.01"
-                                >
-
-                            </div>
-
-                            <small>
-                                Jika tiada caruman sukarela tambahan,
-                                masukkan RM0.
-                            </small>
-
-                        </div>
-
-
-                        <!-- ASSUMPTIONS -->
-
-                        <div class="form-divider"></div>
-
-                        <h3 class="form-section-title">
-                            Andaian Dividen
-                        </h3>
-
-
-                        <div class="form-group">
-
-                            <label for="dividendRate">
-                                Jangkaan kadar dividen tahunan
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <input
-                                    type="number"
-                                    id="dividendRate"
-                                    value="5.5"
-                                    min="0"
-                                    max="15"
-                                    step="0.01"
-                                >
-
-                                <span class="suffix">%</span>
-
-                            </div>
-
-                            <small>
-                                Kadar dividen KWSP secara sejarah berbeza
-                                setiap tahun (cth. 6.30% pada 2024 dan 6.15%
-                                pada 2025). Gunakan andaian yang berpatutan.
-                            </small>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            id="calculateKwspButton"
-                            class="button primary calculate-button"
-                        >
-                            Kira Simpanan KWSP
-                        </button>
-
+                <small>
+                    Pilih baki keseluruhan jika anda hanya mengetahui jumlah simpanan semasa.
+                    Pilih baki setiap akaun jika anda mahu menggunakan baki sebenar setiap akaun,
+                    contohnya selepas pernah membuat pengeluaran.
+                </small>
+            </div>
+
+            <div class="form-group" id="totalBalanceGroup">
+                <label for="currentBalance">Baki simpanan KWSP semasa</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="currentBalance" value="0" min="0" step="0.01">
+                </div>
+                <small>
+                    Jumlah kesemua akaun (Akaun Persaraan, Sejahtera dan Fleksibel)
+                    mengikut penyata KWSP terkini anda.
+                </small>
+            </div>
+
+            <div id="individualBalanceGroup" hidden>
+                <div class="form-group">
+                    <label for="currentPersaraan">Baki Akaun Persaraan</label>
+                    <div class="input-wrapper">
+                        <span>RM</span>
+                        <input type="number" id="currentPersaraan" value="0" min="0" step="0.01">
                     </div>
+                </div>
 
-
-                    <!-- RESULT -->
-                    <div class="calculator-result-card">
-
-                        <h2>Anggaran Simpanan KWSP</h2>
-
-
-                        <div class="take-home">
-
-                            <span>
-                                Anggaran simpanan pada umur persaraan
-                            </span>
-
-                            <strong id="kwspTotal">
-                                RM0.00
-                            </strong>
-
-                        </div>
-
-
-                        <div class="result-list">
-
-                            <div class="result-row">
-
-                                <span>
-                                    Baki sedia ada + dividen
-                                </span>
-
-                                <strong id="resultLegacy">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="result-row">
-
-                                <span>
-                                    Akaun Persaraan (75%)
-                                </span>
-
-                                <strong id="resultPersaraan">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="result-row">
-
-                                <span>
-                                    Akaun Sejahtera (15%)
-                                </span>
-
-                                <strong id="resultSejahtera">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="result-row">
-
-                                <span>
-                                    Akaun Fleksibel (10%)
-                                </span>
-
-                                <strong id="resultFleksibel">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="result-row">
-
-                                <span>
-                                    Jumlah dividen diperoleh
-                                </span>
-
-                                <strong id="resultDividend">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="result-row total-row">
-
-                                <span>
-                                    Jumlah anggaran simpanan
-                                </span>
-
-                                <strong id="resultTotal">
-                                    RM0.00
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="pcb-notice">
-
-                            <strong>Nota Caruman</strong>
-
-                            <p id="contributionNote">
-                                Masukkan gaji dan umur anda untuk melihat
-                                anggaran caruman bulanan pertama dan
-                                pecahan mengikut akaun KWSP.
-                            </p>
-
-                        </div>
-
+                <div class="form-group">
+                    <label for="currentSejahtera">Baki Akaun Sejahtera</label>
+                    <div class="input-wrapper">
+                        <span>RM</span>
+                        <input type="number" id="currentSejahtera" value="0" min="0" step="0.01">
                     </div>
-
                 </div>
 
+                <div class="form-group">
+                    <label for="currentFleksibel">Baki Akaun Fleksibel</label>
+                    <div class="input-wrapper">
+                        <span>RM</span>
+                        <input type="number" id="currentFleksibel" value="0" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="pcb-notice">
+                    <strong>Jumlah baki semasa</strong>
+                    <p id="individualBalanceTotal">RM0.00</p>
+                    <small>
+                        Masukkan baki sebenar daripada penyata KWSP atau i-Akaun.
+                        Pengiraan ini membolehkan pengeluaran terdahulu diambil kira.
+                    </small>
+                </div>
             </div>
 
-        </section>
-
-
-        <!-- EXPLANATION -->
-        <section class="section light-section">
-
-            <div class="container">
-
-                <div class="section-heading">
-
-                    <span class="eyebrow">
-                        Faham KWSP Anda
-                    </span>
-
-                    <h2>Bagaimana simpanan KWSP anda berkembang?</h2>
-
-                    <p>
-                        KWSP (Kumpulan Wang Simpanan Pekerja) ialah skim
-                        simpanan persaraan wajib di Malaysia. Setiap bulan,
-                        anda dan majikan mencarum, dan simpanan ini
-                        berkembang melalui dividen tahunan yang diisytiharkan
-                        oleh KWSP.
-                    </p>
-
+            <div class="form-group">
+                <label for="grossSalary">Gaji kasar bulanan semasa</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="grossSalary" placeholder="Contoh: 5000" min="0" step="0.01">
                 </div>
-
-
-                <div class="topic-grid">
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            🧮
-                        </div>
-
-                        <h3>
-                            Kadar Caruman
-                        </h3>
-
-                        <p>
-                            Pekerja mencarum 11% dan majikan 13% (gaji
-                            ≤RM5,000) atau 12% (gaji &gt;RM5,000), sebelum
-                            umur 60.
-                        </p>
-
-                    </article>
-
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            🏦
-                        </div>
-
-                        <h3>
-                            Akaun Persaraan (75%)
-                        </h3>
-
-                        <p>
-                            Bahagian terbesar caruman anda, dikunci sehingga
-                            umur 55 sebagai sumber pendapatan utama semasa
-                            persaraan.
-                        </p>
-
-                    </article>
-
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            🩺
-                        </div>
-
-                        <h3>
-                            Akaun Sejahtera (15%)
-                        </h3>
-
-                        <p>
-                            Boleh dikeluarkan untuk tujuan tertentu seperti
-                            rumah, perubatan, haji atau pendidikan mengikut
-                            syarat KWSP.
-                        </p>
-
-                    </article>
-
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            💧
-                        </div>
-
-                        <h3>
-                            Akaun Fleksibel (10%)
-                        </h3>
-
-                        <p>
-                            Boleh dikeluarkan pada bila-bila masa untuk
-                            keperluan jangka pendek atau kecemasan.
-                        </p>
-
-                    </article>
-
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            📈
-                        </div>
-
-                        <h3>
-                            Kadar Dividen
-                        </h3>
-
-                        <p>
-                            Ketiga-tiga akaun menerima kadar dividen yang
-                            sama setiap tahun, dan kadar ini berbeza
-                            mengikut prestasi pelaburan KWSP.
-                        </p>
-
-                    </article>
-
-
-                    <article class="topic">
-
-                        <div class="topic-icon">
-                            ⏳
-                        </div>
-
-                        <h3>
-                            Kuasa Kompaun
-                        </h3>
-
-                        <p>
-                            Semakin awal anda mencarum, semakin lama dividen
-                            sempat terkumpul di atas dividen sebelumnya.
-                        </p>
-
-                    </article>
-
-                </div>
-
             </div>
 
-        </section>
-
-
-        <!-- DISCLAIMER -->
-        <section class="section">
-
-            <div class="container">
-
-                <div class="principle-box">
-
-                    <span class="eyebrow">
-                        Penting
-                    </span>
-
-                    <h2>
-                        Ini ialah anggaran, bukan penyata KWSP rasmi
-                    </h2>
-
-                    <p>
-                        Pengiraan ini menganggarkan pertumbuhan simpanan
-                        berdasarkan kadar dividen tetap yang anda masukkan,
-                        sedangkan kadar dividen sebenar berbeza setiap
-                        tahun dan ditentukan oleh KWSP. Kadar caruman,
-                        potongan, penambahbaikan gaji dan pengeluaran
-                        sebenar turut boleh menjejaskan angka sebenar.
-                        Sila rujuk penyata KWSP atau aplikasi i-Akaun
-                        untuk baki rasmi anda.
-                    </p>
-
+            <div class="form-group">
+                <label for="salaryIncrement">Anggaran kenaikan gaji tahunan</label>
+                <div class="input-wrapper">
+                    <input type="number" id="salaryIncrement" value="3" min="0" max="20" step="0.1">
+                    <span class="suffix">%</span>
                 </div>
-
             </div>
 
-        </section>
+            <div class="form-divider"></div>
+            <h3 class="form-section-title">Caruman Tambahan (Pilihan)</h3>
 
-    </main>
+            <div class="form-group">
+                <label for="voluntaryContribution">Caruman tambahan bulanan (i-Simpan / i-Saraan)</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="voluntaryContribution" value="0" min="0" step="0.01">
+                </div>
+                <small>Jika tiada caruman sukarela tambahan, masukkan RM0.</small>
+            </div>
 
+            <div class="form-divider"></div>
+            <h3 class="form-section-title">Andaian Dividen</h3>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
+            <div class="form-group">
+                <label for="dividendRate">Jangkaan kadar dividen tahunan</label>
+                <div class="input-wrapper">
+                    <input type="number" id="dividendRate" value="5.5" min="0" max="15" step="0.01">
+                    <span class="suffix">%</span>
+                </div>
+                <small>
+                    Kadar dividen KWSP secara sejarah berbeza setiap tahun (cth. 6.30%
+                    pada 2024 dan 6.15% pada 2025). Gunakan andaian yang berpatutan.
+                </small>
+            </div>
 
-        <div class="footer-inner">
-
-            <p class="footer-brand">
-                BAJET MALAYSIA
-            </p>
-
-            <p>
-                Faham Duit. Urus Duit. Rancang Hidup.
-            </p>
-
-            <p>
-                Maklumat di laman ini adalah untuk tujuan pendidikan dan
-                rujukan umum sahaja.
-            </p>
-
-            <p>
-                © 2026 Bajet Malaysia
-            </p>
-
+            <button type="button" id="calculateKwspButton" class="button primary calculate-button">
+                Kira Simpanan KWSP
+            </button>
         </div>
 
-    </footer>
+        <div class="calculator-result-card">
+            <h2>Anggaran Simpanan KWSP</h2>
 
+            <div class="take-home">
+                <span>Anggaran simpanan pada umur persaraan</span>
+                <strong id="kwspTotal">RM0.00</strong>
+            </div>
 
-    <script src="kwsp.js"></script>
+            <div class="result-list">
+                <div class="result-row">
+                    <span>Baki sedia ada + dividen</span>
+                    <strong id="resultLegacy">RM0.00</strong>
+                </div>
+                <div class="result-row">
+                    <span>Akaun Persaraan (75%)</span>
+                    <strong id="resultPersaraan">RM0.00</strong>
+                </div>
+                <div class="result-row">
+                    <span>Akaun Sejahtera (15%)</span>
+                    <strong id="resultSejahtera">RM0.00</strong>
+                </div>
+                <div class="result-row">
+                    <span>Akaun Fleksibel (10%)</span>
+                    <strong id="resultFleksibel">RM0.00</strong>
+                </div>
+                <div class="result-row">
+                    <span>Jumlah dividen diperoleh</span>
+                    <strong id="resultDividend">RM0.00</strong>
+                </div>
+                <div class="result-row total-row">
+                    <span>Jumlah anggaran simpanan</span>
+                    <strong id="resultTotal">RM0.00</strong>
+                </div>
+            </div>
 
+            <div class="pcb-notice">
+                <strong>Nota Baki Semasa</strong>
+                <p id="balanceNote">
+                    Pilih kaedah baki semasa dan masukkan maklumat anda untuk melihat unjuran.
+                </p>
+            </div>
+
+            <div class="pcb-notice">
+                <strong>Nota Caruman</strong>
+                <p id="contributionNote">
+                    Masukkan gaji dan umur anda untuk melihat anggaran caruman bulanan pertama
+                    dan pecahan mengikut akaun KWSP.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">Faham KWSP Anda</span>
+        <h2>Bagaimana simpanan KWSP anda berkembang?</h2>
+        <p>
+            KWSP (Kumpulan Wang Simpanan Pekerja) ialah skim simpanan persaraan wajib di Malaysia.
+            Setiap bulan, anda dan majikan mencarum, dan simpanan ini berkembang melalui dividen
+            tahunan yang diisytiharkan oleh KWSP.
+        </p>
+    </div>
+
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">🧮</div><h3>Kadar Caruman</h3><p>Pekerja mencarum 11% dan majikan 13% (gaji ≤RM5,000) atau 12% (gaji &gt;RM5,000), sebelum umur 60.</p></article>
+        <article class="topic"><div class="topic-icon">🏦</div><h3>Akaun Persaraan (75%)</h3><p>Bahagian terbesar caruman anda, dikunci sehingga umur 55 sebagai sumber pendapatan utama semasa persaraan.</p></article>
+        <article class="topic"><div class="topic-icon">🩺</div><h3>Akaun Sejahtera (15%)</h3><p>Boleh dikeluarkan untuk tujuan tertentu seperti rumah, perubatan, haji atau pendidikan mengikut syarat KWSP.</p></article>
+        <article class="topic"><div class="topic-icon">💧</div><h3>Akaun Fleksibel (10%)</h3><p>Boleh dikeluarkan pada bila-bila masa untuk keperluan jangka pendek atau kecemasan.</p></article>
+        <article class="topic"><div class="topic-icon">📈</div><h3>Kadar Dividen</h3><p>Ketiga-tiga akaun menerima kadar dividen yang sama setiap tahun, dan kadar ini berbeza mengikut prestasi pelaburan KWSP.</p></article>
+        <article class="topic"><div class="topic-icon">⏳</div><h3>Kuasa Kompaun</h3><p>Semakin awal anda mencarum, semakin lama dividen sempat terkumpul di atas dividen sebelumnya.</p></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">Penting</span>
+        <h2>Ini ialah anggaran, bukan penyata KWSP rasmi</h2>
+        <p>
+            Pengiraan ini menganggarkan pertumbuhan simpanan berdasarkan kadar dividen tetap yang
+            anda masukkan, sedangkan kadar dividen sebenar berbeza setiap tahun dan ditentukan oleh
+            KWSP. Kadar caruman, potongan, penambahbaikan gaji dan pengeluaran sebenar turut boleh
+            menjejaskan angka sebenar. Sila rujuk penyata KWSP atau aplikasi i-Akaun untuk baki rasmi anda.
+        </p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+<div class="footer-inner">
+    <p class="footer-brand">BAJET MALAYSIA</p>
+    <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+    <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+    <p>© 2026 Bajet Malaysia</p>
+</div>
+</footer>
+
+<script src="kwsp.js"></script>
 </body>
 </html>
