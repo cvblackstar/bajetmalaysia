@@ -12,7 +12,7 @@
 .retirement-results{margin-top:2rem}.retirement-status{padding:1.25rem;border-radius:14px;margin-bottom:1.25rem}.retirement-status strong{font-size:1.05rem}.retirement-status p{margin:.5rem 0 0}.retirement-status.good{border-left:4px solid #2e7d32;background:rgba(46,125,50,.08)}.retirement-status.caution{border-left:4px solid #ef6c00;background:rgba(239,108,0,.08)}.retirement-status.neutral{border-left:4px solid #607d8b;background:rgba(96,125,139,.08)}
 .retirement-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.25rem 0}.retirement-metric{padding:1rem;border:1px solid rgba(0,0,0,.1);border-radius:12px}.retirement-metric span{display:block;font-size:.85rem;opacity:.75}.retirement-metric strong{display:block;margin-top:.3rem;font-size:1.15rem}
 .chart-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:.75rem;background:rgba(0,0,0,.015)}#retirementChart{width:100%;min-width:680px;height:auto;display:block}
-.phase2-link{display:inline-flex;align-items:center;justify-content:center;margin-top:.75rem;width:100%;text-align:center}
+.phase2-link{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;margin-top:.75rem;padding:.85rem 1rem;border-radius:10px;background:#2e7d32;color:#fff !important;text-decoration:none;font-weight:700;text-align:center;transition:background .2s ease,transform .2s ease}.phase2-link:hover{background:#256628;color:#fff !important;transform:translateY(-1px)}.phase2-link:focus-visible{outline:3px solid rgba(46,125,50,.3);outline-offset:2px}
 @media(max-width:760px){.retirement-grid,.retirement-metrics{grid-template-columns:1fr}.retirement-goal-box{padding:1rem}}
 </style>
 </head>
@@ -48,7 +48,7 @@
 <div class="form-group"><label for="retirementEndAge">Simpanan perlu bertahan sehingga</label><input type="number" id="retirementEndAge" value="85" min="56" max="110"></div>
 </div></div>
 <button type="button" id="calculateKwspButton" class="button primary calculate-button">Kira Unjuran Persaraan</button>
-<a id="retirementPlannerLinkStatic" class="button secondary phase2-link" href="kwsp-retirement.html">🎯 Buka Perancang Persaraan “What If?”</a>
+<a id="retirementPlannerLinkStatic" class="button phase2-link" href="kwsp-retirement.html">🎯 Buka Perancang Persaraan “What If?”</a>
 </div>
 
 <div class="calculator-result-card">
