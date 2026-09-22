@@ -30,7 +30,25 @@ function calculateEmergencyFund() {
     const target3M = totalMonthly * 3;
     const targetRec = totalMonthly * recommendedMonths;
     const targetMax = totalMonthly * 12;
+/*
+         * ==========================================
+         * EMERGENCY FUND PROGRESS BAR UPDATE
+         * ==========================================
+         */
+        const emergencyCurrent = parseFloat(document.getElementById("currentSavingsInput").value) || 0;
+        const monthlyExpenses = parseFloat(document.getElementById("monthlyExpensesInput").value) || 0;
+        const targetMonths = 6; // e.g., 6 months of expenses
+        const emergencyTarget = monthlyExpenses * targetMonths;
 
+        // Calculate percentage (cap at 100% for the bar width)
+        let emergencyPercent = emergencyTarget > 0 ? (emergencyCurrent / emergencyTarget) * 100 : 0;
+        if (emergencyPercent > 100) emergencyPercent = 100;
+
+        // Update DOM elements
+        document.getElementById("emergencyBar").style.width = emergencyPercent + "%";
+        document.getElementById("emergencyCurrentLabel").innerText = "Terkumpul: RM " + emergencyCurrent.toLocaleString();
+        document.getElementById("emergencyTargetLabel").innerText = "Sasaran (" + targetMonths + " Bulan): RM " + emergencyTarget.toLocaleString();
+    
     // Shortfall berdasarkan sasaran disyorkan
     const shortfall = Math.max(0, targetRec - currentSavings);
 
