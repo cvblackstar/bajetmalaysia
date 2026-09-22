@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Loan Rumah — Bajet Malaysia</title>
+    <meta name="description" content="Kira ansuran bulanan loan rumah, jumlah faedah, dan kelayakan pembiayaan perumahan di Malaysia.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            BAJET MALAYSIA
+        </a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="gaji-bersih.html">Gaji Bersih</a>
+            <a href="dsr.html">DSR</a>
+            <a href="kwsp.html">KWSP</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="section">
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">KALKULATOR LOAN RUMAH</span>
+                <h2>Kira Ansuran & Pembiayaan Rumah</h2>
+                <p>Semak anggaran bayaran ansuran bulanan rumah serta jumlah keseluruhan faedah bank.</p>
+            </div>
+
+            <div class="calculator-layout">
+                
+                <!-- FORM CARD -->
+                <div class="calculator-form-card">
+                    <h2>Maklumat Hartanah & Pinjaman</h2>
+                    
+                    <form id="housingForm">
+                        
+                        <div class="form-group">
+                            <label for="homePrice">Harga Hartanah (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="homePrice" value="500000" min="0" step="1000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="downPaymentPct">Bayaran Muka (%) / Deposit</label>
+                            <input type="number" id="downPaymentPct" value="10" min="0" max="90" step="1" required>
+                            <small>Minimum lazimnya 10% daripada harga rumah.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interestRate">Kadar Faedah / Profit Tahunan (%)</label>
+                            <input type="number" id="interestRate" value="4.0" min="1" max="10" step="0.05" required>
+                            <small>Kadar purata semasa pinjaman perumahan bank di Malaysia.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loanDuration">Tempoh Pinjaman (Tahun)</label>
+                            <input type="number" id="loanDuration" value="35" min="1" max="35" step="1" required>
+                            <small>Maksimum tempoh pinjaman di Malaysia adalah 35 tahun (atau sehingga umur 70).</small>
+                        </div>
+
+                        <button type="button" id="calculateBtn" class="button primary calculate-button">
+                            🧮 Kira Ansuran Rumah
+                        </button>
+
+                    </form>
+                </div>
+
+                <!-- RESULT CARD -->
+                <div class="calculator-result-card">
+                    <h2>Ringkasan Pembiayaan</h2>
+
+                    <div class="take-home">
+                        <span>Anggaran Ansuran Bulanan</span>
+                        <strong id="monthlyInstallment">RM 0.00</strong>
+                    </div>
+
+                    <div class="result-list">
+                        <div class="result-row">
+                            <span>Harga Rumah</span>
+                            <strong id="resHomePrice">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Bayaran Muka (Deposit)</span>
+                            <strong id="resDownPayment">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Jumlah Pinjaman (Loan Amount)</span>
+                            <strong id="resLoanAmount">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Jumlah Faedah Dibayar</span>
+                            <strong id="resTotalInterest">RM 0.00</strong>
+                        </div>
+                        <div class="result-row total-row">
+                            <span>Jumlah Bayaran Keseluruhan</span>
+                            <strong id="resTotalPayment">RM 0.00</strong>
+                        </div>
+                    </div>
+
+                    <div class="pcb-notice">
+                        <strong>Nota Penting</strong>
+                        <p>Pengiraan ini adalah sebagai rujukan asas. Anggaran belum mengambil kira kos guaman, duti setem, penilaian hartanah, dan takaful/insurans MRTA/MLTA.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MALAYSIA</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>© 2026 Bajet Malaysia</p>
+    </div>
+</footer>
+
+<script src="housing.js"></script>
+</body>
+</html>
