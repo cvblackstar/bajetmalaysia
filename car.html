@@ -3,66 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Loan Kereta</title>
+    <title>Kalkulator Loan Kereta — Bajet Malaysia</title>
+    <meta name="description" content="Kira anggaran bayaran ansuran bulanan pinjaman kenderaan dan jumlah faedah kenderaan di Malaysia.">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <a href="index.html" class="back-link">← Kembali ke Menu Utama</a>
-            <h1>🚗 Kalkulator Loan Kereta</h1>
-            <p>Kira anggaran bayaran bulanan pinjaman kenderaan anda.</p>
-        </header>
 
-        <main class="calculator-layout">
-            <!-- Bahagian Input -->
-            <section class="input-section">
-                <div class="form-group">
-                    <label for="carPrice">Harga Kereta (RM)</label>
-                    <input type="number" id="carPrice" placeholder="Contoh: 80000" value="80000">
-                </div>
-
-                <div class="form-group">
-                    <label for="downPayment">Muka Depan / Downpayment (RM)</label>
-                    <input type="number" id="downPayment" placeholder="Contoh: 8000" value="8000">
-                </div>
-
-                <div class="form-group">
-                    <label for="interestRate">Kadar Faedah Setahun (%)</label>
-                    <input type="number" step="0.01" id="interestRate" placeholder="Contoh: 3.0" value="3.0">
-                </div>
-
-                <div class="form-group">
-                    <label for="loanDuration">Tempoh Pinjaman (Tahun)</label>
-                    <select id="loanDuration">
-                        <option value="3">3 Tahun</option>
-                        <option value="5">5 Tahun</option>
-                        <option value="7" selected>7 Tahun</option>
-                        <option value="9">9 Tahun</option>
-                    </select>
-                </div>
-
-                <button id="calculateBtn" class="btn-primary">Kira Bayaran</button>
-            </section>
-
-            <!-- Bahagian Keputusan -->
-            <section class="result-section">
-                <h2>Ringkasan Pinjaman</h2>
-                <div class="result-card">
-                    <div class="result-item highlight">
-                        <span>Anggaran Bulanan</span>
-                        <h3 id="monthlyPayment">RM 0.00</h3>
-                    </div>
-                    <div class="result-breakdown">
-                        <p>Jumlah Pinjaman: <span id="totalLoan">RM 0.00</span></p>
-                        <p>Jumlah Faedah Keseluruhan: <span id="totalInterest">RM 0.00</span></p>
-                        <p>Jumlah Pembayaran: <span id="totalPayment">RM 0.00</span></p>
-                    </div>
-                </div>
-            </section>
-        </main>
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            BAJET MALAYSIA
+        </a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="gaji-bersih.html">Gaji Bersih</a>
+            <a href="dsr.html">DSR</a>
+            <a href="kwsp.html">KWSP</a>
+            <a href="housing.html">Loan Rumah</a>
+        </nav>
     </div>
+</header>
 
-    <script src="car.js"></script>
+<main>
+    <section class="section">
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">KALKULATOR LOAN KERETA</span>
+                <h2>Kira Ansuran & Pinjaman Kenderaan</h2>
+                <p>Semak anggaran bayaran ansuran bulanan kereta serta jumlah keseluruhan faedah pinjaman.</p>
+            </div>
+
+            <div class="calculator-layout">
+                
+                <!-- FORM CARD -->
+                <div class="calculator-form-card">
+                    <h2>Maklumat Kenderaan & Pinjaman</h2>
+                    
+                    <form id="carForm">
+                        
+                        <div class="form-group">
+                            <label for="carPrice">Harga Kereta (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="carPrice" value="80000" min="0" step="1000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="downPayment">Bayaran Muka / Downpayment (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="downPayment" value="8000" min="0" step="500" required>
+                            </div>
+                            <small>Jumlah wang pendahuluan yang dibayar.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interestRate">Kadar Faedah Setahun (%)</label>
+                            <input type="number" id="interestRate" value="3.0" min="0.1" max="15" step="0.05" required>
+                            <small>Kadar faedah purata pinjaman kenderaan konvensional/islamik.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loanDuration">Tempoh Pinjaman (Tahun)</label>
+                            <select id="loanDuration" required>
+                                <option value="3">3 Tahun</option>
+                                <option value="5">5 Tahun</option>
+                                <option value="7" selected>7 Tahun</option>
+                                <option value="9">9 Tahun</option>
+                            </select>
+                            <small>Maksimum tempoh pinjaman kenderaan biasanya 9 tahun.</small>
+                        </div>
+
+                        <button type="button" id="calculateBtn" class="button primary calculate-button">
+                            🧮 Kira Ansuran Kereta
+                        </button>
+
+                    </form>
+                </div>
+
+                <!-- RESULT CARD -->
+                <div class="calculator-result-card">
+                    <h2>Ringkasan Pinjaman</h2>
+
+                    <div class="take-home">
+                        <span>Anggaran Ansuran Bulanan</span>
+                        <strong id="monthlyPayment">RM 0.00</strong>
+                    </div>
+
+                    <div class="result-list">
+                        <div class="result-row">
+                            <span>Harga Kereta</span>
+                            <strong id="resCarPrice">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Bayaran Muka (Downpayment)</span>
+                            <strong id="resDownPayment">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Jumlah Pinjaman (Loan Amount)</span>
+                            <strong id="resTotalLoan">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Jumlah Faedah Keseluruhan</span>
+                            <strong id="resTotalInterest">RM 0.00</strong>
+                        </div>
+                        <div class="result-row total-row">
+                            <span>Jumlah Pembayaran Keseluruhan</span>
+                            <strong id="resTotalPayment">RM 0.00</strong>
+                        </div>
+                    </div>
+
+                    <div class="pcb-notice">
+                        <strong>Nota Penting</strong>
+                        <p>Pengiraan ini menggunakan formula faedah tetap (flat rate) kenderaan standard di Malaysia. Anggaran belum mengambil kira kos insurans kenderaan (takaful) dan cukai jalan (roadtax) tahunan.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MALAYSIA</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>© 2026 Bajet Malaysia</p>
+    </div>
+</footer>
+
+<script src="car.js"></script>
 </body>
 </html>
