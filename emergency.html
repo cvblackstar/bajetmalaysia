@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator & Perancang Tabung Kecemasan — Bajet Malaysia</title>
+    <meta name="description" content="Kira bajet tabung kecemasan ideal anda (3 hingga 12 bulan) berdasarkan komitmen bulanan dan profil risiko di Malaysia.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            BAJET MALAYSIA
+        </a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="gaji-bersih.html">Gaji Bersih</a>
+            <a href="dsr.html">DSR</a>
+            <a href="kwsp.html">KWSP</a>
+            <a href="housing.html">Loan Rumah</a>
+            <a href="car.html">Loan Kereta</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="section">
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">TABUNG KECEMASAN (EMERGENCY FUND)</span>
+                <h2>Berapa Duit Kecemasan Yang Anda Perlukan?</h2>
+                <p>Kira sasaran tabung kecemasan yang realistik berdasarkan komitmen bulanan serta profil risiko anda.</p>
+            </div>
+
+            <div class="calculator-layout">
+                
+                <!-- FORM CARD -->
+                <div class="calculator-form-card">
+                    <h2>Maklumat Perbelanjaan & Profil</h2>
+                    
+                    <form id="emergencyForm">
+                        
+                        <div class="form-group">
+                            <label for="essentialExp">Perbelanjaan Asas Bulanan (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="essentialExp" value="2500" min="0" step="100" required>
+                            </div>
+                            <small>Makan minum, utiliti, sewa rumah, insurans, barang dapur asas.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="debtCommitment">Komitmen Hutang Bulanan (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="debtCommitment" value="2000" min="0" step="100" required>
+                            </div>
+                            <small>Ansuran pinjaman perumahan, kereta, peribadi, kad kredit, PTPTN.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="currentSavings">Simpanan Kecemasan Sedia Ada (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="currentSavings" value="8000" min="0" step="100" required>
+                            </div>
+                            <small>Baki tunai dalam akaun semasa/simpanan yang mudah dicairkan.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employmentType">Jenis Pekerjaan & Kestabilan</label>
+                            <select id="employmentType" required>
+                                <option value="stable">Tetap (Kerajaan / Syarikat Besar - Risiko Rendah)</option>
+                                <option value="normal" selected>Swasta Biasa / Pekerja Makan Gaji</option>
+                                <option value="freelance">Freelancer / Bisnes Sendiri / Pendapatan Berubah (Risiko Tinggi)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dependents">Bilangan Tanggungan (Anak / Keluarga)</label>
+                            <select id="dependents" required>
+                                <option value="0" selected>Tiada Tanggungan (Bujang)</option>
+                                <option value="1">1 - 2 Orang Tanggungan</option>
+                                <option value="2">3 Orang atau Lebih Tanggungan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="monthlySaveCapacity">Kemampuan Menabung Bulanan (RM)</label>
+                            <div class="input-wrapper">
+                                <span>RM</span>
+                                <input type="number" id="monthlySaveCapacity" value="500" min="0" step="50" required>
+                            </div>
+                            <small>Berapa banyak anda boleh simpan khusus untuk tabung ini setiap bulan.</small>
+                        </div>
+
+                        <button type="button" id="calculateBtn" class="button primary calculate-button">
+                            🧮 Kira Tabung Kecemasan
+                        </button>
+
+                    </form>
+                </div>
+
+                <!-- RESULT CARD -->
+                <div class="calculator-result-card">
+                    <h2>Sasaran & Perancang Tabung</h2>
+
+                    <div class="take-home">
+                        <span>Jumlah Komitmen Bulanan</span>
+                        <strong id="totalMonthlyCommitment">RM 0.00</strong>
+                    </div>
+
+                    <div class="result-list">
+                        <div class="result-row">
+                            <span>Sasaran Minimum (3 Bulan)</span>
+                            <strong id="target3M">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Sasaran Disyorkan (<span id="recommendedMonths">6</span> Bulan)</span>
+                            <strong id="targetRec" style="color: var(--primary-color);">RM 0.00</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Sasaran Konservatif (9–12 Bulan)</span>
+                            <strong id="targetMax">RM 0.00</strong>
+                        </div>
+                        <div class="result-row total-row">
+                            <span>Baki Kekurangan (Shortfall)</span>
+                            <strong id="shortfallAmount">RM 0.00</strong>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div style="margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+                            <span>Pencapaian Semasa</span>
+                            <span id="progressText">0%</span>
+                        </div>
+                        <div style="background: #e2e8f0; border-radius: 999px; height: 12px; overflow: hidden;">
+                            <div id="progressBar" style="background: var(--primary-color); width: 0%; height: 100%; transition: width 0.4s ease;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Savings Planner Breakdown -->
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 1rem; color: #1e293b;">🗓️ Tempoh Capai Sasaran (Berdasarkan Simpanan Bulanan)</h4>
+                        <p style="font-size: 0.9kt; color: #475569; margin-bottom: 0.5rem;" id="timeToGoalText">Masukkan kemampuan menabung untuk lihat jangka masa.</p>
+                    </div>
+
+                    <div class="pcb-notice" style="margin-top: 1.5rem;">
+                        <strong>Kenapa Julat Ini Dipilih?</strong>
+                        <p id="riskProfileReason">Profil anda menetapkan sasaran disyorkan berdasarkan kestabilan pekerjaan dan tanggungan.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- EDUCATIONAL SECTION / ARTICLE -->
+            <div style="margin-top: 3rem; background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1e293b;">📖 Panduan & Falsafah Tabung Kecemasan</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                    <div>
+                        <h4 style="color: #0f172a; margin-bottom: 0.5rem;">1. Emergency Fund Bukan Pelaburan</h4>
+                        <p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">
+                            Tujuan utama tabung ini **bukan untuk mengejar pulangan dividen tinggi**. Ia mesti mudah dicairkan (*liquid*) dan selamat. Letakkan di tempat seperti ASB, Tabung Haji, atau Akaun Simpanan Tetap (FD) yang boleh dikeluarkan segera tanpa penalti besar.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: #0f172a; margin-bottom: 0.5rem;">2. Apa Yang Dikira Sebagai 'Kecemasan'?</h4>
+                        <p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">
+                            Kecemasan adalah situasi darurat yang tidak dijangka: kehilangan kerja, kerosakan kenderaan mendadak untuk mencari rezeki, atau kecemasan kesihatan kritikal. **Bukan** untuk melancong, beli gajet baru, atau downpayment fesyen.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: #0f172a; margin-bottom: 0.5rem;">3. Bermula Dari RM0? Jangan Panas Baran</h4>
+                        <p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">
+                            Sasaran 6 bulan mungkin nampak jauh. Mulakan dengan sasaran kecil dulu—cuba kumpul **RM1,000 pertama**, kemudian capai 1 bulan perbelanjaan, dan naikkan perlahan-lahan secara konsisten setiap bulan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MALAYSIA</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>© 2026 Bajet Malaysia</p>
+    </div>
+</footer>
+
+<script src="emergency.js"></script>
+</body>
+</html>
