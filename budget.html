@@ -1,77 +1,616 @@
-<section id="monthlyBudgetSection" class="calculator-card" style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 24px;">
-    <h2>Belanjawan Bulanan (Monthly Budget)</h2>
-    <p style="color: #4a5568; font-size: 0.9rem; margin-bottom: 16px;">Ketahui ke mana pergi duit gaji anda setiap bulan dan kenal pasti ruang untuk dijimatkan.</p>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Net Income Input -->
-    <div style="margin-bottom: 16px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 6px;">Gaji Bersih (RM)</label>
-        <input type="number" id="bud_netSalary" value="6000" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;" oninput="calculateBudget()">
-    </div>
+    <title>Kalkulator Belanjawan Bulanan Malaysia | Bajet Malaysia</title>
 
-    <!-- Expense Categories (Split into Needs, Wants, Savings) -->
-    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Keperluan (Needs)</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-        <div><label style="font-size: 0.85rem;">🏠 Rumah</label><input type="number" class="bud-input needs" data-category="rumah" value="1500" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">🚗 Kereta</label><input type="number" class="bud-input needs" data-category="kereta" value="1200" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">🍜 Makanan</label><input type="number" class="bud-input needs" data-category="makanan" value="1000" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">💡 Utilities</label><input type="number" class="bud-input needs" data-category="utilities" value="300" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">📱 Phone/Internet</label><input type="number" class="bud-input needs" data-category="phone" value="150" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">👨‍👩‍👧 Family</label><input type="number" class="bud-input needs" data-category="family" value="400" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-    </div>
+    <meta
+        name="description"
+        content="Ketahui ke mana perginya gaji anda setiap bulan dengan kalkulator belanjawan 50/30/20 (keperluan, kehendak, simpanan) untuk rakyat Malaysia."
+    >
 
-    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Kehendak (Wants)</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-        <div><label style="font-size: 0.85rem;">🛒 Shopping</label><input type="number" class="bud-input wants" data-category="shopping" value="300" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-        <div><label style="font-size: 0.85rem;">🎮 Entertainment</label><input type="number" class="bud-input wants" data-category="entertainment" value="200" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-    </div>
+    <link rel="stylesheet" href="style.css">
+</head>
 
-    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Simpanan / Pelaburan (Savings)</h3>
-    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;">
-        <div><label style="font-size: 0.85rem;">💰 Tabungan/Pelaburan</label><input type="number" class="bud-input savings" data-category="savings" value="500" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
-    </div>
+<body>
 
-    <!-- Results Card -->
-    <div style="background: #f7fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 20px;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #2d3748;">Rumusan Belanjawan</h3>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Jumlah Perbelanjaan:</span><strong id="bud_totalExpenses">RM 5,550</strong></div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;"><span>Baki Tunai (Surplus):</span><strong id="bud_remaining" style="color: #38a169;">RM 450</strong></div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
 
-        <!-- Visual Progress / Breakdown Chart Bar -->
-        <div style="margin-top: 15px; margin-bottom: 8px;">
-            <span style="font-size: 0.85rem; font-weight: 600; color: #4a5568;">Pecahan Aliran Duit:</span>
-            <div style="display: flex; height: 20px; border-radius: 10px; overflow: hidden; background: #e2e8f0; width: 100%; margin-top: 6px;">
-                <div id="budBarNeeds" style="width: 0%; background-color: #3182ce; transition: width 0.4s;" title="Keperluan (Needs)"></div>
-                <div id="budBarWants" style="width: 0%; background-color: #d69e2e; transition: width 0.4s;" title="Kehendak (Wants)"></div>
-                <div id="budBarSavings" style="width: 0%; background-color: #38a169; transition: width 0.4s;" title="Simpanan (Savings)"></div>
-                <div id="budBarSurplus" style="width: 0%; background-color: #cbd5e0; transition: width 0.4s;" title="Baki (Surplus)"></div>
+            <a href="index.html" class="logo">
+                BAJET MALAYSIA
+            </a>
+
+            <nav class="main-nav">
+                <a href="index.html">Utama</a>
+                <a href="index.html#kalkulator">Kalkulator</a>
+                <a href="index.html#panduan">Panduan</a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <!-- MAIN -->
+    <main>
+
+        <section class="section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="eyebrow">
+                        Kalkulator
+                    </span>
+
+                    <h1>Kalkulator Belanjawan Bulanan</h1>
+
+                    <p>
+                        Masukkan gaji bersih dan perbelanjaan anda untuk
+                        lihat ke mana duit anda pergi setiap bulan,
+                        berbanding rujukan 50/30/20.
+                    </p>
+
+                </div>
+
+
+                <!-- CALCULATOR -->
+                <div class="calculator-layout">
+
+
+                    <!-- INPUT -->
+                    <div class="calculator-form-card">
+
+                        <h2>Gaji & Perbelanjaan</h2>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_netSalary">
+                                Gaji bersih bulanan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_netSalary"
+                                    value="6000"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                            <small>
+                                Jumlah yang benar-benar masuk akaun bank
+                                selepas semua potongan.
+                            </small>
+
+                        </div>
+
+
+                        <!-- NEEDS -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Keperluan (Needs)
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_rumah">
+                                🏠 Rumah (sewa/ansuran)
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_rumah"
+                                    class="bud-input needs"
+                                    data-category="rumah"
+                                    value="1500"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_kereta">
+                                🚗 Kereta (ansuran/minyak)
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_kereta"
+                                    class="bud-input needs"
+                                    data-category="kereta"
+                                    value="1200"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_makanan">
+                                🍜 Makanan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_makanan"
+                                    class="bud-input needs"
+                                    data-category="makanan"
+                                    value="1000"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_utilities">
+                                💡 Utiliti (elektrik, air, dsb.)
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_utilities"
+                                    class="bud-input needs"
+                                    data-category="utilities"
+                                    value="300"
+                                    min="0"
+                                    step="25"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_phone">
+                                📱 Telefon / internet
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_phone"
+                                    class="bud-input needs"
+                                    data-category="phone"
+                                    value="150"
+                                    min="0"
+                                    step="10"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_family">
+                                👨‍👩‍👧 Keluarga / tanggungan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_family"
+                                    class="bud-input needs"
+                                    data-category="family"
+                                    value="400"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- WANTS -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Kehendak (Wants)
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_shopping">
+                                🛒 Shopping
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_shopping"
+                                    class="bud-input wants"
+                                    data-category="shopping"
+                                    value="300"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_entertainment">
+                                🎮 Hiburan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_entertainment"
+                                    class="bud-input wants"
+                                    data-category="entertainment"
+                                    value="200"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SAVINGS -->
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="form-section-title">
+                            Simpanan / Pelaburan
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="bud_savings">
+                                💰 Tabungan / pelaburan
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <span>RM</span>
+
+                                <input
+                                    type="number"
+                                    id="bud_savings"
+                                    class="bud-input savings"
+                                    data-category="savings"
+                                    value="500"
+                                    min="0"
+                                    step="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="calculateBudgetButton"
+                            class="button primary calculate-button"
+                        >
+                            Kira Belanjawan
+                        </button>
+
+                        <small style="display: block; margin-top: 10px; text-align: center;">
+                            Keputusan dikemas kini secara automatik semasa
+                            anda menaip, dan disimpan pada peranti ini
+                            untuk lawatan akan datang.
+                        </small>
+
+                    </div>
+
+
+                    <!-- RESULT -->
+                    <div class="calculator-result-card">
+
+                        <h2>Rumusan Belanjawan</h2>
+
+
+                        <div class="take-home">
+
+                            <span>
+                                Baki tunai (surplus) bulanan
+                            </span>
+
+                            <strong id="bud_remaining">
+                                RM0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="result-list">
+
+                            <div class="result-row">
+
+                                <span>
+                                    Jumlah perbelanjaan
+                                </span>
+
+                                <strong id="bud_totalExpenses">
+                                    RM0.00
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="progress-block">
+
+                            <div class="progress-header">
+                                <span>Pecahan aliran duit</span>
+                            </div>
+
+                            <div class="segment-bar">
+                                <div id="budBarNeeds" class="segment-needs"></div>
+                                <div id="budBarWants" class="segment-wants"></div>
+                                <div id="budBarSavings" class="segment-savings"></div>
+                                <div id="budBarSurplus" class="segment-surplus"></div>
+                            </div>
+
+                            <div class="segment-legend">
+                                <span><span class="dot" style="background: var(--navy);"></span> Keperluan</span>
+                                <span><span class="dot" style="background: #e0a83e;"></span> Kehendak</span>
+                                <span><span class="dot" style="background: var(--green);"></span> Simpanan</span>
+                                <span><span class="dot" style="background: #cbd5e1;"></span> Baki</span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="result-list" style="margin-top: 18px;">
+
+                            <div class="result-row">
+                                <span>Keperluan (rujukan 50%)</span>
+                                <strong id="bud_pctNeeds">0%</strong>
+                            </div>
+
+                            <div class="result-row">
+                                <span>Kehendak (rujukan 30%)</span>
+                                <strong id="bud_pctWants">0%</strong>
+                            </div>
+
+                            <div class="result-row">
+                                <span>Simpanan (rujukan 20%)</span>
+                                <strong id="bud_pctSavings">0%</strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="pcb-notice">
+
+                            <strong>
+                                Analisis
+                            </strong>
+
+                            <p id="bud_insight">
+                                Masukkan data anda untuk melihat analisis
+                                corak perbelanjaan.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
-            <div style="display: flex; gap: 15px; font-size: 0.75rem; margin-top: 6px; color: #4a5568;">
-                <span><span style="display:inline-block;width:8px;height:8px;background:#3182ce;border-radius:50%;"></span> Keperluan</span>
-                <span><span style="display:inline-block;width:8px;height:8px;background:#d69e2e;border-radius:50%;"></span> Kehendak</span>
-                <span><span style="display:inline-block;width:8px;height:8px;background:#38a169;border-radius:50%;"></span> Simpanan</span>
-                <span><span style="display:inline-block;width:8px;height:8px;background:#cbd5e0;border-radius:50%;"></span> Baki</span>
+
+        </section>
+
+
+        <!-- EXPLANATION -->
+        <section class="section light-section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="eyebrow">
+                        Panduan
+                    </span>
+
+                    <h2>Peraturan 50/30/20</h2>
+
+                    <p>
+                        Satu titik permulaan yang mudah untuk mengagihkan
+                        gaji bersih anda kepada tiga kategori utama.
+                    </p>
+
+                </div>
+
+
+                <div class="topic-grid">
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🏠
+                        </div>
+
+                        <h3>
+                            50% Keperluan
+                        </h3>
+
+                        <p>
+                            Rumah, makanan, utiliti, pengangkutan dan
+                            komitmen wajib lain yang tidak boleh
+                            dielakkan.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            🛍️
+                        </div>
+
+                        <h3>
+                            30% Kehendak
+                        </h3>
+
+                        <p>
+                            Hiburan, makan di luar, shopping dan gaya
+                            hidup — perkara yang boleh dikurangkan jika
+                            perlu.
+                        </p>
+
+                    </article>
+
+
+                    <article class="topic">
+
+                        <div class="topic-icon">
+                            💰
+                        </div>
+
+                        <h3>
+                            20% Simpanan
+                        </h3>
+
+                        <p>
+                            Tabung kecemasan, KWSP tambahan, ASB atau
+                            pelaburan lain untuk masa depan anda.
+                        </p>
+
+                    </article>
+
+                </div>
+
             </div>
+
+        </section>
+
+
+        <!-- DISCLAIMER -->
+        <section class="section">
+
+            <div class="container">
+
+                <div class="principle-box">
+
+                    <span class="eyebrow">
+                        Penting
+                    </span>
+
+                    <h2>
+                        50/30/20 ialah rujukan, bukan peraturan tegar
+                    </h2>
+
+                    <p>
+                        Kos sara hidup berbeza mengikut lokasi, saiz
+                        keluarga dan tahap pendapatan. Gunakan nisbah ini
+                        sebagai titik permulaan untuk menilai belanjawan
+                        anda, bukan sasaran mutlak yang mesti dicapai
+                        setiap bulan.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <p class="footer-brand">
+                BAJET MALAYSIA
+            </p>
+
+            <p>
+                Faham Duit. Urus Duit. Rancang Hidup.
+            </p>
+
+            <p>
+                Maklumat di laman ini adalah untuk tujuan pendidikan dan
+                rujukan umum sahaja.
+            </p>
+
+            <p>
+                © 2026 Bajet Malaysia
+            </p>
+
         </div>
 
-        <!-- 50/30/20 Reference Table -->
-        <table style="width: 100%; margin-top: 16px; font-size: 0.85rem; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 1px solid #cbd5e0; text-align: left;">
-                    <th style="padding: 4px;">Komponen</th>
-                    <th style="padding: 4px;">Anda</th>
-                    <th style="padding: 4px;">Rujukan Ideal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td style="padding: 4px;">Needs</td><td id="bud_pctNeeds" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">50%</td></tr>
-                <tr><td style="padding: 4px;">Wants</td><td id="bud_pctWants" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">30%</td></tr>
-                <tr><td style="padding: 4px;">Savings</td><td id="bud_pctSavings" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">20%</td></tr>
-            </tbody>
-        </table>
+    </footer>
 
-        <!-- Educational Insight / Duit Bocor Feedback -->
-        <div id="bud_insight" style="margin-top: 14px; padding: 10px; background: #ebf8ff; border-left: 4px solid #3182ce; font-size: 0.85rem; color: #2b6cb0; border-radius: 4px;">
-            Masukkan data anda untuk melihat analisis corak perbelanjaan.
-        </div>
-    </div>
-</section>
+
+    <script src="budget.js"></script>
+
+</body>
+</html>

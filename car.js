@@ -20,12 +20,26 @@ function calculateCarLoan() {
     const monthlyPayment = totalMonths > 0 ? totalPayment / totalMonths : 0;
 
     // Paparkan hasil pada senarai ringkasan baharu
-    document.getElementById('monthlyPayment').textContent = `RM ${monthlyPayment.toFixed(2)}`;
-    document.getElementById('resCarPrice').textContent = `RM ${carPrice.toFixed(2)}`;
-    document.getElementById('resDownPayment').textContent = `RM ${downPayment.toFixed(2)}`;
-    document.getElementById('resTotalLoan').textContent = `RM ${loanAmount.toFixed(2)}`;
-    document.getElementById('resTotalInterest').textContent = `RM ${totalInterest.toFixed(2)}`;
-    document.getElementById('resTotalPayment').textContent = `RM ${totalPayment.toFixed(2)}`;
+    document.getElementById('monthlyPayment').textContent = formatRM(monthlyPayment);
+    document.getElementById('resCarPrice').textContent = formatRM(carPrice);
+    document.getElementById('resDownPayment').textContent = formatRM(downPayment);
+    document.getElementById('resTotalLoan').textContent = formatRM(loanAmount);
+    document.getElementById('resTotalInterest').textContent = formatRM(totalInterest);
+    document.getElementById('resTotalPayment').textContent = formatRM(totalPayment);
+}
+
+function formatRM(amount) {
+
+    return new Intl.NumberFormat(
+        "ms-MY",
+        {
+            style: "currency",
+            currency: "MYR",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    ).format(amount);
+
 }
 
 // Jalankan pengiraan kali pertama apabila muka surat dibuka

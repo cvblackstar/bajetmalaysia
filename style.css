@@ -141,6 +141,18 @@ a {
     padding: 85px 0;
 }
 
+.hero-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
 .hero-inner {
     max-width: 850px;
 }
@@ -150,6 +162,10 @@ a {
     line-height: 1.1;
     margin-bottom: 20px;
     letter-spacing: -1px;
+}
+
+.hero h1 span {
+    color: #6ee7b7;
 }
 
 .hero p {
@@ -423,6 +439,57 @@ a {
     transition: width 0.4s ease;
 }
 
+.segment-bar {
+    display: flex;
+    height: 18px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--border);
+}
+
+.segment-bar > div {
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+.segment-needs {
+    background: var(--navy);
+}
+
+.segment-wants {
+    background: #e0a83e;
+}
+
+.segment-savings {
+    background: var(--green);
+}
+
+.segment-surplus {
+    background: #cbd5e1;
+}
+
+.segment-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.segment-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.segment-legend .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -657,6 +724,11 @@ a {
     max-width: 760px;
     margin: 0 auto;
     text-align: center;
+}
+
+.principle-icon {
+    font-size: 2.2rem;
+    margin-bottom: 14px;
 }
 
 .principle h2 {

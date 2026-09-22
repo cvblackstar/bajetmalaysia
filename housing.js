@@ -40,7 +40,15 @@ function calculateHousingLoan() {
 
     // Format currency helper
     const formatRM = (num) => {
-        return 'RM ' + num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return new Intl.NumberFormat(
+            "ms-MY",
+            {
+                style: "currency",
+                currency: "MYR",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        ).format(num);
     };
 
     // Update DOM elements
