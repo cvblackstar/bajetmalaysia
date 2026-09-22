@@ -1,0 +1,77 @@
+<section id="monthlyBudgetSection" class="calculator-card" style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 24px;">
+    <h2>Belanjawan Bulanan (Monthly Budget)</h2>
+    <p style="color: #4a5568; font-size: 0.9rem; margin-bottom: 16px;">Ketahui ke mana pergi duit gaji anda setiap bulan dan kenal pasti ruang untuk dijimatkan.</p>
+
+    <!-- Net Income Input -->
+    <div style="margin-bottom: 16px;">
+        <label style="display: block; font-weight: 600; margin-bottom: 6px;">Gaji Bersih (RM)</label>
+        <input type="number" id="bud_netSalary" value="6000" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;" oninput="calculateBudget()">
+    </div>
+
+    <!-- Expense Categories (Split into Needs, Wants, Savings) -->
+    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Keperluan (Needs)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div><label style="font-size: 0.85rem;">🏠 Rumah</label><input type="number" class="bud-input needs" data-category="rumah" value="1500" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">🚗 Kereta</label><input type="number" class="bud-input needs" data-category="kereta" value="1200" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">🍜 Makanan</label><input type="number" class="bud-input needs" data-category="makanan" value="1000" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">💡 Utilities</label><input type="number" class="bud-input needs" data-category="utilities" value="300" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">📱 Phone/Internet</label><input type="number" class="bud-input needs" data-category="phone" value="150" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">👨‍👩‍👧 Family</label><input type="number" class="bud-input needs" data-category="family" value="400" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+    </div>
+
+    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Kehendak (Wants)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div><label style="font-size: 0.85rem;">🛒 Shopping</label><input type="number" class="bud-input wants" data-category="shopping" value="300" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+        <div><label style="font-size: 0.85rem;">🎮 Entertainment</label><input type="number" class="bud-input wants" data-category="entertainment" value="200" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+    </div>
+
+    <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 6px;">Simpanan / Pelaburan (Savings)</h3>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;">
+        <div><label style="font-size: 0.85rem;">💰 Tabungan/Pelaburan</label><input type="number" class="bud-input savings" data-category="savings" value="500" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" oninput="calculateBudget()"></div>
+    </div>
+
+    <!-- Results Card -->
+    <div style="background: #f7fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 20px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #2d3748;">Rumusan Belanjawan</h3>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Jumlah Perbelanjaan:</span><strong id="bud_totalExpenses">RM 5,550</strong></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;"><span>Baki Tunai (Surplus):</span><strong id="bud_remaining" style="color: #38a169;">RM 450</strong></div>
+
+        <!-- Visual Progress / Breakdown Chart Bar -->
+        <div style="margin-top: 15px; margin-bottom: 8px;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: #4a5568;">Pecahan Aliran Duit:</span>
+            <div style="display: flex; height: 20px; border-radius: 10px; overflow: hidden; background: #e2e8f0; width: 100%; margin-top: 6px;">
+                <div id="budBarNeeds" style="width: 0%; background-color: #3182ce; transition: width 0.4s;" title="Keperluan (Needs)"></div>
+                <div id="budBarWants" style="width: 0%; background-color: #d69e2e; transition: width 0.4s;" title="Kehendak (Wants)"></div>
+                <div id="budBarSavings" style="width: 0%; background-color: #38a169; transition: width 0.4s;" title="Simpanan (Savings)"></div>
+                <div id="budBarSurplus" style="width: 0%; background-color: #cbd5e0; transition: width 0.4s;" title="Baki (Surplus)"></div>
+            </div>
+            <div style="display: flex; gap: 15px; font-size: 0.75rem; margin-top: 6px; color: #4a5568;">
+                <span><span style="display:inline-block;width:8px;height:8px;background:#3182ce;border-radius:50%;"></span> Keperluan</span>
+                <span><span style="display:inline-block;width:8px;height:8px;background:#d69e2e;border-radius:50%;"></span> Kehendak</span>
+                <span><span style="display:inline-block;width:8px;height:8px;background:#38a169;border-radius:50%;"></span> Simpanan</span>
+                <span><span style="display:inline-block;width:8px;height:8px;background:#cbd5e0;border-radius:50%;"></span> Baki</span>
+            </div>
+        </div>
+
+        <!-- 50/30/20 Reference Table -->
+        <table style="width: 100%; margin-top: 16px; font-size: 0.85rem; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 1px solid #cbd5e0; text-align: left;">
+                    <th style="padding: 4px;">Komponen</th>
+                    <th style="padding: 4px;">Anda</th>
+                    <th style="padding: 4px;">Rujukan Ideal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="padding: 4px;">Needs</td><td id="bud_pctNeeds" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">50%</td></tr>
+                <tr><td style="padding: 4px;">Wants</td><td id="bud_pctWants" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">30%</td></tr>
+                <tr><td style="padding: 4px;">Savings</td><td id="bud_pctSavings" style="padding: 4px; font-weight:600;">0%</td><td style="padding: 4px; color: #718096;">20%</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Educational Insight / Duit Bocor Feedback -->
+        <div id="bud_insight" style="margin-top: 14px; padding: 10px; background: #ebf8ff; border-left: 4px solid #3182ce; font-size: 0.85rem; color: #2b6cb0; border-radius: 4px;">
+            Masukkan data anda untuk melihat analisis corak perbelanjaan.
+        </div>
+    </div>
+</section>
