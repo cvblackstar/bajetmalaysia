@@ -1,92 +1,241 @@
-document.getElementById('calculateBtn').addEventListener('click', calculateEmergencyFund);
+document.addEventListener("DOMContentLoaded", function () {
 
-function calculateEmergencyFund() {
-    const essentialExp = parseFloat(document.getElementById('essentialExp').value) || 0;
-    const debtCommitment = parseFloat(document.getElementById('debtCommitment').value) || 0;
-    const currentSavings = parseFloat(document.getElementById('currentSavings').value) || 0;
-    const employmentType = document.getElementById('employmentType').value;
-    const dependents = parseInt(document.getElementById('dependents').value) || 0;
-    const monthlySaveCapacity = parseFloat(document.getElementById('monthlySaveCapacity').value) || 0;
+    const calculateButton =
+        document.getElementById("calculateEmergencyButton");
 
-    // Jumlah komitmen bulanan
-    const totalMonthly = essentialExp + debtCommitment;
+    calculateButton.addEventListener("click", calculateEmergencyFund);
 
-    // Tentukan bulan disyorkan berdasarkan profil risiko
-    let recommendedMonths = 6;
-    let riskReason = "";
 
-    if (employmentType === 'stable' && dependents === 0) {
-        recommendedMonths = 3;
-        riskReason = "Anda mempunyai pekerjaan yang stabil (kerajaan/syarikat besar) dan tiada tanggungan, jadi 3 bulan sudah memadai sebagai asas permulaan.";
-    } else if (employmentType === 'freelance' || dependents >= 2) {
-        recommendedMonths = 9;
-        riskReason = "Oleh kerana profil pendapatan tidak menentu (freelance/bisnes) atau mempunyai tanggungan keluarga yang ramai, sasaran 9 hingga 12 bulan lebih disyorkan untuk keselamatan jangka panjang.";
-    } else {
-        recommendedMonths = 6;
-        riskReason = "Pekerjaan swasta biasa dan tanggungan sederhana menjadikan 6 bulan sebagai standard emas keselamatan kewangan di Malaysia.";
-    }
+    /*
+     * Run once on load so the pre-filled example values
+     * show a result immediately, same as the defaults
+     * already sitting in the form.
+     */
+    calculateEmergencyFund();
 
-    // Kira sasaran nilai wang
-    const target3M = totalMonthly * 3;
-    const targetRec = totalMonthly * recommendedMonths;
-    const targetMax = totalMonthly * 12;
-/*
+
+    function calculateEmergencyFund() {
+
+        /*
          * ==========================================
-         * EMERGENCY FUND PROGRESS BAR UPDATE
+         * INPUTS
          * ==========================================
          */
-        const emergencyCurrent = parseFloat(document.getElementById("currentSavingsInput").value) || 0;
-        const monthlyExpenses = parseFloat(document.getElementById("monthlyExpensesInput").value) || 0;
-        const targetMonths = 6; // e.g., 6 months of expenses
-        const emergencyTarget = monthlyExpenses * targetMonths;
 
-        // Calculate percentage (cap at 100% for the bar width)
-        let emergencyPercent = emergencyTarget > 0 ? (emergencyCurrent / emergencyTarget) * 100 : 0;
-        if (emergencyPercent > 100) emergencyPercent = 100;
+        const essentialExp =
+            parseFloat(
+                document.getElementById("essentialExp").value
+            ) || 0;
 
-        // Update DOM elements
-        document.getElementById("emergencyBar").style.width = emergencyPercent + "%";
-        document.getElementById("emergencyCurrentLabel").innerText = "Terkumpul: RM " + emergencyCurrent.toLocaleString();
-        document.getElementById("emergencyTargetLabel").innerText = "Sasaran (" + targetMonths + " Bulan): RM " + emergencyTarget.toLocaleString();
-    
-    // Shortfall berdasarkan sasaran disyorkan
-    const shortfall = Math.max(0, targetRec - currentSavings);
+        const debtCommitment =
+            parseFloat(
+                document.getElementById("debtCommitment").value
+            ) || 0;
 
-    // Kira peratusan pencapaian berbanding sasaran disyorkan
-    let percentage = targetRec > 0 ? (currentSavings / targetRec) * 100 : 0;
-    if (percentage > 100) percentage = 100;
+        const currentSavings =
+            parseFloat(
+                document.getElementById("currentSavings").value
+            ) || 0;
 
-    // Kira tempoh masa capai sasaran (dalam bulan)
-    let timeText = "";
-    if (shortfall === 0) {
-        timeText = "🎉 Tahniah! Tabung kecemasan anda telah mencapai atau melebihi sasaran disyorkan.";
-    } else if (monthlySaveCapacity <= 0) {
-        timeText = `Kekurangan anda ialah <strong>RM ${shortfall.toFixed(2)}</strong>. Sila masukkan kemampuan menabung bulanan untuk melihat anggaran tempoh.`;
-    } else {
-        const monthsNeeded = Math.ceil(shortfall / monthlySaveCapacity);
-        const years = Math.floor(monthsNeeded / 12);
-        const remMonths = monthsNeeded % 12;
-        
-        let durationStr = "";
-        if (years > 0) durationStr += `${years} tahun `;
-        if (remMonths > 0 || years === 0) durationStr += `${remMonths} bulan`;
+        const employmentType =
+            document.getElementById("employmentType").value;
 
-        timeText = `Kekurangan sebanyak <strong>RM ${shortfall.toFixed(2)}</strong> akan dapat diselesaikan dalam masa kira-kira <strong>${durationStr}</strong> jika anda menabung RM ${monthlySaveCapacity.toFixed(2)} sebulan.`;
+        const dependents =
+            parseInt(
+                document.getElementById("dependents").value
+            ) || 0;
+
+        const monthlySaveCapacity =
+            parseFloat(
+                document.getElementById("monthlySaveCapacity").value
+            ) || 0;
+
+
+        const totalMonthly =
+            essentialExp + debtCommitment;
+
+
+        /*
+         * ==========================================
+         * RECOMMENDED MONTHS BY RISK PROFILE
+         * ==========================================
+         */
+
+        let recommendedMonths = 6;
+        let riskReason = "";
+
+        if (employmentType === "stable" && dependents === 0) {
+
+            recommendedMonths = 3;
+
+            riskReason =
+                "Anda mempunyai pekerjaan yang stabil (kerajaan/syarikat " +
+                "besar) dan tiada tanggungan, jadi 3 bulan sudah memadai " +
+                "sebagai asas permulaan.";
+
+        } else if (employmentType === "freelance" || dependents >= 2) {
+
+            recommendedMonths = 9;
+
+            riskReason =
+                "Oleh kerana profil pendapatan tidak menentu " +
+                "(freelance/bisnes) atau mempunyai tanggungan keluarga " +
+                "yang ramai, sasaran 9 hingga 12 bulan lebih disyorkan " +
+                "untuk keselamatan jangka panjang.";
+
+        } else {
+
+            recommendedMonths = 6;
+
+            riskReason =
+                "Pekerjaan swasta biasa dan tanggungan sederhana " +
+                "menjadikan 6 bulan sebagai standard emas keselamatan " +
+                "kewangan di Malaysia.";
+
+        }
+
+
+        /*
+         * ==========================================
+         * TARGETS
+         * ==========================================
+         */
+
+        const target3M =
+            totalMonthly * 3;
+
+        const targetRec =
+            totalMonthly * recommendedMonths;
+
+        const targetMax =
+            totalMonthly * 12;
+
+        const shortfall =
+            Math.max(0, targetRec - currentSavings);
+
+        let percentage =
+            targetRec > 0 ?
+                (currentSavings / targetRec) * 100 :
+                0;
+
+        percentage =
+            Math.max(0, Math.min(100, percentage));
+
+
+        /*
+         * ==========================================
+         * TIME TO GOAL
+         * ==========================================
+         */
+
+        let timeText = "";
+
+        if (shortfall === 0) {
+
+            timeText =
+                "Tahniah! Tabung kecemasan anda telah mencapai atau " +
+                "melebihi sasaran disyorkan.";
+
+        } else if (monthlySaveCapacity <= 0) {
+
+            timeText =
+                "Kekurangan anda ialah " + formatRM(shortfall) + ". " +
+                "Sila masukkan kemampuan menabung bulanan untuk melihat " +
+                "anggaran tempoh.";
+
+        } else {
+
+            const monthsNeeded =
+                Math.ceil(shortfall / monthlySaveCapacity);
+
+            const years =
+                Math.floor(monthsNeeded / 12);
+
+            const remMonths =
+                monthsNeeded % 12;
+
+            let durationStr = "";
+
+            if (years > 0) {
+
+                durationStr += years + " tahun ";
+
+            }
+
+            if (remMonths > 0 || years === 0) {
+
+                durationStr += remMonths + " bulan";
+
+            }
+
+            timeText =
+                "Kekurangan sebanyak " + formatRM(shortfall) + " akan " +
+                "dapat diselesaikan dalam masa kira-kira " + durationStr +
+                " jika anda menabung " + formatRM(monthlySaveCapacity) +
+                " sebulan.";
+
+        }
+
+
+        /*
+         * ==========================================
+         * DISPLAY RESULTS
+         * ==========================================
+         */
+
+        document.getElementById("totalMonthlyCommitment").textContent =
+            formatRM(totalMonthly);
+
+        document.getElementById("target3M").textContent =
+            formatRM(target3M);
+
+        document.getElementById("recommendedMonths").textContent =
+            recommendedMonths;
+
+        document.getElementById("targetRec").textContent =
+            formatRM(targetRec);
+
+        document.getElementById("targetMax").textContent =
+            formatRM(targetMax);
+
+        document.getElementById("shortfallAmount").textContent =
+            shortfall > 0 ?
+                formatRM(shortfall) :
+                formatRM(0) + " (sasaran tercapai)";
+
+        document.getElementById("progressText").textContent =
+            percentage.toFixed(0) + "%";
+
+        document.getElementById("progressBar").style.width =
+            percentage + "%";
+
+        document.getElementById("timeToGoalText").textContent =
+            timeText;
+
+        document.getElementById("riskProfileReason").textContent =
+            riskReason;
+
     }
 
-    // Paparkan hasil ke UI
-    document.getElementById('totalMonthlyCommitment').textContent = `RM ${totalMonthly.toFixed(2)}`;
-    document.getElementById('target3M').textContent = `RM ${target3M.toFixed(2)}`;
-    document.getElementById('recommendedMonths').textContent = recommendedMonths;
-    document.getElementById('targetRec').textContent = `RM ${targetRec.toFixed(2)}`;
-    document.getElementById('targetMax').textContent = `RM ${targetMax.toFixed(2)}`;
-    document.getElementById('shortfallAmount').textContent = shortfall > 0 ? `RM ${shortfall.toFixed(2)}` : "RM 0.00 (Sasaran Tercapai!)";
-    
-    document.getElementById('progressText').textContent = `${percentage.toFixed(0)}%`;
-    document.getElementById('progressBar').style.width = `${percentage}%`;
-    document.getElementById('timeToGoalText').innerHTML = timeText;
-    document.getElementById('riskProfileReason').textContent = riskReason;
-}
 
-// Jalankan pengiraan automatik semasa muat halaman
-window.onload = calculateEmergencyFund;
+    /*
+     * ==========================================
+     * FORMAT RM
+     * ==========================================
+     */
+
+    function formatRM(amount) {
+
+        return new Intl.NumberFormat(
+            "ms-MY",
+            {
+                style: "currency",
+                currency: "MYR",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        ).format(amount);
+
+    }
+
+});
