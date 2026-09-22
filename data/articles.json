@@ -1,0 +1,26 @@
+[
+  {
+    "title": "DSR Malaysia: Apa Itu Debt Service Ratio dan Bagaimana Ia Dikira?",
+    "slug": "debt-service-ratio-malaysia",
+    "path": "articles/dsr/debt-service-ratio-malaysia.md",
+    "category": "Hutang & Pinjaman",
+    "tags": ["DSR", "Hutang", "Pinjaman", "Pinjaman Rumah"],
+    "published": "2026-09-22",
+    "updated": "2026-09-22",
+    "description": "Panduan ringkas tentang Debt Service Ratio (DSR), formula pengiraan dan bagaimana ia digunakan untuk menilai kemampuan membayar hutang.",
+    "calculator": "dsr",
+    "status": "published"
+  },
+  {
+    "title": "Emergency Fund: Berapa Banyak Simpanan Kecemasan Yang Anda Perlukan?",
+    "slug": "emergency-fund-malaysia",
+    "path": "articles/budgeting/emergency-fund-malaysia.md",
+    "category": "Bajet & Simpanan",
+    "tags": ["Emergency Fund", "Simpanan", "Bajet", "Financial Safety Net"],
+    "published": "2026-09-22",
+    "updated": "2026-09-22",
+    "description": "Panduan membina emergency fund berdasarkan perbelanjaan, komitmen dan keadaan kewangan anda.",
+    "calculator": "emergency-fund",
+    "status": "published"
+  }
+]
