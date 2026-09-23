@@ -81,9 +81,81 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function formatScheduleRM(value) {
+        const n = Math.max(0, Number(value) || 0);
+        if (n >= 1000000) return `RM ${(n / 1000000).toFixed(2)} M`;
+        if (n >= 1000) return `RM ${Math.round(n / 1000)} K`;
+        return `RM ${Math.round(n).toLocaleString("ms-MY")}`;
+    }
+
+    function renderCompoundingSchedule() {
+        if (!retirementResults) return;
+        let container = $("kwspCompoundingSchedule");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "kwspCompoundingSchedule";
+            container.className = "planner-card kwsp-schedule-card";
+            retirementResults.appendChild(container);
+        }
+
+        const currentAge = Number($("currentAge")?.value) || 0;
+        const retireAge = Number($("retireAge")?.value) || 0;
+        const endAge = Number($("retirementEndAge")?.value) || 0;
+        const salaryStart = Number($("grossSalary")?.value) || 0;
+        const salaryGrowth = (Number($("salaryIncrement")?.value) || 0) / 100;
+        const dividendRate = (Number($("dividendRate")?.value) || 0) / 100;
+        const inflationRate = (Number($("inflationRate")?.value) || 0) / 100;
+        const spendingToday = Number($("retirementSpending")?.value) || 0;
+        const voluntary = Number($("voluntaryContribution")?.value) || 0;
+        if (!currentAge || !retireAge || !endAge || retireAge <= currentAge || endAge <= currentAge) {
+            container.hidden = true;
+            return;
+        }
+
+        const mode = getBalanceMode();
+        let balance = mode === "individual"
+            ? (Number($("currentPersaraan")?.value) || 0) + (Number($("currentSejahtera")?.value) || 0) + (Number($("currentFleksibel")?.value) || 0)
+            : (Number($("currentBalance")?.value) || 0);
+        let salary = salaryStart;
+        const rows = [];
+
+        for (let age = currentAge; age < endAge; age++) {
+            const startBalance = balance;
+            let annualSaving = 0;
+            let dividend = 0;
+            let spending = 0;
+            const working = age < retireAge;
+            if (working) {
+                const employeeRate = age < 60 ? 0.11 : 0;
+                const employerRate = age < 60 ? (salary <= 5000 ? 0.13 : 0.12) : 0;
+                annualSaving = (salary * (employeeRate + employerRate) + voluntary) * 12;
+                dividend = (startBalance + annualSaving / 2) * dividendRate;
+                balance = startBalance + annualSaving + dividend;
+                salary *= 1 + salaryGrowth;
+            } else {
+                spending = spendingToday * Math.pow(1 + inflationRate, age - retireAge);
+                dividend = Math.max(0, startBalance - spending / 2) * dividendRate;
+                balance = Math.max(0, startBalance + dividend - spending);
+            }
+            rows.push({ yearAge: age, endAge: age + 1, startBalance, annualSaving, dividend, spending, endBalance: balance, phase: working ? "Simpanan" : "Persaraan" });
+            if (balance <= 0 && !working) break;
+        }
+
+        const totalSavings = rows.reduce((sum, row) => sum + row.annualSaving, 0);
+        const totalDividend = rows.reduce((sum, row) => sum + row.dividend, 0);
+        container.hidden = false;
+        container.innerHTML = `<h2>Jadual Kesan Kompaun KWSP</h2><p class="small-note">Jadual ini menunjukkan bagaimana baki awal, caruman, dividen dan belanja persaraan membentuk baki akhir setiap tahun. Ia ialah anggaran tahunan dan bukan kaedah pengiraan dividen rasmi KWSP.</p><div class="kwsp-schedule-summary"><span><strong>${formatScheduleRM(totalSavings)}</strong><small>Jumlah caruman sepanjang tempoh jadual</small></span><span><strong>${formatScheduleRM(totalDividend)}</strong><small>Jumlah dividen diunjur</small></span></div><div class="kwsp-schedule-wrap"><table class="kwsp-schedule"><thead><tr><th>Umur</th><th>Fasa</th><th>Baki awal tahun</th><th>Caruman tahunan</th><th>Dividen tahun itu</th><th>Belanja tahunan</th><th>Baki akhir tahun</th></tr></thead><tbody>${rows.map(row => `<tr><td>${row.yearAge}–${row.endAge}</td><td>${row.phase}</td><td>${formatScheduleRM(row.startBalance)}</td><td>${formatScheduleRM(row.annualSaving)}</td><td>${formatScheduleRM(row.dividend)}</td><td>${formatScheduleRM(row.spending)}</td><td><strong>${formatScheduleRM(row.endBalance)}</strong></td></tr>`).join("")}</tbody></table></div><p class="small-note">Nota: KWSP mengira dividen sebenar menggunakan baki agregat harian (MADB), termasuk kesan masa caruman dan pengeluaran. Jadual ini menggunakan anggaran tahunan untuk memudahkan pemahaman kesan kompaun. <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" rel="noopener">Rujukan kaedah dividen KWSP</a>.</p>`;
+    }
+
+    function updateAgeLabel() {
+        const label = document.querySelector('label[for="retirementEndAge"]');
+        if (label) label.textContent = "Simpanan bertahan hingga (umur)";
+    }
+
     removeLegacyPlannerLink();
     ensureReadinessIndicator();
     syncPlannerLink();
+    updateAgeLabel();
 
     const ids = ["currentAge", "retireAge", "currentBalance", "currentPersaraan", "currentSejahtera", "currentFleksibel", "grossSalary", "salaryIncrement", "dividendRate", "retirementSpending", "inflationRate", "retirementEndAge", "voluntaryContribution"];
     ids.forEach(id => {
@@ -102,6 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 movePlannerLinkBelowGraph();
                 updateReadinessIndicator();
                 removeLegacyPlannerLink();
+                renderCompoundingSchedule();
             }, 0);
         });
     }
@@ -114,12 +187,19 @@ document.addEventListener("DOMContentLoaded", function () {
         observer.observe(retirementStatus, { attributes: true, attributeFilter: ["class"] });
     }
 
-    // kwsp.js can recreate the legacy link after calculations. Watch the document
-    // so the old button is always removed while the static replacement remains.
     const legacyObserver = new MutationObserver(function () {
         removeLegacyPlannerLink();
     });
     legacyObserver.observe(document.body, { childList: true, subtree: true });
+
+    (function injectKwspScheduleStyles() {
+        const style = document.createElement("style");
+        style.textContent = `
+            .kwsp-schedule-card{margin-top:1rem}.kwsp-schedule-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin:1rem 0}.kwsp-schedule-summary span{padding:1rem;border:1px solid rgba(0,0,0,.1);border-radius:12px;background:rgba(0,0,0,.02)}.kwsp-schedule-summary strong,.kwsp-schedule-summary small{display:block}.kwsp-schedule-summary small{margin-top:.25rem;opacity:.7}.kwsp-schedule-wrap{overflow:auto;border:1px solid rgba(0,0,0,.1);border-radius:12px}.kwsp-schedule{width:100%;border-collapse:collapse;min-width:850px;font-size:.88rem}.kwsp-schedule th,.kwsp-schedule td{padding:.7rem .65rem;border-bottom:1px solid rgba(0,0,0,.08);text-align:right;white-space:nowrap}.kwsp-schedule th:first-child,.kwsp-schedule td:first-child,.kwsp-schedule th:nth-child(2),.kwsp-schedule td:nth-child(2){text-align:left}.kwsp-schedule thead th{background:rgba(0,0,0,.035);font-weight:700}.kwsp-schedule tbody tr:last-child td{border-bottom:0}.kwsp-schedule tbody tr:nth-child(even){background:rgba(0,0,0,.015)}
+            @media(max-width:600px){.kwsp-schedule-summary{grid-template-columns:1fr}.kwsp-schedule-card{padding:1rem}.kwsp-schedule-wrap{margin:0 -0.25rem}}
+        `;
+        document.head.appendChild(style);
+    })();
 });
 
 (function injectKwspUiStyles() {
