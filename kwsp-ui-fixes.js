@@ -144,12 +144,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const totalSavings = rows.reduce((sum, row) => sum + row.annualSaving, 0);
         const totalDividend = rows.reduce((sum, row) => sum + row.dividend, 0);
         container.hidden = false;
-        container.innerHTML = `<h2>Jadual Kesan Kompaun KWSP</h2><p class="small-note">Jadual ini menunjukkan bagaimana baki awal, caruman, dividen dan pengeluaran persaraan membentuk baki akhir setiap tahun. Ia ialah anggaran tahunan dan bukan kaedah pengiraan dividen rasmi KWSP.</p><div class="kwsp-schedule-summary"><span><strong>${formatScheduleRM(totalSavings)}</strong><small>Jumlah caruman sepanjang tempoh jadual</small></span><span><strong>${formatScheduleRM(totalDividend)}</strong><small>Jumlah dividen diunjur</small></span></div><div class="kwsp-schedule-wrap"><table class="kwsp-schedule"><thead><tr><th>Umur</th><th>Fasa</th><th>Baki awal tahun</th><th>Caruman tahunan</th><th>Dividen tahun itu</th><th>Belanja tahunan</th><th>Baki akhir tahun</th></tr></thead><tbody>${rows.map(row => `<tr><td>${row.yearAge}–${row.endAge}</td><td>${row.phase}</td><td>${formatScheduleRM(row.startBalance)}</td><td>${formatScheduleRM(row.annualSaving)}</td><td>${formatScheduleRM(row.dividend)}</td><td>${formatScheduleRM(row.spending)}</td><td><strong>${formatScheduleRM(row.endBalance)}</strong></td></tr>`).join("")}</tbody></table></div><p class="small-note">Nota: KWSP mengira dividen sebenar menggunakan baki agregat harian (MADB), termasuk kesan masa caruman dan pengeluaran. Jadual ini menggunakan anggaran tahunan untuk memudahkan pemahaman kesan kompaun. url_placeholder</p>`;
+        container.innerHTML = `<h2>Jadual Kesan Kompaun KWSP</h2><p class="small-note">Jadual ini menunjukkan bagaimana baki awal, caruman, dividen dan belanja persaraan membentuk baki akhir setiap tahun. Ia ialah anggaran tahunan dan bukan kaedah pengiraan dividen rasmi KWSP.</p><div class="kwsp-schedule-summary"><span><strong>${formatScheduleRM(totalSavings)}</strong><small>Jumlah caruman sepanjang tempoh jadual</small></span><span><strong>${formatScheduleRM(totalDividend)}</strong><small>Jumlah dividen diunjur</small></span></div><div class="kwsp-schedule-wrap"><table class="kwsp-schedule"><thead><tr><th>Umur</th><th>Fasa</th><th>Baki awal tahun</th><th>Caruman tahunan</th><th>Dividen tahun itu</th><th>Belanja tahunan</th><th>Baki akhir tahun</th></tr></thead><tbody>${rows.map(row => `<tr><td>${row.yearAge}–${row.endAge}</td><td>${row.phase}</td><td>${formatScheduleRM(row.startBalance)}</td><td>${formatScheduleRM(row.annualSaving)}</td><td>${formatScheduleRM(row.dividend)}</td><td>${formatScheduleRM(row.spending)}</td><td><strong>${formatScheduleRM(row.endBalance)}</strong></td></tr>`).join("")}</tbody></table></div><p class="small-note">Nota: KWSP mengira dividen sebenar menggunakan baki agregat harian (MADB), termasuk kesan masa caruman dan pengeluaran. Jadual ini menggunakan anggaran tahunan untuk memudahkan pemahaman kesan kompaun. <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" rel="noopener">Rujukan kaedah dividen KWSP</a>.</p>`;
+    }
+
+    function updateAgeLabel() {
+        const label = document.querySelector('label[for="retirementEndAge"]');
+        if (label) label.textContent = "Simpanan bertahan hingga (umur)";
     }
 
     removeLegacyPlannerLink();
     ensureReadinessIndicator();
     syncPlannerLink();
+    updateAgeLabel();
 
     const ids = ["currentAge", "retireAge", "currentBalance", "currentPersaraan", "currentSejahtera", "currentFleksibel", "grossSalary", "salaryIncrement", "dividendRate", "retirementSpending", "inflationRate", "retirementEndAge", "voluntaryContribution"];
     ids.forEach(id => {
