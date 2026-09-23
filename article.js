@@ -3,7 +3,9 @@ const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug') || new URL(window.location.href).hash.replace(/^#/, '') || '';
 const calculatorLinks = {
   dsr: { href: 'dsr.html', label: 'Kira DSR Anda' },
-  'emergency-fund': { href: 'emergency.html', label: 'Kira Emergency Fund Anda' }
+  'emergency-fund': { href: 'emergency.html', label: 'Kira Dana Kecemasan Anda' },
+  'monthly-budget': { href: 'budget.html', label: 'Kira Bajet Bulanan Anda' },
+  kwsp: { href: 'kwsp.html', label: 'Kira Simpanan KWSP Anda' }
 };
 
 function esc(value) {
