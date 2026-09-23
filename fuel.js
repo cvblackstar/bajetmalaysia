@@ -49,9 +49,9 @@ function niceMaxDistance(distance) {
 function drawChart(carAEfficiency, carBEfficiency, currentDistance) {
     if (!chart) return;
 
-    const width = 760;
-    const height = 360;
-    const pad = { top: 24, right: 24, bottom: 52, left: 64 };
+    const width = 1100;
+    const height = 420;
+    const pad = { top: 30, right: 32, bottom: 64, left: 82 };
     const plotWidth = width - pad.left - pad.right;
     const plotHeight = height - pad.top - pad.bottom;
     const maxDistance = niceMaxDistance(currentDistance);
@@ -80,13 +80,13 @@ function drawChart(carAEfficiency, carBEfficiency, currentDistance) {
         const value = (yMax / 4) * i;
         const yy = y(value);
         grid.push(`<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" class="chart-grid"/>`);
-        grid.push(`<text x="${pad.left - 10}" y="${yy + 4}" text-anchor="end" class="chart-axis-label">${formatAxisMoney(value)}</text>`);
+        grid.push(`<text x="${pad.left - 12}" y="${yy + 4}" text-anchor="end" class="chart-axis-label">${formatAxisMoney(value)}</text>`);
     }
 
     points.forEach((distance) => {
         const xx = x(distance);
         grid.push(`<line x1="${xx}" y1="${pad.top}" x2="${xx}" y2="${pad.top + plotHeight}" class="chart-grid chart-grid-vertical"/>`);
-        grid.push(`<text x="${xx}" y="${height - 23}" text-anchor="middle" class="chart-axis-label">${Math.round(distance).toLocaleString('ms-MY')}</text>`);
+        grid.push(`<text x="${xx}" y="${height - 30}" text-anchor="middle" class="chart-axis-label">${Math.round(distance).toLocaleString('ms-MY')}</text>`);
     });
 
     const currentX = x(currentDistance);
@@ -98,15 +98,15 @@ function drawChart(carAEfficiency, carBEfficiency, currentDistance) {
         <desc id="fuelChartDesc">Kos minyak bulanan Kereta A dan Kereta B berdasarkan jarak pemanduan.</desc>
         <g>${grid.join('')}</g>
         <line x1="${currentX}" y1="${pad.top}" x2="${currentX}" y2="${pad.top + plotHeight}" class="chart-current-distance"/>
-        <text x="${Math.min(currentX + 7, width - 100)}" y="${pad.top + 16}" class="chart-current-label">Jarak anda</text>
+        <text x="${Math.min(currentX + 9, width - 105)}" y="${pad.top + 18}" class="chart-current-label">Jarak anda</text>
         <path d="${pathFor(carAEfficiency)}" class="chart-line chart-line-a"/>
         <path d="${pathFor(carBEfficiency)}" class="chart-line chart-line-b"/>
-        <circle cx="${currentX}" cy="${y(currentCostA)}" r="5" class="chart-dot chart-dot-a"/>
-        <circle cx="${currentX}" cy="${y(currentCostB)}" r="5" class="chart-dot chart-dot-b"/>
-        <text x="${currentX}" y="${Math.max(pad.top + 30, y(currentCostA) - 10)}" text-anchor="middle" class="chart-value-label">${money(currentCostA)}</text>
-        <text x="${currentX}" y="${Math.min(pad.top + plotHeight - 5, y(currentCostB) + 20)}" text-anchor="middle" class="chart-value-label">${money(currentCostB)}</text>
-        <text x="${pad.left + plotWidth / 2}" y="${height - 3}" text-anchor="middle" class="chart-axis-title">Jarak pemanduan sebulan (km)</text>
-        <text x="16" y="${pad.top + plotHeight / 2}" text-anchor="middle" transform="rotate(-90 16 ${pad.top + plotHeight / 2})" class="chart-axis-title">Kos minyak sebulan</text>
+        <circle cx="${currentX}" cy="${y(currentCostA)}" r="6" class="chart-dot chart-dot-a"/>
+        <circle cx="${currentX}" cy="${y(currentCostB)}" r="6" class="chart-dot chart-dot-b"/>
+        <text x="${currentX}" y="${Math.max(pad.top + 32, y(currentCostA) - 12)}" text-anchor="middle" class="chart-value-label">${money(currentCostA)}</text>
+        <text x="${currentX}" y="${Math.min(pad.top + plotHeight - 5, y(currentCostB) + 22)}" text-anchor="middle" class="chart-value-label">${money(currentCostB)}</text>
+        <text x="${pad.left + plotWidth / 2}" y="${height - 4}" text-anchor="middle" class="chart-axis-title">Jarak pemanduan sebulan (km)</text>
+        <text x="22" y="${pad.top + plotHeight / 2}" text-anchor="middle" transform="rotate(-90 22 ${pad.top + plotHeight / 2})" class="chart-axis-title">Kos minyak sebulan</text>
     `;
 }
 
