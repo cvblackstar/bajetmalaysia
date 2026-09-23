@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Kecekapan Minyak RON95 — Bajet Malaysia</title>
+    <meta name="description" content="Bandingkan kecekapan minyak dua kereta dan anggarkan kos RON95 bersubsidi berdasarkan jarak pemanduan bulanan.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fuel.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MALAYSIA</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="section">
+        <div class="container">
+            <div class="section-heading">
+                <span class="eyebrow">KALKULATOR MINYAK</span>
+                <h2>Bandingkan Kecekapan Minyak Kereta</h2>
+                <p>Lihat berapa banyak RON95 yang diperlukan dan anggarkan perbezaan kos antara dua kereta berdasarkan jarak pemanduan yang sama.</p>
+            </div>
+
+            <div class="fuel-price-banner">
+                <div>
+                    <span class="fuel-price-label">Harga benchmark RON95 bersubsidi</span>
+                    <strong>RM 1.99 / liter</strong>
+                </div>
+                <span class="fuel-price-badge">BUDI95</span>
+            </div>
+
+            <div class="calculator-layout fuel-layout">
+                <div class="calculator-form-card">
+                    <h2>Maklumat Perbandingan</h2>
+                    <form id="fuelForm">
+                        <div class="form-section-title">Jarak pemanduan</div>
+                        <div class="form-group">
+                            <label for="monthlyDistance">Jarak pemanduan sebulan (km)</label>
+                            <div class="input-wrapper">
+                                <span>KM</span>
+                                <input type="number" id="monthlyDistance" value="1500" min="1" step="50" required>
+                            </div>
+                            <small>Gunakan anggaran jarak sebenar yang anda pandu dalam sebulan.</small>
+                        </div>
+
+                        <div class="form-divider"></div>
+                        <div class="form-section-title">Kereta A</div>
+                        <div class="form-group">
+                            <label for="carAEfficiency">Kecekapan minyak (km/L)</label>
+                            <div class="input-wrapper">
+                                <span>KM/L</span>
+                                <input type="number" id="carAEfficiency" value="14" min="1" max="100" step="0.1" required>
+                            </div>
+                        </div>
+
+                        <div class="form-divider"></div>
+                        <div class="form-section-title">Kereta B</div>
+                        <div class="form-group">
+                            <label for="carBEfficiency">Kecekapan minyak (km/L)</label>
+                            <div class="input-wrapper">
+                                <span>KM/L</span>
+                                <input type="number" id="carBEfficiency" value="18" min="1" max="100" step="0.1" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="button primary calculate-button">⛽ Bandingkan Kos Minyak</button>
+                    </form>
+                </div>
+
+                <div class="calculator-result-card fuel-result-card">
+                    <h2>Ringkasan Perbandingan</h2>
+
+                    <div class="fuel-hero-result">
+                        <span>Penjimatan tahunan Kereta B</span>
+                        <strong id="annualSaving">RM 0.00</strong>
+                        <small id="savingMessage">Berdasarkan jarak pemanduan yang sama.</small>
+                    </div>
+
+                    <div class="fuel-comparison-grid">
+                        <div class="fuel-car-result car-a">
+                            <div class="fuel-car-title">🚗 Kereta A</div>
+                            <div class="fuel-big-number" id="carACostMonthly">RM 0.00</div>
+                            <span>Kos minyak / bulan</span>
+                            <div class="fuel-stat"><span>Penggunaan</span><strong id="carALitres">0 L</strong></div>
+                            <div class="fuel-stat"><span>Kos / 100 km</span><strong id="carACost100">RM 0.00</strong></div>
+                            <div class="fuel-stat"><span>Kos / tahun</span><strong id="carACostAnnual">RM 0.00</strong></div>
+                        </div>
+
+                        <div class="fuel-car-result car-b">
+                            <div class="fuel-car-title">🚙 Kereta B</div>
+                            <div class="fuel-big-number" id="carBCostMonthly">RM 0.00</div>
+                            <span>Kos minyak / bulan</span>
+                            <div class="fuel-stat"><span>Penggunaan</span><strong id="carBLitres">0 L</strong></div>
+                            <div class="fuel-stat"><span>Kos / 100 km</span><strong id="carBCost100">RM 0.00</strong></div>
+                            <div class="fuel-stat"><span>Kos / tahun</span><strong id="carBCostAnnual">RM 0.00</strong></div>
+                        </div>
+                    </div>
+
+                    <div id="quotaNotice" class="fuel-notice" hidden></div>
+
+                    <div class="pcb-notice">
+                        <strong>Nota pengiraan</strong>
+                        <p>Harga benchmark menggunakan RON95 bersubsidi BUDI95 sebanyak RM1.99 seliter. Kalkulator ini tidak menyemak kelayakan BUDI95 atau baki kuota anda. Kecekapan sebenar boleh berubah mengikut kesesakan, gaya pemanduan, muatan, tekanan tayar dan keadaan jalan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fuel-explanation">
+                <h3>Bagaimana pengiraan dibuat?</h3>
+                <div class="fuel-formula-grid">
+                    <div><strong>Liter sebulan</strong><span>Jarak bulanan ÷ km/L</span></div>
+                    <div><strong>Kos bulanan</strong><span>Liter sebulan × RM1.99</span></div>
+                    <div><strong>Kos per 100 km</strong><span>100 ÷ km/L × RM1.99</span></div>
+                </div>
+            </div>
+
+            <div class="fuel-back-link">
+                <a href="index.html#kalkulator" class="button secondary fuel-back-button">← Kembali ke Kalkulator</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MALAYSIA</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet Malaysia</p>
+    </div>
+</footer>
+
+<script src="fuel.js"></script>
+</body>
+</html>
