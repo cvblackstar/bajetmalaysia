@@ -69,6 +69,38 @@
     font-size: 0.78rem;
 }
 
+.saving-period-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 12px;
+}
+
+.saving-period-control label {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.saving-period-control select {
+    min-width: 112px;
+    padding: 7px 10px;
+    border: 1px solid rgba(15, 39, 71, 0.16);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.saving-period-control select:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(15, 139, 95, 0.12);
+}
+
 .fuel-comparison-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -326,10 +358,7 @@
 }
 
 .fuel-back-button {
-    display: inline-flex;
-    color: var(--navy);
-    border-color: var(--border);
-    background: var(--white);
+    min-width: 220px;
 }
 
 @media (max-width: 600px) {
@@ -349,6 +378,15 @@
 
     .fuel-hero-result strong {
         font-size: 1.65rem;
+    }
+
+    .saving-period-control {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .saving-period-control select {
+        width: min(180px, 100%);
     }
 
     .fuel-graph-card {
