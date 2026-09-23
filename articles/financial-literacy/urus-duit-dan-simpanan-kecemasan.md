@@ -5,7 +5,7 @@ category: "Bajet & Simpanan"
 tags: ["Bajet", "Simpanan", "Emergency Fund", "Financial Literacy"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Asas pengurusan wang yang membantu rakyat Malaysia membina simpanan dan menghadapi kejutan kewangan."
 calculator: "monthly-budget"
 status: "published"
@@ -39,7 +39,7 @@ Sumber rasmi: [Bank Negara Malaysia — National Strategy for Financial Literacy
 
 > **Tahu berapa masuk → tahu berapa keluar → bina simpanan → barulah fikir tentang langkah seterusnya.**
 
-Gunakan kalkulator bajet Bajet Malaysia untuk melihat aliran wang bulanan anda.
+Gunakan kalkulator bajet Bajet MY untuk melihat aliran wang bulanan anda.
 
 ### Sumber rasmi
 

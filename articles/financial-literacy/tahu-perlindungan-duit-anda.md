@@ -5,7 +5,7 @@ category: "Keselamatan Kewangan"
 tags: ["PIDM", "Deposit", "Perlindungan", "Financial Literacy"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Fahami beza antara deposit bank, pelaburan dan produk kewangan lain serta jenis perlindungan yang berkaitan."
 calculator: ""
 status: "published"

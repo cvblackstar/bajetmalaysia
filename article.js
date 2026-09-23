@@ -56,7 +56,7 @@ async function loadArticle() {
     const raw = await articleResponse.text();
     const body = raw.replace(/^---[\s\S]*?---\s*/, '').trim();
     const calc = calculatorLinks[meta.calculator];
-    root.innerHTML = `<div class="eyebrow">${esc(meta.category)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet Malaysia yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
+    root.innerHTML = `<div class="eyebrow">${esc(meta.category)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
   } catch (error) {
     root.innerHTML = `<div class="article-error"><h1>Artikel tidak dapat dimuatkan</h1><p>${esc(error.message)}</p><p><a href="panduan.html">Kembali ke Panduan</a></p></div>`;
   }

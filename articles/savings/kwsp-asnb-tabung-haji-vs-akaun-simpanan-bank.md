@@ -5,7 +5,7 @@ category: "Simpanan & Pelaburan"
 tags: [KWSP, ASNB, Tabung Haji, Simpanan Bank, Simpanan]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Perbandingan ringkas KWSP, ASNB, Tabung Haji dan akaun simpanan bank dari segi tujuan, akses, risiko dan perlindungan."
 calculator: ""
 status: "published"

@@ -5,7 +5,7 @@ category: "Hutang & Pinjaman"
 tags: ["Ah Long", "Pinjaman", "Hutang", "Kredit Komuniti", "AKPK"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Kenapa pinjaman Ah Long sangat berisiko, tanda amaran yang perlu diperhatikan dan pilihan pembiayaan yang lebih terkawal jika anda benar-benar memerlukan wang."
 calculator: ""
 status: "published"

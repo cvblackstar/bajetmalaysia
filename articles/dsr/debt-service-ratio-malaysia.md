@@ -5,7 +5,7 @@ category: "Hutang & Pinjaman"
 tags: [DSR, Hutang, Pinjaman, Pinjaman Rumah]
 published: "2026-09-22"
 updated: "2026-09-22"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Panduan memahami Debt Service Ratio (DSR), formula pengiraan dan batasannya dalam menilai kemampuan membayar hutang."
 calculator: "dsr"
 status: "published"
@@ -97,7 +97,7 @@ Matlamatnya bukan sekadar mendapatkan kelulusan pinjaman. Yang penting ialah mem
 
 ## Kira DSR anda
 
-Gunakan kalkulator DSR Bajet Malaysia untuk memasukkan pendapatan dan komitmen bulanan anda.
+Gunakan kalkulator DSR Bajet MY untuk memasukkan pendapatan dan komitmen bulanan anda.
 
 > **Nota:** Kalkulator ini ialah alat pendidikan dan anggaran. Ia tidak menjamin kelulusan mana-mana pinjaman atau pembiayaan.
 

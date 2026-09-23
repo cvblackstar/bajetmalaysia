@@ -5,7 +5,7 @@ category: "Hutang & Pinjaman"
 tags: ["Hutang", "Pinjaman", "DSR", "Financial Literacy"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Perkara asas yang perlu difahami sebelum mengambil pinjaman supaya kos dan kemampuan bayaran balik lebih jelas."
 calculator: "dsr"
 status: "published"
@@ -47,7 +47,7 @@ Sumber rasmi: [Bank Negara Malaysia — Policy Document on Personal Financing](h
 
 > **Jangan tanya hanya “berapa ansuran sebulan?” — tanya “berapa kos sebenar dan mampukah saya bayar?”**
 
-Gunakan kalkulator DSR Bajet Malaysia sebagai semakan awal, bukan sebagai jaminan kelulusan pinjaman.
+Gunakan kalkulator DSR Bajet MY sebagai semakan awal, bukan sebagai jaminan kelulusan pinjaman.
 
 ### Sumber rasmi
 
