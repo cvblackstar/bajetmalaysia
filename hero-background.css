@@ -1,19 +1,20 @@
 .hero {
     position: relative;
     overflow: hidden;
+    color: var(--navy);
     background-image:
         linear-gradient(
             90deg,
-            rgba(15, 39, 71, 0.94) 0%,
-            rgba(15, 39, 71, 0.84) 34%,
-            rgba(15, 39, 71, 0.30) 68%,
-            rgba(15, 39, 71, 0.08) 100%
+            rgba(245, 247, 250, 0.97) 0%,
+            rgba(245, 247, 250, 0.92) 38%,
+            rgba(245, 247, 250, 0.55) 62%,
+            rgba(245, 247, 250, 0.18) 100%
         ),
         url('assets/hero-finance-photo.webp');
-    background-position: center, right center;
-    background-size: cover, 50% auto;
+    background-position: center, center;
+    background-size: cover, cover;
     background-repeat: no-repeat, no-repeat;
-    background-color: var(--navy);
+    background-color: var(--background);
 }
 
 .hero .container {
@@ -21,24 +22,53 @@
     z-index: 1;
 }
 
+.hero .hero-badge {
+    background: rgba(15, 39, 71, 0.06);
+    border-color: rgba(15, 39, 71, 0.16);
+    color: var(--navy);
+}
+
+.hero h1 {
+    color: var(--navy);
+}
+
+.hero h1 span {
+    color: var(--green);
+}
+
+.hero p {
+    color: var(--muted);
+}
+
+.hero .button.secondary {
+    background: var(--white);
+    color: var(--navy);
+    border-color: var(--border);
+    box-shadow: 0 2px 8px rgba(15, 39, 71, 0.06);
+}
+
+.hero .button.secondary:hover {
+    background: var(--background);
+}
+
 @media (max-width: 850px) {
     .hero {
         background-image:
             linear-gradient(
                 180deg,
-                rgba(15, 39, 71, 0.90) 0%,
-                rgba(15, 39, 71, 0.72) 58%,
-                rgba(15, 39, 71, 0.50) 100%
+                rgba(245, 247, 250, 0.94) 0%,
+                rgba(245, 247, 250, 0.80) 55%,
+                rgba(245, 247, 250, 0.45) 100%
             ),
             url('assets/hero-finance-photo.webp');
         background-position: center, center bottom;
-        background-size: cover, 100% auto;
+        background-size: cover, cover;
         background-repeat: no-repeat, no-repeat;
     }
 }
 
 @media (max-width: 520px) {
     .hero {
-        background-size: cover, 100% auto;
+        background-size: cover, cover;
     }
 }
