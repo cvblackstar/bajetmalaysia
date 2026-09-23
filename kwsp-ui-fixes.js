@@ -6,9 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const resultCard = document.querySelector(".calculator-result-card");
     const calculateButton = $("calculateKwspButton");
 
-    // Remove the legacy dynamically-created Phase 2 link from kwsp.js.
-    const dynamicLink = $("retirementPlannerLink");
-    if (dynamicLink) dynamicLink.remove();
+    function removeLegacyPlannerLink() {
+        const legacyLink = $("retirementPlannerLink");
+        if (legacyLink) legacyLink.remove();
+    }
 
     function getBalanceMode() {
         const selected = document.querySelector('input[name="balanceMode"]:checked');
@@ -36,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function syncPlannerLink() {
+        removeLegacyPlannerLink();
         if (staticLink) staticLink.href = buildRetirementPlannerUrl();
     }
 
@@ -60,10 +62,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ensureReadinessIndicator();
         const indicator = $("retirementReadinessIndicator");
         if (!indicator) return;
-
         const statusClass = retirementStatus.className || "";
         indicator.classList.remove("good", "caution", "neutral");
-
         if (statusClass.includes("good")) {
             indicator.classList.add("good");
             indicator.innerHTML = "<span class=\"readiness-dot\" aria-hidden=\"true\"></span><span><strong>🟢 Unjuran mencukupi</strong><small>Simpanan masih berbaki pada umur sasaran yang anda tetapkan.</small></span>";
@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    removeLegacyPlannerLink();
     ensureReadinessIndicator();
     syncPlannerLink();
 
@@ -100,6 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 syncPlannerLink();
                 movePlannerLinkBelowGraph();
                 updateReadinessIndicator();
+                removeLegacyPlannerLink();
             }, 0);
         });
     }
@@ -107,9 +109,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (retirementStatus) {
         const observer = new MutationObserver(function () {
             updateReadinessIndicator();
+            removeLegacyPlannerLink();
         });
         observer.observe(retirementStatus, { attributes: true, attributeFilter: ["class"] });
     }
+
+    // kwsp.js can recreate the legacy link after calculations. Watch the document
+    // so the old button is always removed while the static replacement remains.
+    const legacyObserver = new MutationObserver(function () {
+        removeLegacyPlannerLink();
+    });
+    legacyObserver.observe(document.body, { childList: true, subtree: true });
 });
 
 (function injectKwspUiStyles() {
