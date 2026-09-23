@@ -5,6 +5,7 @@ const form = document.getElementById('fuelForm');
 const distanceInput = document.getElementById('monthlyDistance');
 const carAEfficiencyInput = document.getElementById('carAEfficiency');
 const carBEfficiencyInput = document.getElementById('carBEfficiency');
+const savingPeriodInput = document.getElementById('savingPeriod');
 const formError = document.getElementById('fuelFormError');
 const chart = document.getElementById('fuelChart');
 
@@ -113,6 +114,7 @@ function calculate() {
     const distance = Number(distanceInput.value);
     const carAEfficiency = Number(carAEfficiencyInput.value);
     const carBEfficiency = Number(carBEfficiencyInput.value);
+    const savingPeriod = Number(savingPeriodInput.value);
 
     if (!Number.isFinite(distance) || distance <= 0) {
         showFormError('Sila masukkan jarak pemanduan sebulan yang lebih daripada 0 km.');
@@ -129,6 +131,11 @@ function calculate() {
         carBEfficiencyInput.focus();
         return false;
     }
+    if (!Number.isFinite(savingPeriod) || savingPeriod <= 0) {
+        showFormError('Sila pilih tempoh penjimatan yang sah.');
+        savingPeriodInput.focus();
+        return false;
+    }
 
     showFormError('');
 
@@ -139,9 +146,11 @@ function calculate() {
     updateCar('carB', carB);
 
     const annualSaving = Math.abs(carA.annualCost - carB.annualCost);
+    const periodSaving = annualSaving * savingPeriod;
     const betterCar = carA.annualCost <= carB.annualCost ? 'Kereta A' : 'Kereta B';
 
-    document.getElementById('annualSaving').textContent = money(annualSaving);
+    document.getElementById('savingLabel').textContent = `Penjimatan untuk ${savingPeriod} ${savingPeriod === 1 ? 'tahun' : 'tahun'}`;
+    document.getElementById('annualSaving').textContent = money(periodSaving);
     document.getElementById('savingMessage').textContent =
         annualSaving < 0.01
             ? 'Kedua-dua kereta mempunyai kos minyak yang hampir sama.'
@@ -174,8 +183,9 @@ form.addEventListener('submit', (event) => {
     calculate();
 });
 
-[distanceInput, carAEfficiencyInput, carBEfficiencyInput].forEach((input) => {
+[distanceInput, carAEfficiencyInput, carBEfficiencyInput, savingPeriodInput].forEach((input) => {
     input.addEventListener('input', calculate);
+    input.addEventListener('change', calculate);
 });
 
 calculate();

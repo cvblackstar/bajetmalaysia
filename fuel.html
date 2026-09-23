@@ -82,9 +82,19 @@
                     <h2>Ringkasan Perbandingan</h2>
 
                     <div class="fuel-hero-result">
-                        <span>Penjimatan tahunan Kereta B</span>
+                        <span id="savingLabel">Penjimatan untuk 1 tahun</span>
                         <strong id="annualSaving">RM 0.00</strong>
                         <small id="savingMessage">Berdasarkan jarak pemanduan yang sama.</small>
+                        <div class="saving-period-control">
+                            <label for="savingPeriod">Tempoh penjimatan</label>
+                            <select id="savingPeriod">
+                                <option value="1" selected>1 tahun</option>
+                                <option value="2">2 tahun</option>
+                                <option value="3">3 tahun</option>
+                                <option value="5">5 tahun</option>
+                                <option value="10">10 tahun</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="fuel-comparison-grid">
@@ -145,7 +155,7 @@
             </div>
 
             <div class="fuel-back-link">
-                <a href="index.html#kalkulator" class="button secondary fuel-back-button">← Kembali ke Kalkulator</a>
+                <a href="index.html#kalkulator" class="button primary fuel-back-button">← Kembali ke Kalkulator</a>
             </div>
         </div>
     </section>
