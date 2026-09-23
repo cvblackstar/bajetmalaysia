@@ -36,6 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
         individualBalanceTotal.textContent = formatRM(b.persaraan + b.sejahtera + b.fleksibel);
     }
 
+    function renameRetirementSpendingField() {
+        const label = document.querySelector('label[for="retirementSpending"]');
+        if (label) label.textContent = "Belanja bulanan selepas bersara";
+        const goalText = document.querySelector(".retirement-goal-box > p");
+        if (goalText) goalText.innerHTML = "Berapa banyak anda mahu belanja setiap bulan <strong>selepas bersara</strong>? Masukkan jumlah dalam nilai wang semasa; kalkulator akan mengembangkan perbelanjaan mengikut inflasi bermula pada umur persaraan.";
+    }
+
     function buildRetirementPlannerUrl() {
         const params = new URLSearchParams({
             currentAge: $("currentAge").value || "",
@@ -57,15 +64,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function addRetirementPlannerLink() {
-        let link = $("retirementPlannerLink");
-        if (!link) {
-            link = document.createElement("a");
-            link.id = "retirementPlannerLink";
-            link.className = "button secondary";
-            link.textContent = "🎯 Buka Perancang Persaraan ‘What If?’";
-            calculateButton.insertAdjacentElement("afterend", link);
-        }
-        link.href = buildRetirementPlannerUrl();
+        const legacy = $("retirementPlannerLink");
+        if (legacy) legacy.remove();
+        const link = $("retirementPlannerLinkStatic");
+        if (link) link.href = buildRetirementPlannerUrl();
     }
 
     balanceModeInputs.forEach(input => input.addEventListener("change", updateBalanceInputMode));
@@ -75,6 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (input) input.addEventListener("input", addRetirementPlannerLink);
         if (input) input.addEventListener("change", addRetirementPlannerLink);
     });
+    renameRetirementSpendingField();
     updateBalanceInputMode();
     addRetirementPlannerLink();
 
@@ -88,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const salaryIncrement = parseFloat($("salaryIncrement").value) || 0;
         const voluntaryContribution = parseFloat($("voluntaryContribution").value) || 0;
         const dividendRate = parseFloat($("dividendRate").value) || 0;
-        const retirementSpendingToday = parseFloat($("retirementSpending").value);
+        const retirementSpending = parseFloat($("retirementSpending").value);
         const retirementEndAge = parseInt($("retirementEndAge").value, 10);
         const inflationRate = parseFloat($("inflationRate").value) || 0;
 
@@ -104,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Umur akhir persaraan mestilah lebih besar daripada umur persaraan.");
             return;
         }
-        if (retirementSpendingToday < 0 || inflationRate < 0 || dividendRate < 0 || salaryIncrement < 0 || voluntaryContribution < 0) {
+        if (retirementSpending < 0 || inflationRate < 0 || dividendRate < 0 || salaryIncrement < 0 || voluntaryContribution < 0) {
             alert("Nilai peratusan dan perbelanjaan tidak boleh negatif.");
             return;
         }
@@ -151,24 +154,23 @@ document.addEventListener("DOMContentLoaded", function () {
             sejahteraBalance += sc + ds;
             fleksibelBalance += fc + df;
             salary *= 1 + incrementDecimal;
-            timeline.push({ age: age + 1, phase: age + 1 < retireAge ? "Simpanan" : "Bersara", balance: persaraanBalance + sejahteraBalance + fleksibelBalance, spending: 0 });
+            timeline.push({ age: age + 1, phase: "Simpanan", balance: persaraanBalance + sejahteraBalance + fleksibelBalance, spending: 0 });
         }
 
         const retirementStartingBalance = persaraanBalance + sejahteraBalance + fleksibelBalance;
-        const retirementStartSpending = retirementSpendingToday * Math.pow(1 + inflationDecimal, retireAge - currentAge);
         let retirementBalance = retirementStartingBalance;
         let depletionAge = null;
-        let finalRetirementSpending = 0;
-        const retirementTimelineStart = timeline.length;
+        let finalRetirementSpending = retirementSpending;
         const retirementWithdrawalTimeline = [];
-        
+
         for (let age = retireAge; age < retirementEndAge; age++) {
             const yearsIntoRetirement = age - retireAge;
-            const annualSpending = retirementStartSpending * Math.pow(1 + inflationDecimal, yearsIntoRetirement);
+            const monthlySpending = retirementSpending * Math.pow(1 + inflationDecimal, yearsIntoRetirement);
+            const annualSpending = monthlySpending * 12;
             const dividendBase = Math.max(0, retirementBalance - annualSpending / 2);
             const dividend = dividendBase * dividendDecimal;
             retirementBalance = Math.max(0, retirementBalance + dividend - annualSpending);
-            finalRetirementSpending = annualSpending;
+            finalRetirementSpending = monthlySpending;
             retirementWithdrawalTimeline.push({ age: age + 1, phase: "Bersara", balance: retirementBalance, spending: annualSpending });
             if (retirementBalance <= 0 && depletionAge === null) {
                 depletionAge = age + 1;
@@ -190,14 +192,14 @@ document.addEventListener("DOMContentLoaded", function () {
         $("resultTotal").textContent = formatRM(totalSavings);
 
         $("retirementBalance").textContent = formatRM(retirementBalance);
-        $("retirementMonthlySpend").textContent = formatRM(retirementStartSpending / 12);
-        $("retirementEndSpend").textContent = formatRM(finalRetirementSpending / 12);
+        $("retirementMonthlySpend").textContent = formatRM(retirementSpending);
+        $("retirementEndSpend").textContent = formatRM(finalRetirementSpending);
         $("retirementAgeOut").textContent = depletionAge ? `sekitar umur ${depletionAge}` : `sekurang-kurangnya umur ${retirementEndAge}`;
         $("retirementYears").textContent = `${retirementEndAge - retireAge} tahun`;
         $("retirementWithdrawals").textContent = formatRM(totalRetirementWithdrawals);
 
         const status = $("retirementStatus");
-        if (retirementSpendingToday === 0) {
+        if (retirementSpending === 0) {
             status.className = "retirement-status neutral";
             status.innerHTML = "<strong>Masukkan sasaran perbelanjaan persaraan</strong><p>Masukkan jumlah yang anda mahu belanja setiap bulan selepas bersara untuk melihat sama ada simpanan anda boleh bertahan.</p>";
         } else if (targetEndBalance) {
@@ -215,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let noteText = `Anggaran caruman bulanan pertama: ${formatRM(firstMonth.employee)} (pekerja) + ${formatRM(firstMonth.employer)} (majikan)`;
         if (firstMonth.voluntary > 0) noteText += ` + ${formatRM(firstMonth.voluntary)} (caruman tambahan)`;
         $("contributionNote").textContent = `${noteText} = ${formatRM(firstMonth.total)} sebulan, dengan andaian dividen ${dividendRate.toFixed(2)}% setahun.`;
-        $("retirementNote").textContent = `Perbelanjaan RM${Number(retirementSpendingToday).toLocaleString("ms-MY")} sebulan hari ini diunjurkan meningkat ${inflationRate.toFixed(1)}% setahun selepas bersara. Ini ialah anggaran, bukan jaminan pulangan atau baki KWSP rasmi.`;
+        $("retirementNote").textContent = `Belanja RM${Number(retirementSpending).toLocaleString("ms-MY")} sebulan selepas bersara. Jumlah tahunan bermula pada RM${Number(retirementSpending * 12).toLocaleString("ms-MY")} dan meningkat ${inflationRate.toFixed(1)}% setahun sepanjang tempoh persaraan. Ini ialah anggaran, bukan jaminan pulangan atau baki KWSP rasmi.`;
 
         renderRetirementChart(timeline, currentAge, retireAge);
         $("retirementResults").hidden = false;
