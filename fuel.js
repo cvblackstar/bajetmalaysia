@@ -5,6 +5,8 @@ const form = document.getElementById('fuelForm');
 const distanceInput = document.getElementById('monthlyDistance');
 const carAEfficiencyInput = document.getElementById('carAEfficiency');
 const carBEfficiencyInput = document.getElementById('carBEfficiency');
+const formError = document.getElementById('fuelFormError');
+const chart = document.getElementById('fuelChart');
 
 const money = (value) => `RM ${value.toLocaleString('ms-MY', {
     minimumFractionDigits: 2,
@@ -32,16 +34,103 @@ function updateCar(prefix, result) {
     document.getElementById(`${prefix}CostAnnual`).textContent = money(result.annualCost);
 }
 
+function showFormError(message) {
+    formError.hidden = !message;
+    formError.textContent = message || '';
+}
+
+function niceMaxDistance(distance) {
+    const minimum = 2000;
+    const rounded = Math.ceil(Math.max(distance, minimum) / 500) * 500;
+    return Math.min(rounded, 10000);
+}
+
+function drawChart(carAEfficiency, carBEfficiency, currentDistance) {
+    if (!chart) return;
+
+    const width = 760;
+    const height = 360;
+    const pad = { top: 24, right: 24, bottom: 52, left: 64 };
+    const plotWidth = width - pad.left - pad.right;
+    const plotHeight = height - pad.top - pad.bottom;
+    const maxDistance = niceMaxDistance(currentDistance);
+    const steps = 6;
+    const points = Array.from({ length: steps + 1 }, (_, index) => (maxDistance / steps) * index);
+    const values = points.flatMap((distance) => [
+        calculateCar(distance, carAEfficiency).monthlyCost,
+        calculateCar(distance, carBEfficiency).monthlyCost
+    ]);
+    const maxCost = Math.max(...values, 1);
+    const yMax = Math.ceil(maxCost / 50) * 50 || 50;
+
+    const x = (distance) => pad.left + (distance / maxDistance) * plotWidth;
+    const y = (cost) => pad.top + plotHeight - (cost / yMax) * plotHeight;
+    const pathFor = (efficiency) => points.map((distance, index) => {
+        const cost = calculateCar(distance, efficiency).monthlyCost;
+        return `${index === 0 ? 'M' : 'L'} ${x(distance).toFixed(1)} ${y(cost).toFixed(1)}`;
+    }).join(' ');
+
+    const formatAxisMoney = (value) => value >= 1000
+        ? `RM ${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}K`
+        : `RM ${Math.round(value)}`;
+
+    const grid = [];
+    for (let i = 0; i <= 4; i += 1) {
+        const value = (yMax / 4) * i;
+        const yy = y(value);
+        grid.push(`<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" class="chart-grid"/>`);
+        grid.push(`<text x="${pad.left - 10}" y="${yy + 4}" text-anchor="end" class="chart-axis-label">${formatAxisMoney(value)}</text>`);
+    }
+
+    points.forEach((distance) => {
+        const xx = x(distance);
+        grid.push(`<line x1="${xx}" y1="${pad.top}" x2="${xx}" y2="${pad.top + plotHeight}" class="chart-grid chart-grid-vertical"/>`);
+        grid.push(`<text x="${xx}" y="${height - 23}" text-anchor="middle" class="chart-axis-label">${Math.round(distance).toLocaleString('ms-MY')}</text>`);
+    });
+
+    const currentX = x(currentDistance);
+    const currentCostA = calculateCar(currentDistance, carAEfficiency).monthlyCost;
+    const currentCostB = calculateCar(currentDistance, carBEfficiency).monthlyCost;
+
+    chart.innerHTML = `
+        <title id="fuelChartTitle">Perbandingan kos RON95 mengikut jarak pemanduan</title>
+        <desc id="fuelChartDesc">Kos minyak bulanan Kereta A dan Kereta B berdasarkan jarak pemanduan.</desc>
+        <g>${grid.join('')}</g>
+        <line x1="${currentX}" y1="${pad.top}" x2="${currentX}" y2="${pad.top + plotHeight}" class="chart-current-distance"/>
+        <text x="${Math.min(currentX + 7, width - 100)}" y="${pad.top + 16}" class="chart-current-label">Jarak anda</text>
+        <path d="${pathFor(carAEfficiency)}" class="chart-line chart-line-a"/>
+        <path d="${pathFor(carBEfficiency)}" class="chart-line chart-line-b"/>
+        <circle cx="${currentX}" cy="${y(currentCostA)}" r="5" class="chart-dot chart-dot-a"/>
+        <circle cx="${currentX}" cy="${y(currentCostB)}" r="5" class="chart-dot chart-dot-b"/>
+        <text x="${currentX}" y="${Math.max(pad.top + 30, y(currentCostA) - 10)}" text-anchor="middle" class="chart-value-label">${money(currentCostA)}</text>
+        <text x="${currentX}" y="${Math.min(pad.top + plotHeight - 5, y(currentCostB) + 20)}" text-anchor="middle" class="chart-value-label">${money(currentCostB)}</text>
+        <text x="${pad.left + plotWidth / 2}" y="${height - 3}" text-anchor="middle" class="chart-axis-title">Jarak pemanduan sebulan (km)</text>
+        <text x="16" y="${pad.top + plotHeight / 2}" text-anchor="middle" transform="rotate(-90 16 ${pad.top + plotHeight / 2})" class="chart-axis-title">Kos minyak sebulan</text>
+    `;
+}
+
 function calculate() {
     const distance = Number(distanceInput.value);
     const carAEfficiency = Number(carAEfficiencyInput.value);
     const carBEfficiency = Number(carBEfficiencyInput.value);
 
-    if (!Number.isFinite(distance) || distance <= 0 ||
-        !Number.isFinite(carAEfficiency) || carAEfficiency <= 0 ||
-        !Number.isFinite(carBEfficiency) || carBEfficiency <= 0) {
-        return;
+    if (!Number.isFinite(distance) || distance <= 0) {
+        showFormError('Sila masukkan jarak pemanduan sebulan yang lebih daripada 0 km.');
+        distanceInput.focus();
+        return false;
     }
+    if (!Number.isFinite(carAEfficiency) || carAEfficiency <= 0 || carAEfficiency > 100) {
+        showFormError('Sila masukkan kecekapan Kereta A antara 1 hingga 100 km/L.');
+        carAEfficiencyInput.focus();
+        return false;
+    }
+    if (!Number.isFinite(carBEfficiency) || carBEfficiency <= 0 || carBEfficiency > 100) {
+        showFormError('Sila masukkan kecekapan Kereta B antara 1 hingga 100 km/L.');
+        carBEfficiencyInput.focus();
+        return false;
+    }
+
+    showFormError('');
 
     const carA = calculateCar(distance, carAEfficiency);
     const carB = calculateCar(distance, carBEfficiency);
@@ -75,6 +164,9 @@ function calculate() {
         quotaNotice.hidden = true;
         quotaNotice.textContent = '';
     }
+
+    drawChart(carAEfficiency, carBEfficiency, distance);
+    return true;
 }
 
 form.addEventListener('submit', (event) => {

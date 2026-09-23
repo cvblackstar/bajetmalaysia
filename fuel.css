@@ -123,12 +123,16 @@
     white-space: nowrap;
 }
 
-.fuel-notice {
+.fuel-notice,
+.fuel-form-error {
     margin-top: 18px;
-    background: #fff7e8;
-    border: 1px solid #f1d49a;
     border-radius: 10px;
     padding: 14px 16px;
+}
+
+.fuel-notice {
+    background: #fff7e8;
+    border: 1px solid #f1d49a;
 }
 
 .fuel-notice strong {
@@ -141,6 +145,138 @@
 .fuel-notice p {
     color: #7a5a1a;
     font-size: 0.8rem;
+}
+
+.fuel-form-error {
+    background: #fff1f1;
+    border: 1px solid #e5b5b5;
+    color: #9b3030;
+    font-size: 0.82rem;
+}
+
+.fuel-graph-card {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+}
+
+.fuel-graph-heading h3 {
+    color: var(--navy);
+    margin-bottom: 5px;
+}
+
+.fuel-graph-heading p {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.55;
+    margin-bottom: 12px;
+}
+
+.fuel-chart-wrap {
+    width: 100%;
+    overflow: hidden;
+}
+
+.fuel-chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+}
+
+.chart-grid {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.chart-grid-vertical {
+    opacity: 0.45;
+    stroke-dasharray: 3 5;
+}
+
+.chart-axis-label {
+    fill: var(--muted);
+    font-size: 11px;
+}
+
+.chart-axis-title,
+.chart-current-label,
+.chart-value-label {
+    fill: var(--text);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.chart-line {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-line-a {
+    stroke: #486581;
+}
+
+.chart-line-b {
+    stroke: var(--green);
+}
+
+.chart-dot {
+    stroke: var(--white);
+    stroke-width: 2;
+}
+
+.chart-dot-a {
+    fill: #486581;
+}
+
+.chart-dot-b {
+    fill: var(--green);
+}
+
+.chart-current-distance {
+    stroke: var(--green);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+    opacity: 0.7;
+}
+
+.chart-current-label {
+    fill: var(--green);
+    font-size: 10px;
+}
+
+.fuel-chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-top: -2px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.fuel-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-line {
+    width: 22px;
+    height: 3px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.legend-a {
+    background: #486581;
+}
+
+.legend-b {
+    background: var(--green);
 }
 
 .fuel-explanation {
@@ -213,5 +349,26 @@
 
     .fuel-hero-result strong {
         font-size: 1.65rem;
+    }
+
+    .fuel-graph-card {
+        padding: 14px;
+    }
+
+    .fuel-chart {
+        min-height: 220px;
+    }
+
+    .chart-axis-label {
+        font-size: 9px;
+    }
+
+    .chart-axis-title {
+        font-size: 9px;
+    }
+
+    .chart-current-label,
+    .chart-value-label {
+        font-size: 9px;
     }
 }

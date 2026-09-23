@@ -42,13 +42,13 @@
             <div class="calculator-layout fuel-layout">
                 <div class="calculator-form-card">
                     <h2>Maklumat Perbandingan</h2>
-                    <form id="fuelForm">
+                    <form id="fuelForm" novalidate>
                         <div class="form-section-title">Jarak pemanduan</div>
                         <div class="form-group">
                             <label for="monthlyDistance">Jarak pemanduan sebulan (km)</label>
                             <div class="input-wrapper">
                                 <span>KM</span>
-                                <input type="number" id="monthlyDistance" value="1500" min="1" step="50" required>
+                                <input type="number" id="monthlyDistance" value="1500" min="1" step="50" inputmode="numeric">
                             </div>
                             <small>Gunakan anggaran jarak sebenar yang anda pandu dalam sebulan.</small>
                         </div>
@@ -59,7 +59,7 @@
                             <label for="carAEfficiency">Kecekapan minyak (km/L)</label>
                             <div class="input-wrapper">
                                 <span>KM/L</span>
-                                <input type="number" id="carAEfficiency" value="14" min="1" max="100" step="0.1" required>
+                                <input type="number" id="carAEfficiency" value="14" min="1" max="100" step="0.1" inputmode="decimal">
                             </div>
                         </div>
 
@@ -69,10 +69,11 @@
                             <label for="carBEfficiency">Kecekapan minyak (km/L)</label>
                             <div class="input-wrapper">
                                 <span>KM/L</span>
-                                <input type="number" id="carBEfficiency" value="18" min="1" max="100" step="0.1" required>
+                                <input type="number" id="carBEfficiency" value="18" min="1" max="100" step="0.1" inputmode="decimal">
                             </div>
                         </div>
 
+                        <p id="fuelFormError" class="fuel-form-error" role="alert" hidden></p>
                         <button type="submit" class="button primary calculate-button">⛽ Bandingkan Kos Minyak</button>
                     </form>
                 </div>
@@ -107,6 +108,25 @@
                     </div>
 
                     <div id="quotaNotice" class="fuel-notice" hidden></div>
+
+                    <div class="fuel-graph-card">
+                        <div class="fuel-graph-heading">
+                            <div>
+                                <h3>Perbezaan kos mengikut jarak</h3>
+                                <p>Anggaran kos minyak bulanan jika jarak pemanduan berubah. Semakin jauh anda memandu, semakin besar beza kos antara dua kecekapan minyak.</p>
+                            </div>
+                        </div>
+                        <div class="fuel-chart-wrap">
+                            <svg id="fuelChart" class="fuel-chart" viewBox="0 0 760 360" role="img" aria-labelledby="fuelChartTitle fuelChartDesc">
+                                <title id="fuelChartTitle">Perbandingan kos RON95 mengikut jarak pemanduan</title>
+                                <desc id="fuelChartDesc">Graf menunjukkan anggaran kos minyak bulanan Kereta A dan Kereta B pada beberapa jarak pemanduan.</desc>
+                            </svg>
+                        </div>
+                        <div class="fuel-chart-legend">
+                            <span><i class="legend-line legend-a"></i> Kereta A</span>
+                            <span><i class="legend-line legend-b"></i> Kereta B</span>
+                        </div>
+                    </div>
 
                     <div class="pcb-notice">
                         <strong>Nota pengiraan</strong>
