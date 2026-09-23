@@ -1,4 +1,134 @@
-{
-  "content": "[\n  {\n    \"title\": \"DSR Malaysia: Apa Itu Debt Service Ratio dan Bagaimana Ia Dikira?\",\n    \"slug\": \"debt-service-ratio-malaysia\",\n    \"path\": \"articles/dsr/debt-service-ratio-malaysia.md\",\n    \"category\": \"Hutang & Pinjaman\",\n    \"tags\": [\"DSR\", \"Hutang\", \"Pinjaman\", \"Pinjaman Rumah\"],\n    \"published\": \"2026-09-22\",\n    \"updated\": \"2026-09-22\",\n    \"description\": \"Panduan memahami Debt Service Ratio (DSR), formula pengiraan dan batasannya dalam menilai kemampuan membayar hutang.\",\n    \"calculator\": \"dsr\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Emergency Fund: Berapa Banyak Simpanan Kecemasan Yang Anda Perlukan?\",\n    \"slug\": \"emergency-fund-malaysia\",\n    \"path\": \"articles/budgeting/emergency-fund-malaysia.md\",\n    \"category\": \"Bajet & Simpanan\",\n    \"tags\": [\"Emergency Fund\", \"Simpanan\", \"Bajet\", \"Financial Safety Net\"],\n    \"published\": \"2026-09-22\",\n    \"updated\": \"2026-09-22\",\n    \"description\": \"Panduan membina emergency fund berdasarkan perbelanjaan, komitmen dan keadaan kewangan anda.\",\n    \"calculator\": \"emergency-fund\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Bagaimana Bank Negara Malaysia Menentukan OPR?\",\n    \"slug\": \"bagaimana-bank-negara-menentukan-opr\",\n    \"path\": \"articles/economy/bagaimana-bank-negara-menentukan-opr.md\",\n    \"category\": \"Ekonomi & OPR\",\n    \"tags\": [\"OPR\", \"Bank Negara Malaysia\", \"Inflasi\", \"Ekonomi\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Panduan ringkas tentang bagaimana Bank Negara Malaysia melalui Monetary Policy Committee (MPC) menentukan OPR.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"KWSP vs ASNB vs Tabung Haji vs Akaun Simpanan Bank: Apa Bezanya?\",\n    \"slug\": \"kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank\",\n    \"path\": \"articles/savings/kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank.md\",\n    \"category\": \"Simpanan & Pelaburan\",\n    \"tags\": [\"KWSP\", \"ASNB\", \"Tabung Haji\", \"Simpanan Bank\", \"Simpanan\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Perbandingan ringkas KWSP, ASNB, Tabung Haji dan akaun simpanan bank dari segi tujuan, akses, risiko dan perlindungan.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Pinjam Ah Long: Apa Bahayanya dan Apa Alternatif Yang Lebih Selamat?\",\n    \"slug\": \"pinjam-ah-long-dan-alternatif-selamat\",\n    \"path\": \"articles/debt/pinjaman-ah-long-dan-alternatif-selamat.md\",\n    \"category\": \"Hutang & Pinjaman\",\n    \"tags\": [\"Ah Long\", \"Pinjaman\", \"Hutang\", \"Kredit Komuniti\", \"AKPK\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Kenapa pinjaman Ah Long sangat berisiko, tanda amaran yang perlu diperhatikan dan pilihan pembiayaan yang lebih terkawal jika anda benar-benar memerlukan wang.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Urus Duit dan Bina Simpanan Kecemasan\",\n    \"slug\": \"urus-duit-dan-simpanan-kecemasan\",\n    \"path\": \"articles/financial-literacy/urus-duit-dan-simpanan-kecemasan.md\",\n    \"category\": \"Bajet & Simpanan\",\n    \"tags\": [\"Bajet\", \"Simpanan\", \"Emergency Fund\", \"Financial Literacy\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Asas pengurusan wang yang membantu rakyat Malaysia membina simpanan dan menghadapi kejutan kewangan.\",\n    \"calculator\": \"monthly-budget\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Faham Hutang Sebelum Meminjam\",\n    \"slug\": \"faham-hutang-sebelum-meminjam\",\n    \"path\": \"articles/financial-literacy/faham-hutang-sebelum-meminjam.md\",\n    \"category\": \"Hutang & Pinjaman\",\n    \"tags\": [\"Hutang\", \"Pinjaman\", \"DSR\", \"Financial Literacy\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Perkara asas yang perlu difahami sebelum mengambil pinjaman supaya kos dan kemampuan bayaran balik lebih jelas.\",\n    \"calculator\": \"dsr\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Elak Scam: Semak Dahulu Sebelum Hantar Duit\",\n    \"slug\": \"elak-scam-dan-semak-entiti\",\n    \"path\": \"articles/financial-literacy/elak-scam-dan-semak-entiti.md\",\n    \"category\": \"Keselamatan Kewangan\",\n    \"tags\": [\"Scam\", \"Keselamatan\", \"Pelaburan\", \"Financial Literacy\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Panduan ringkas untuk menyemak tawaran kewangan dan mengenal pasti tanda amaran sebelum menyerahkan wang atau maklumat peribadi.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Tahu Di Mana Duit Anda Dilindungi\",\n    \"slug\": \"tahu-perlindungan-duit-anda\",\n    \"path\": \"articles/financial-literacy/tahu-perlindungan-duit-anda.md\",\n    \"category\": \"Keselamatan Kewangan\",\n    \"tags\": [\"PIDM\", \"Deposit\", \"Perlindungan\", \"Financial Literacy\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Fahami beza antara deposit bank, pelaburan dan produk kewangan lain serta jenis perlindungan yang berkaitan.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Rancang Persaraan dan Pelaburan Lebih Awal\",\n    \"slug\": \"rancang-persaraan-dan-pelaburan\",\n    \"path\": \"articles/financial-literacy/rancang-persaraan-dan-pelaburan.md\",\n    \"category\": \"Persaraan & Pelaburan\",\n    \"tags\": [\"Persaraan\", \"KWSP\", \"Pelaburan\", \"Financial Literacy\"],\n    \"published\": \"2026-09-23\",\n    \"updated\": \"2026-09-23\",\n    \"description\": \"Asas merancang persaraan dan memahami beza antara simpanan dengan pelaburan supaya matlamat kewangan lebih jelas.\",\n    \"calculator\": \"kwsp\",\n    \"status\": \"published\"\n  },\n  {\n    \"title\": \"Panduan Beli Rumah: Semak Sebelum Tandatangan\",\n    \"slug\": \"panduan-beli-rumah-due-diligence\",\n    \"path\": \"articles/property/panduan-beli-rumah-due-diligence.md\",\n    \"category\": \"Rumah & Hartanah\",\n    \"tags\": [\"Rumah\", \"Hartanah\", \"Pemaju\", \"Due Diligence\", \"Pinjaman Rumah\", \"KPKT\", \"TEDUH\"],\n    \"published\": \"2026-09-24\",\n    \"updated\": \"2026-09-24\",\n    \"description\": \"Panduan ringkas untuk menilai rumah dan projek perumahan, termasuk semakan lesen, status projek, tanah dan rekod pemaju sebelum membuat komitmen kewangan.\",\n    \"calculator\": \"\",\n    \"status\": \"published\"\n  }\n]",
-  "encoding": "utf-8"
-}
+[
+  {
+    "title": "DSR Malaysia: Apa Itu Debt Service Ratio dan Bagaimana Ia Dikira?",
+    "slug": "debt-service-ratio-malaysia",
+    "path": "articles/dsr/debt-service-ratio-malaysia.md",
+    "category": "Hutang & Pinjaman",
+    "tags": ["DSR", "Hutang", "Pinjaman", "Pinjaman Rumah"],
+    "published": "2026-09-22",
+    "updated": "2026-09-22",
+    "description": "Panduan memahami Debt Service Ratio (DSR), formula pengiraan dan batasannya dalam menilai kemampuan membayar hutang.",
+    "calculator": "dsr",
+    "status": "published"
+  },
+  {
+    "title": "Emergency Fund: Berapa Banyak Simpanan Kecemasan Yang Anda Perlukan?",
+    "slug": "emergency-fund-malaysia",
+    "path": "articles/budgeting/emergency-fund-malaysia.md",
+    "category": "Bajet & Simpanan",
+    "tags": ["Emergency Fund", "Simpanan", "Bajet", "Financial Safety Net"],
+    "published": "2026-09-22",
+    "updated": "2026-09-22",
+    "description": "Panduan membina emergency fund berdasarkan perbelanjaan, komitmen dan keadaan kewangan anda.",
+    "calculator": "emergency-fund",
+    "status": "published"
+  },
+  {
+    "title": "Bagaimana Bank Negara Malaysia Menentukan OPR?",
+    "slug": "bagaimana-bank-negara-menentukan-opr",
+    "path": "articles/economy/bagaimana-bank-negara-menentukan-opr.md",
+    "category": "Ekonomi & OPR",
+    "tags": ["OPR", "Bank Negara Malaysia", "Inflasi", "Ekonomi"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Panduan ringkas tentang bagaimana Bank Negara Malaysia melalui Monetary Policy Committee (MPC) menentukan OPR.",
+    "calculator": "",
+    "status": "published"
+  },
+  {
+    "title": "KWSP vs ASNB vs Tabung Haji vs Akaun Simpanan Bank: Apa Bezanya?",
+    "slug": "kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank",
+    "path": "articles/savings/kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank.md",
+    "category": "Simpanan & Pelaburan",
+    "tags": ["KWSP", "ASNB", "Tabung Haji", "Simpanan Bank", "Simpanan"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Perbandingan ringkas KWSP, ASNB, Tabung Haji dan akaun simpanan bank dari segi tujuan, akses, risiko dan perlindungan.",
+    "calculator": "",
+    "status": "published"
+  },
+  {
+    "title": "Pinjam Ah Long: Apa Bahayanya dan Apa Alternatif Yang Lebih Selamat?",
+    "slug": "pinjam-ah-long-dan-alternatif-selamat",
+    "path": "articles/debt/pinjaman-ah-long-dan-alternatif-selamat.md",
+    "category": "Hutang & Pinjaman",
+    "tags": ["Ah Long", "Pinjaman", "Hutang", "Kredit Komuniti", "AKPK"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Kenapa pinjaman Ah Long sangat berisiko, tanda amaran yang perlu diperhatikan dan pilihan pembiayaan yang lebih terkawal jika anda benar-benar memerlukan wang.",
+    "calculator": "",
+    "status": "published"
+  },
+  {
+    "title": "Urus Duit dan Bina Simpanan Kecemasan",
+    "slug": "urus-duit-dan-simpanan-kecemasan",
+    "path": "articles/financial-literacy/urus-duit-dan-simpanan-kecemasan.md",
+    "category": "Bajet & Simpanan",
+    "tags": ["Bajet", "Simpanan", "Emergency Fund", "Financial Literacy"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Asas pengurusan wang yang membantu rakyat Malaysia membina simpanan dan menghadapi kejutan kewangan.",
+    "calculator": "monthly-budget",
+    "status": "published"
+  },
+  {
+    "title": "Faham Hutang Sebelum Meminjam",
+    "slug": "faham-hutang-sebelum-meminjam",
+    "path": "articles/financial-literacy/faham-hutang-sebelum-meminjam.md",
+    "category": "Hutang & Pinjaman",
+    "tags": ["Hutang", "Pinjaman", "DSR", "Financial Literacy"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Perkara asas yang perlu difahami sebelum mengambil pinjaman supaya kos dan kemampuan bayaran balik lebih jelas.",
+    "calculator": "dsr",
+    "status": "published"
+  },
+  {
+    "title": "Elak Scam: Semak Dahulu Sebelum Hantar Duit",
+    "slug": "elak-scam-dan-semak-entiti",
+    "path": "articles/financial-literacy/elak-scam-dan-semak-entiti.md",
+    "category": "Keselamatan Kewangan",
+    "tags": ["Scam", "Keselamatan", "Pelaburan", "Financial Literacy"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Panduan ringkas untuk menyemak tawaran kewangan dan mengenal pasti tanda amaran sebelum menyerahkan wang atau maklumat peribadi.",
+    "calculator": "",
+    "status": "published"
+  },
+  {
+    "title": "Tahu Di Mana Duit Anda Dilindungi",
+    "slug": "tahu-perlindungan-duit-anda",
+    "path": "articles/financial-literacy/tahu-perlindungan-duit-anda.md",
+    "category": "Keselamatan Kewangan",
+    "tags": ["PIDM", "Deposit", "Perlindungan", "Financial Literacy"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Fahami beza antara deposit bank, pelaburan dan produk kewangan lain serta jenis perlindungan yang berkaitan.",
+    "calculator": "",
+    "status": "published"
+  },
+  {
+    "title": "Rancang Persaraan dan Pelaburan Lebih Awal",
+    "slug": "rancang-persaraan-dan-pelaburan",
+    "path": "articles/financial-literacy/rancang-persaraan-dan-pelaburan.md",
+    "category": "Persaraan & Pelaburan",
+    "tags": ["Persaraan", "KWSP", "Pelaburan", "Financial Literacy"],
+    "published": "2026-09-23",
+    "updated": "2026-09-23",
+    "description": "Asas merancang persaraan dan memahami beza antara simpanan dengan pelaburan supaya matlamat kewangan lebih jelas.",
+    "calculator": "kwsp",
+    "status": "published"
+  },
+  {
+    "title": "Panduan Beli Rumah: Semak Sebelum Tandatangan",
+    "slug": "panduan-beli-rumah-due-diligence",
+    "path": "articles/property/panduan-beli-rumah-due-diligence.md",
+    "category": "Rumah & Hartanah",
+    "tags": ["Rumah", "Hartanah", "Pemaju", "Due Diligence", "Pinjaman Rumah", "KPKT", "TEDUH"],
+    "published": "2026-09-24",
+    "updated": "2026-09-24",
+    "description": "Panduan ringkas untuk menilai rumah dan projek perumahan, termasuk semakan lesen, status projek, tanah dan rekod pemaju sebelum membuat komitmen kewangan.",
+    "calculator": "",
+    "status": "published"
+  }
+]
