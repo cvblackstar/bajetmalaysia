@@ -187,35 +187,44 @@
 }
 
 .fuel-graph-card {
-    margin-top: 20px;
-    padding: 20px;
+    margin-top: 24px;
+    padding: 24px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--white);
 }
 
+.fuel-graph-card-wide {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .fuel-graph-heading h3 {
     color: var(--navy);
     margin-bottom: 5px;
+    font-size: 1.2rem;
 }
 
 .fuel-graph-heading p {
     color: var(--muted);
     font-size: 0.8rem;
     line-height: 1.55;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    max-width: 760px;
 }
 
 .fuel-chart-wrap {
     width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 10px;
 }
 
 .fuel-chart {
     display: block;
     width: 100%;
     height: auto;
-    min-height: 250px;
+    min-height: 360px;
 }
 
 .chart-grid {
@@ -230,14 +239,14 @@
 
 .chart-axis-label {
     fill: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .chart-axis-title,
 .chart-current-label,
 .chart-value-label {
     fill: var(--text);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
 }
 
@@ -278,14 +287,14 @@
 
 .chart-current-label {
     fill: var(--green);
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .fuel-chart-legend {
     display: flex;
     justify-content: center;
     gap: 22px;
-    margin-top: -2px;
+    margin-top: 2px;
     color: var(--muted);
     font-size: 0.78rem;
 }
@@ -393,7 +402,13 @@
         padding: 14px;
     }
 
+    .fuel-chart-wrap {
+        overflow-x: auto;
+    }
+
     .fuel-chart {
+        width: 100%;
+        min-width: 0;
         min-height: 220px;
     }
 
