@@ -215,6 +215,19 @@ document.addEventListener("DOMContentLoaded", function () {
         .retirement-ready-good{border-top:4px solid #2e7d32}.retirement-ready-caution{border-top:4px solid #d32f2f}
         #retirementResults > #retirementPlannerLinkStatic{margin-top:1rem;margin-bottom:.5rem}
         @media(max-width:760px){.retirement-readiness{align-items:flex-start}}
+        .calculator-form-card,.calculator-result-card,.retirement-results{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+        .calculator-form-card h2,.calculator-result-card h2,.retirement-results h2{letter-spacing:-.02em}
+        .calculator-form-card h3,.retirement-results h3{letter-spacing:-.01em}
+        .calculator-form-card label,.calculator-result-card .result-row,.retirement-metric span{letter-spacing:.005em}
+        .calculator-form-card .form-group small,.retirement-results .small-note{line-height:1.5}
+        .calculator-form-card input,.calculator-form-card select{font-family:inherit}
+        .calculator-form-card .form-section-title{margin-bottom:.65rem}
+        .calculator-form-card .retirement-goal-box{box-shadow:0 8px 24px rgba(15,39,71,.05);background:linear-gradient(180deg,rgba(15,139,95,.045),rgba(15,139,95,.015))}
+        .calculator-result-card{box-shadow:0 8px 24px rgba(15,39,71,.06)}
+        .kwsp-schedule-card{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+        .kwsp-schedule{font-variant-numeric:tabular-nums}
+        .kwsp-schedule thead th{letter-spacing:.01em}
+        @media(max-width:760px){.calculator-form-card label{line-height:1.35}.calculator-form-card input,.calculator-form-card select{min-height:44px}.calculator-form-card .button{width:100%}}
     `;
     document.head.appendChild(style);
 })();
