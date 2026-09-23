@@ -3,13 +3,63 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panduan Kewangan | Bajet Malaysia</title>
-<meta name="description" content="Panduan kewangan peribadi untuk rakyat Malaysia — DSR, emergency fund dan topik kewangan lain.">
+<meta name="description" content="Panduan kewangan peribadi untuk rakyat Malaysia — DSR, simpanan, persaraan dan topik kewangan lain.">
 <link rel="stylesheet" href="style.css">
-<style>.article-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}.article-card{display:block;padding:1.5rem;border:1px solid rgba(0,0,0,.1);border-radius:16px;background:#fff;text-decoration:none;color:inherit}.article-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}.article-card .category{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65}.article-card h2{margin:.45rem 0 .65rem}.article-card p{opacity:.78;line-height:1.6}.article-card .read{display:inline-block;margin-top:.75rem;font-weight:700}@media(max-width:700px){.article-list{grid-template-columns:1fr}}</style>
+<style>
+.article-tools{margin:0 auto 30px;max-width:900px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.article-search-row{display:grid;grid-template-columns:1fr 220px auto;gap:10px}
+.article-search-row input,.article-search-row select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:9px;font:inherit;color:var(--text);background:#fff}
+.article-search-row input:focus,.article-search-row select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(15,139,95,.12)}
+.article-search-row button{padding:12px 16px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
+.article-search-row button:hover{background:var(--background)}
+.category-filter{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.category-filter button{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--muted);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.category-filter button.active{background:var(--green-light);border-color:#b8e3d1;color:var(--green)}
+.article-count{margin-top:12px;color:var(--muted);font-size:.84rem}
+.article-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}.article-card{display:block;padding:1.5rem;border:1px solid rgba(0,0,0,.1);border-radius:16px;background:#fff;text-decoration:none;color:inherit}.article-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}.article-card .category{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65}.article-card h2{margin:.45rem 0 .65rem}.article-card p{opacity:.78;line-height:1.6}.article-card .read{display:inline-block;margin-top:.75rem;font-weight:700}.no-results{text-align:center;padding:30px;background:#fff;border:1px dashed var(--border);border-radius:16px;color:var(--muted)}
+@media(max-width:700px){.article-search-row{grid-template-columns:1fr}.article-list{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-<header class="site-header"><div class="header-inner"><a href="index.html" class="logo">BAJET MALAYSIA</a><nav class="main-nav"><a href="index.html">Utama</a><a href="index.html#kalkulator">Kalkulator</a><a href="panduan.html">Panduan</a></nav></div></header>
-<main><section class="section"><div class="container"><div class="section-heading"><span class="eyebrow">PANDUAN KEWANGAN</span><h1>Belajar Tentang Duit</h1><p>Panduan ringkas dan praktikal untuk membantu anda memahami kewangan peribadi di Malaysia.</p></div><div id="articles" class="article-list"></div></div></section></main>
+<header class="site-header"><div class="header-inner"><a href="index.html" class="logo">BAJET MALAYSIA</a><nav class="main-nav"><a href="index.html">Utama</a><a href="index.html#kalkulator">Kalkulator</a><a href="panduan.html">Panduan</a><a href="tentang-kami.html">Tentang Kami</a></nav></div></header>
+<main><section class="section"><div class="container"><div class="section-heading"><span class="eyebrow">PANDUAN KEWANGAN</span><h1>Belajar Tentang Duit</h1><p>Panduan ringkas dan praktikal untuk membantu anda memahami kewangan peribadi di Malaysia.</p></div>
+<div class="article-tools" aria-label="Carian dan kategori artikel"><div class="article-search-row"><input id="articleSearch" type="search" placeholder="Cari artikel, contoh: KWSP, hutang, simpanan..." autocomplete="off" aria-label="Cari artikel"><select id="categorySelect" aria-label="Pilih kategori"><option value="all">Semua kategori</option></select><button id="clearSearch" type="button">Padam</button></div><div id="categoryFilter" class="category-filter" aria-label="Kategori artikel"></div><div id="articleCount" class="article-count"></div></div>
+<div id="articles" class="article-list" aria-live="polite"></div>
+</div></section></main>
 <footer class="site-footer"><div class="footer-inner"><p class="footer-brand">BAJET MALAYSIA</p><p>Faham Duit. Urus Duit. Rancang Hidup.</p><p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p><p>© 2026 Bajet Malaysia</p></div></footer>
-<script>fetch('data/articles.json?v=20260923',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('Senarai artikel tidak dapat dimuatkan.');return r.json()}).then(items=>{document.getElementById('articles').innerHTML=items.filter(a=>a.status==='published').map(a=>`<a class="article-card" href="article.html?v=20260923&slug=${encodeURIComponent(a.slug)}"><div class="category">${a.category}</div><h2>${a.title}</h2><p>${a.description}</p><span class="read">Baca panduan →</span></a>`).join('')}).catch(()=>{document.getElementById('articles').innerHTML='<p>Artikel tidak dapat dimuatkan buat masa ini.</p>'})</script>
+<script>
+const searchInput=document.getElementById('articleSearch');
+const categorySelect=document.getElementById('categorySelect');
+const categoryFilter=document.getElementById('categoryFilter');
+const clearButton=document.getElementById('clearSearch');
+const articleContainer=document.getElementById('articles');
+const articleCount=document.getElementById('articleCount');
+let articles=[];
+let activeCategory='all';
+
+function escapeHtml(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function articleMatches(article,query){
+  if(!query)return true;
+  const haystack=[article.title,article.description,article.category,...(article.tags||[])].join(' ').toLowerCase();
+  return haystack.includes(query.toLowerCase());
+}
+function renderArticles(){
+  const query=searchInput.value.trim();
+  const filtered=articles.filter(a=>(activeCategory==='all'||a.category===activeCategory)&&articleMatches(a,query));
+  articleCount.textContent=`${filtered.length} artikel${filtered.length===1?'':' tersedia'}`;
+  if(!filtered.length){articleContainer.innerHTML='<div class="no-results">Tiada artikel ditemui. Cuba kata kunci lain atau pilih kategori yang berbeza.</div>';return;}
+  articleContainer.innerHTML=filtered.map(a=>`<a class="article-card" href="article.html?v=20260923&slug=${encodeURIComponent(a.slug)}"><div class="category">${escapeHtml(a.category)}</div><h2>${escapeHtml(a.title)}</h2><p>${escapeHtml(a.description)}</p><span class="read">Baca panduan →</span></a>`).join('');
+}
+function setCategory(category){activeCategory=category;categorySelect.value=category;[...categoryFilter.querySelectorAll('button')].forEach(b=>b.classList.toggle('active',b.dataset.category===category));renderArticles();}
+function renderCategories(){
+  const categories=[...new Set(articles.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ms'));
+  categorySelect.innerHTML='<option value="all">Semua kategori</option>'+categories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  categoryFilter.innerHTML='<button type="button" data-category="all" class="active">Semua</button>'+categories.map(c=>`<button type="button" data-category="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');
+  categoryFilter.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setCategory(b.dataset.category)));
+}
+searchInput.addEventListener('input',renderArticles);
+categorySelect.addEventListener('change',()=>setCategory(categorySelect.value));
+clearButton.addEventListener('click',()=>{searchInput.value='';setCategory('all');searchInput.focus();});
+fetch('data/articles.json?v=20260923',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('Senarai artikel tidak dapat dimuatkan.');return r.json()}).then(items=>{articles=items.filter(a=>a.status==='published');renderCategories();renderArticles();}).catch(()=>{articleContainer.innerHTML='<p>Artikel tidak dapat dimuatkan buat masa ini.</p>';articleCount.textContent='';});
+</script>
 </body></html>
