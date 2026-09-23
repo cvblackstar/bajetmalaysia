@@ -81,23 +81,24 @@ function updateBalanceMode(prefix = '') {
 
 function readScenario(prefix = '') {
   const whatIf = prefix === 'whatIf';
-  const id = key => $(whatIf ? 'whatIf' + key : key);
-  const mode = document.querySelector(`input[name="${whatIf ? 'whatIf' : ''}BalanceMode"]:checked`)?.value || 'total';
+  const id = key => $(whatIf ? 'whatIf' + key.charAt(0).toUpperCase() + key.slice(1) : key);
+  const modeName = whatIf ? 'whatIfBalanceMode' : 'balanceMode';
+  const mode = document.querySelector(`input[name="${modeName}"]:checked`)?.value || 'total';
   return {
-    currentAge: Number(id('CurrentAge').value) || 0,
+    currentAge: Number(id('currentAge').value) || 0,
     retireAge: Number(whatIf ? $('whatIfRetire').value : $('retireAge').value) || 0,
-    salary: Number(id('Salary').value) || 0,
-    salaryGrowth: Number(id('SalaryGrowth').value) || 0,
-    dividend: Number(id('Dividend').value) || 0,
+    salary: Number(id('salary').value) || 0,
+    salaryGrowth: Number(id('salaryGrowth').value) || 0,
+    dividend: Number(id('dividend').value) || 0,
     spending: Number(whatIf ? $('whatIfSpend').value : $('spending').value) || 0,
-    inflation: Number(id('Inflation').value) || 0,
-    endAge: Number(id('EndAge').value) || 0,
+    inflation: Number(id('inflation').value) || 0,
+    endAge: Number(id('endAge').value) || 0,
     extra: whatIf ? Number($('whatIfExtra').value) || 0 : 0,
     balanceMode: mode,
-    currentBalance: Number(id('CurrentBalance').value) || 0,
-    currentPersaraan: Number(id('CurrentPersaraan').value) || 0,
-    currentSejahtera: Number(id('CurrentSejahtera').value) || 0,
-    currentFleksibel: Number(id('CurrentFleksibel').value) || 0
+    currentBalance: Number(id('currentBalance').value) || 0,
+    currentPersaraan: Number(id('currentPersaraan').value) || 0,
+    currentSejahtera: Number(id('currentSejahtera').value) || 0,
+    currentFleksibel: Number(id('currentFleksibel').value) || 0
   };
 }
 
