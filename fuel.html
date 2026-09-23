@@ -118,32 +118,28 @@
                     </div>
 
                     <div id="quotaNotice" class="fuel-notice" hidden></div>
-
-                    <div class="fuel-graph-card">
-                        <div class="fuel-graph-heading">
-                            <div>
-                                <h3>Perbezaan kos mengikut jarak</h3>
-                                <p>Anggaran kos minyak bulanan jika jarak pemanduan berubah. Semakin jauh anda memandu, semakin besar beza kos antara dua kecekapan minyak.</p>
-                            </div>
-                        </div>
-                        <div class="fuel-chart-wrap">
-                            <svg id="fuelChart" class="fuel-chart" viewBox="0 0 760 360" role="img" aria-labelledby="fuelChartTitle fuelChartDesc">
-                                <title id="fuelChartTitle">Perbandingan kos RON95 mengikut jarak pemanduan</title>
-                                <desc id="fuelChartDesc">Graf menunjukkan anggaran kos minyak bulanan Kereta A dan Kereta B pada beberapa jarak pemanduan.</desc>
-                            </svg>
-                        </div>
-                        <div class="fuel-chart-legend">
-                            <span><i class="legend-line legend-a"></i> Kereta A</span>
-                            <span><i class="legend-line legend-b"></i> Kereta B</span>
-                        </div>
-                    </div>
-
-                    <div class="pcb-notice">
-                        <strong>Nota pengiraan</strong>
-                        <p>Harga benchmark menggunakan RON95 bersubsidi BUDI95 sebanyak RM1.99 seliter. Kalkulator ini tidak menyemak kelayakan BUDI95 atau baki kuota anda. Kecekapan sebenar boleh berubah mengikut kesesakan, gaya pemanduan, muatan, tekanan tayar dan keadaan jalan.</p>
-                    </div>
                 </div>
             </div>
+
+            <section class="fuel-graph-card fuel-graph-card-wide" aria-labelledby="fuelGraphHeading">
+                <div class="fuel-graph-heading">
+                    <div>
+                        <span class="eyebrow">PERBANDINGAN JARAK</span>
+                        <h3 id="fuelGraphHeading">Perbezaan kos mengikut jarak</h3>
+                        <p>Anggaran kos minyak bulanan jika jarak pemanduan berubah. Semakin jauh anda memandu, semakin besar beza kos antara dua kecekapan minyak.</p>
+                    </div>
+                </div>
+                <div class="fuel-chart-wrap">
+                    <svg id="fuelChart" class="fuel-chart" viewBox="0 0 1100 420" role="img" aria-labelledby="fuelChartTitle fuelChartDesc">
+                        <title id="fuelChartTitle">Perbandingan kos RON95 mengikut jarak pemanduan</title>
+                        <desc id="fuelChartDesc">Graf menunjukkan anggaran kos minyak bulanan Kereta A dan Kereta B pada beberapa jarak pemanduan.</desc>
+                    </svg>
+                </div>
+                <div class="fuel-chart-legend">
+                    <span><i class="legend-line legend-a"></i> Kereta A</span>
+                    <span><i class="legend-line legend-b"></i> Kereta B</span>
+                </div>
+            </section>
 
             <div class="fuel-explanation">
                 <h3>Bagaimana pengiraan dibuat?</h3>
@@ -152,6 +148,11 @@
                     <div><strong>Kos bulanan</strong><span>Liter sebulan × RM1.99</span></div>
                     <div><strong>Kos per 100 km</strong><span>100 ÷ km/L × RM1.99</span></div>
                 </div>
+            </div>
+
+            <div class="pcb-notice">
+                <strong>Nota pengiraan</strong>
+                <p>Harga benchmark menggunakan RON95 bersubsidi BUDI95 sebanyak RM1.99 seliter. Kalkulator ini tidak menyemak kelayakan BUDI95 atau baki kuota anda. Kecekapan sebenar boleh berubah mengikut kesesakan, gaya pemanduan, muatan, tekanan tayar dan keadaan jalan.</p>
             </div>
 
             <div class="fuel-back-link">
