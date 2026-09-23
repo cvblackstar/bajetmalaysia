@@ -1,0 +1,35 @@
+name: Rebrand to Bajet MY
+
+on:
+  push:
+    branches: [rebrand-bajet-my]
+
+permissions:
+  contents: write
+
+jobs:
+  rebrand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace brand text across repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            sed -i 's/Bajet Malaysia/Bajet MY/g; s/BAJET MALAYSIA/BAJET MY/g' "$file"
+          done < <(grep -rlZ --exclude-dir=.git -E 'Bajet Malaysia|BAJET MALAYSIA' .)
+      - name: Commit replacements and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/rebrand-bajet-my.yml
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No brand replacements found."
+            exit 0
+          fi
+          git commit -m "chore: rename brand to Bajet MY"
+          git push
