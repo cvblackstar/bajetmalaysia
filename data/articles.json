@@ -118,5 +118,17 @@
     "description": "Asas merancang persaraan dan memahami beza antara simpanan dengan pelaburan supaya matlamat kewangan lebih jelas.",
     "calculator": "kwsp",
     "status": "published"
+  },
+  {
+    "title": "Panduan Beli Rumah: Semak Sebelum Tandatangan",
+    "slug": "panduan-beli-rumah-due-diligence",
+    "path": "articles/property/panduan-beli-rumah-due-diligence.md",
+    "category": "Rumah & Hartanah",
+    "tags": ["Rumah", "Hartanah", "Pemaju", "Due Diligence", "Pinjaman Rumah", "KPKT", "TEDUH"],
+    "published": "2026-09-24",
+    "updated": "2026-09-24",
+    "description": "Panduan ringkas untuk menilai rumah dan projek perumahan, termasuk semakan lesen, status projek, tanah dan rekod pemaju sebelum membuat komitmen kewangan.",
+    "calculator": "",
+    "status": "published"
   }
 ]
