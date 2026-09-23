@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Duit Sara Hidup Malaysia | PAKW | Bajet Malaysia</title>
+    <meta name="description" content="Anggarkan duit sara hidup bulanan berdasarkan lokasi, strata dan saiz isi rumah menggunakan data PAKW DOSM 2024.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MALAYSIA</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Kalkulator Duit Sara Hidup</h1>
+        <p>Anggarkan jumlah perbelanjaan bulanan yang diperlukan untuk kehidupan yang wajar berdasarkan lokasi, kawasan bandar atau luar bandar dan saiz isi rumah.</p>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Profil Isi Rumah</h2>
+
+            <div class="form-group">
+                <label for="state">Negeri / Wilayah</label>
+                <select id="state">
+                    <option value="Malaysia">Malaysia</option>
+                    <option value="Johor">Johor</option>
+                    <option value="Kedah">Kedah</option>
+                    <option value="Kelantan">Kelantan</option>
+                    <option value="Melaka">Melaka</option>
+                    <option value="Negeri Sembilan">Negeri Sembilan</option>
+                    <option value="Pahang">Pahang</option>
+                    <option value="Pulau Pinang">Pulau Pinang</option>
+                    <option value="Perak">Perak</option>
+                    <option value="Perlis">Perlis</option>
+                    <option value="Selangor">Selangor</option>
+                    <option value="Terengganu">Terengganu</option>
+                    <option value="Sabah">Sabah</option>
+                    <option value="Sarawak">Sarawak</option>
+                    <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+                    <option value="W.P. Labuan">W.P. Labuan</option>
+                    <option value="W.P. Putrajaya">W.P. Putrajaya</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="strata">Kawasan</label>
+                <select id="strata">
+                    <option value="urban" selected>Bandar</option>
+                    <option value="rural">Luar bandar</option>
+                </select>
+                <small>PAKW DOSM menunjukkan keperluan perbelanjaan berbeza mengikut lokasi dan strata.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="householdSize">Bilangan ahli isi rumah</label>
+                <input type="number" id="householdSize" value="3" min="1" max="15" step="1">
+                <small>Masukkan semua ahli yang biasanya tinggal dan berkongsi keperluan hidup dalam isi rumah.</small>
+            </div>
+
+            <div class="form-divider"></div>
+            <h3 class="form-section-title">Penyesuaian Peribadi</h3>
+
+            <div class="form-group">
+                <label for="adjustment">Pelarasan perbelanjaan</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="adjustment" value="0" min="-10000" max="10000" step="50">
+                </div>
+                <small>Opsyenal. Tambah atau tolak daripada anggaran DOSM untuk mencerminkan keadaan anda sendiri.</small>
+            </div>
+
+            <button type="button" id="calculatePakwButton" class="button primary calculate-button">Kira Duit Sara Hidup</button>
+        </div>
+
+        <div class="calculator-result-card">
+            <h2>Anggaran Anda</h2>
+            <div class="take-home">
+                <span>Duit sara hidup bulanan</span>
+                <strong id="pakwResult">RM0</strong>
+            </div>
+
+            <div class="result-list">
+                <div class="result-row"><span>Keperluan makanan</span><strong id="foodResult">RM0</strong></div>
+                <div class="result-row"><span>Keperluan bukan makanan</span><strong id="nonFoodResult">RM0</strong></div>
+                <div class="result-row"><span>Pelarasan peribadi</span><strong id="adjustmentResult">RM0</strong></div>
+                <div class="result-row total-row"><span>Anggaran sebulan</span><strong id="totalResult">RM0</strong></div>
+            </div>
+
+            <div class="pcb-notice">
+                <strong id="locationLabel">Malaysia · Bandar</strong>
+                <p id="resultNote">Anggaran ini menggunakan PAKW per kapita DOSM 2024 sebagai asas.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">APA ITU PAKW?</span>
+        <h2>Duit sara hidup untuk kehidupan yang wajar</h2>
+        <p>PAKW, atau Perbelanjaan Asas Kehidupan Wajar, ialah ukuran DOSM tentang jumlah perbelanjaan yang diperlukan untuk kehidupan yang wajar, termasuk keperluan dan penyertaan dalam masyarakat.</p>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">📍</div><div><h3>Lokasi mempengaruhi kos</h3><p>PAKW berbeza mengikut negeri, daerah dan strata. Sebab itu kalkulator ini meminta lokasi dan bandar atau luar bandar.</p></div></article>
+        <article class="topic"><div class="topic-icon">🍚</div><div><h3>Makanan + bukan makanan</h3><p>Kerangka PAKW merangkumi komponen makanan dan bukan makanan. Komponen makanan mengambil kira keperluan pemakanan mengikut umur dan jantina.</p></div></article>
+        <article class="topic"><div class="topic-icon">👨‍👩‍👧‍👦</div><div><h3>Saiz isi rumah penting</h3><p>Keperluan isi rumah berubah apabila bilangan ahli berubah. Anggaran di sini menggunakan nilai per kapita untuk memberi kiraan mudah yang boleh difahami.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Ini anggaran, bukan angka wajib</h2>
+        <p>Kalkulator ini ialah versi ringkas yang diinspirasikan oleh kerangka MyPAKW dan menggunakan data PAKW DOSM 2024. Ia bukan salinan kalkulator rasmi DOSM dan tidak menggantikan pengiraan rasmi PAKW yang lebih terperinci mengikut umur, jantina, komposisi isi rumah dan lokasi.</p>
+        <p style="margin-top:0.8rem;">Sumber: Department of Statistics Malaysia (DOSM), <strong>Cost of Living Indicators 2024</strong>. Data PAKW makanan dan bukan makanan per kapita mengikut negeri dan strata.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MALAYSIA</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet Malaysia</p>
+    </div>
+</footer>
+<script src="pakw.js"></script>
+</body>
+</html>
