@@ -1,4 +1,4 @@
-# Bajet Malaysia Articles
+# Bajet MY Articles
 
 Artikel disimpan sebagai fail Markdown supaya kandungan mudah disemak, dikemas kini dan diurus melalui Git.
 

@@ -5,7 +5,7 @@ category: "Persaraan & Pelaburan"
 tags: ["Persaraan", "KWSP", "Pelaburan", "Financial Literacy"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Asas merancang persaraan dan memahami beza antara simpanan dengan pelaburan supaya matlamat kewangan lebih jelas."
 calculator: "kwsp"
 status: "published"
@@ -43,7 +43,7 @@ Sumber rasmi: [Bank Negara Malaysia — National Strategy for Financial Literacy
 
 > **Simpan untuk matlamat jangka pendek dan kecemasan; rancang serta labur dengan memahami risiko untuk matlamat jangka panjang.**
 
-Gunakan kalkulator KWSP Bajet Malaysia untuk membuat unjuran berdasarkan keadaan anda sendiri.
+Gunakan kalkulator KWSP Bajet MY untuk membuat unjuran berdasarkan keadaan anda sendiri.
 
 ### Sumber rasmi
 

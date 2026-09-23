@@ -5,7 +5,7 @@ category: "Keselamatan Kewangan"
 tags: ["Scam", "Keselamatan", "Pelaburan", "Financial Literacy"]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Panduan ringkas untuk menyemak tawaran kewangan dan mengenal pasti tanda amaran sebelum menyerahkan wang atau maklumat peribadi."
 calculator: ""
 status: "published"

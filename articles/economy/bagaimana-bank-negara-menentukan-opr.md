@@ -5,7 +5,7 @@ category: "Ekonomi & OPR"
 tags: [OPR, Bank Negara Malaysia, Inflasi, Ekonomi]
 published: "2026-09-23"
 updated: "2026-09-23"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Panduan ringkas tentang bagaimana Bank Negara Malaysia melalui Monetary Policy Committee (MPC) menentukan Overnight Policy Rate (OPR)."
 calculator: ""
 status: "published"

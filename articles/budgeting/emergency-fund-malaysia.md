@@ -5,7 +5,7 @@ category: "Bajet & Simpanan"
 tags: [Emergency Fund, Simpanan, Bajet, Financial Safety Net]
 published: "2026-09-22"
 updated: "2026-09-22"
-author: "Bajet Malaysia"
+author: "Bajet MY"
 description: "Panduan membina emergency fund berdasarkan perbelanjaan, komitmen dan keadaan kewangan anda."
 calculator: "emergency-fund"
 status: "published"
@@ -132,7 +132,7 @@ Matlamatnya ialah membina beberapa lapisan perlindungan supaya satu kejadian tid
 
 ## Kira emergency fund anda
 
-Gunakan kalkulator Emergency Fund Bajet Malaysia untuk mengira sasaran berdasarkan **perbelanjaan bulanan, komitmen, jumlah simpanan semasa dan kemampuan menyimpan setiap bulan**.
+Gunakan kalkulator Emergency Fund Bajet MY untuk mengira sasaran berdasarkan **perbelanjaan bulanan, komitmen, jumlah simpanan semasa dan kemampuan menyimpan setiap bulan**.
 
 > **Nota:** Ini ialah anggaran pendidikan. Sasaran sebenar anda bergantung pada keadaan kewangan, pekerjaan, tanggungan dan tahap risiko yang anda selesa tanggung.
 
