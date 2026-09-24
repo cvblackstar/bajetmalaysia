@@ -37,6 +37,8 @@ Jangan menganggap jumlah pinjaman maksimum yang bank sanggup luluskan sebagai ju
 
 Untuk projek baharu, semak nama syarikat pemaju dan **rekod projek terdahulunya**.
 
+![Infografik: perkara utama yang perlu disemak sebelum membeli rumah](assets/articles/house-purchase-due-diligence.svg)
+
 TEDUH, portal Jabatan Perumahan Negara, menyediakan carian maklumat pemaju dan projek serta semakan Lesen Pemaju Perumahan dan Permit Iklan dan Jualan. KPKT juga menerangkan bahawa pemaju perumahan perlu mempunyai lesen yang sah dan permit iklan serta jualan yang sah. [TEDUH — Semakan Lesen & Permit](https://teduh.kpkt.gov.my/semakan-lesen-permit) · [KPKT — Pelesenan Pemajuan Perumahan](https://ehome.kpkt.gov.my/index.php/pages/view/29?mid=148)
 
 ### Mengapa rekod pemaju penting?
