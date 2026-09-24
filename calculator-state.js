@@ -104,9 +104,49 @@
 
   function saveLocalState() {
     try {
-      localStorage.setItem(storageKey(), JSON.stringify(collectState()));
+      const payload = collectState();
+      localStorage.setItem(storageKey(), JSON.stringify(payload));
+      if (calculatorKey() === "kwsp.html") {
+        localStorage.setItem("bajetmy:kwsp:main", JSON.stringify(payload));
+      }
     } catch (error) {
       console.warn("Bajet MY: could not save calculator state", error);
+    }
+  }
+
+  function loadKwspMainHandoff() {
+    try {
+      const raw = localStorage.getItem("bajetmy:kwsp:main");
+      if (!raw) return null;
+      const payload = JSON.parse(raw);
+      const source = payload && payload.state ? payload.state : {};
+      const state = {};
+
+      const copy = {
+        "value:currentAge": "value:currentAge",
+        "value:retireAge": "value:retireAge",
+        "value:grossSalary": "value:salary",
+        "value:salaryIncrement": "value:salaryGrowth",
+        "value:dividendRate": "value:dividend",
+        "value:retirementSpending": "value:spending",
+        "value:inflationRate": "value:inflation",
+        "value:retirementEndAge": "value:endAge",
+        "value:voluntaryContribution": "value:extra",
+        "value:currentBalance": "value:currentBalance",
+        "value:currentPersaraan": "value:currentPersaraan",
+        "value:currentSejahtera": "value:currentSejahtera",
+        "value:currentFleksibel": "value:currentFleksibel"
+      };
+
+      for (const [from, to] of Object.entries(copy)) {
+        if (Object.prototype.hasOwnProperty.call(source, from)) state[to] = source[from];
+      }
+      if (source["radio:balanceMode"]) state["radio:balanceMode"] = source["radio:balanceMode"];
+
+      return { v: 1, state };
+    } catch (error) {
+      console.warn("Bajet MY: KWSP main handoff unavailable", error);
+      return null;
     }
   }
 
@@ -200,11 +240,16 @@
 
     const sharedState = readHashState();
     const localState = sharedState ? null : loadLocalState();
+    const handoffState = (!sharedState && !localState && calculatorKey() === "kwsp-retirement.html")
+      ? loadKwspMainHandoff()
+      : null;
 
     if (sharedState) {
       if (restoreState(sharedState)) saveLocalState();
     } else if (localState) {
       restoreState(localState);
+    } else if (handoffState) {
+      restoreState(handoffState);
     }
 
     addSharingUI();
