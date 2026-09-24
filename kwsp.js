@@ -44,23 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function buildRetirementPlannerUrl() {
-        const params = new URLSearchParams({
-            currentAge: $("currentAge").value || "",
-            retireAge: $("retireAge").value || "60",
-            balanceMode: getBalanceMode(),
-            currentBalance: $("currentBalance").value || "0",
-            currentPersaraan: $("currentPersaraan").value || "0",
-            currentSejahtera: $("currentSejahtera").value || "0",
-            currentFleksibel: $("currentFleksibel").value || "0",
-            salary: $("grossSalary").value || "",
-            salaryGrowth: $("salaryIncrement").value || "3",
-            dividend: $("dividendRate").value || "5.5",
-            spending: $("retirementSpending").value || "4000",
-            inflation: $("inflationRate").value || "3",
-            endAge: $("retirementEndAge").value || "85",
-            voluntary: $("voluntaryContribution").value || "0"
-        });
-        return `kwsp-retirement.html?${params.toString()}`;
+        return "kwsp-retirement.html";
     }
 
     function addRetirementPlannerLink() {
