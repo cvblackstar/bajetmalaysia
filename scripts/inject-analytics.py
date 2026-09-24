@@ -12,14 +12,21 @@ SNIPPET = f'''<!-- Google tag (gtag.js) -->
   }});
 </script>'''
 
+POLICY_FOOTER = '''<p class="footer-policies"><a href="disclaimer.html">Penafian</a><a href="privacy.html">Privasi</a><a href="affiliate-disclosure.html">Pendedahan Affiliate</a></p>'''
+
 for path in Path('.').glob('*.html'):
     text = path.read_text(encoding='utf-8')
-    if MEASUREMENT_ID in text:
-        continue
-    marker = '</head>'
-    if marker not in text.lower():
-        continue
-    idx = text.lower().index(marker)
-    text = text[:idx] + SNIPPET + '\n' + text[idx:]
+
+    if MEASUREMENT_ID not in text:
+        marker = '</head>'
+        if marker in text.lower():
+            idx = text.lower().index(marker)
+            text = text[:idx] + SNIPPET + '\n' + text[idx:]
+
+    if 'footer-policies' not in text and '</footer>' in text.lower():
+        marker = '</footer>'
+        idx = text.lower().index(marker)
+        text = text[:idx] + POLICY_FOOTER + '\n' + text[idx:]
+
     path.write_text(text, encoding='utf-8')
-    print(f'Injected GA4 into {path}')
+    print(f'Prepared {path}')
