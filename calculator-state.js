@@ -196,7 +196,7 @@
     const note = document.createElement("p");
     note.className = "calculator-data-note";
     note.innerHTML =
-      'Input disimpan pada pelayar ini secara lalai. Pautan kongsi menggunakan encoded state, <strong>bukan encryption</strong>. ' +
+      'Input anda disimpan dalam browser anda by default. Pautan kongsi menggunakan encoded state, <strong>bukan encryption</strong>. ' +
       '<a href="privacy.html">Lihat Notis Privasi</a>.';
 
     share.addEventListener("click", async () => {
