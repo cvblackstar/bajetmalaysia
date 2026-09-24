@@ -11,7 +11,7 @@ SNIPPET = f'''<!-- Google tag (gtag.js) -->
     anonymize_ip: true,
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
-    page_location: window.location.origin + window.location.pathname + window.location.search
+    page_location: window.location.origin + window.location.pathname
   }});
 </script>'''
 
