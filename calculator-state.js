@@ -248,8 +248,10 @@
       if (restoreState(sharedState)) saveLocalState();
     } else if (localState) {
       restoreState(localState);
+      if (calculatorKey() === "kwsp.html") saveLocalState();
     } else if (handoffState) {
       restoreState(handoffState);
+      saveLocalState();
     }
 
     addSharingUI();
