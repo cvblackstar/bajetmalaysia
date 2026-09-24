@@ -14,10 +14,7 @@
   }
 
   function getControls() {
-    return Array.from(document.querySelectorAll(
-      ".calculator-form-card input[id], .calculator-form-card select[id], .calculator-form-card textarea[id], " +
-      "#scenarioActions input[id], #scenarioActions select[id], #scenarioActions textarea[id]"
-    ));
+    return Array.from(document.querySelectorAll("input[id], select[id], textarea[id]"));
   }
 
   function collectState() {
