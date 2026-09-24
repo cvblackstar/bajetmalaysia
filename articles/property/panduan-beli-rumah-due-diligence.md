@@ -37,8 +37,6 @@ Jangan menganggap jumlah pinjaman maksimum yang bank sanggup luluskan sebagai ju
 
 Untuk projek baharu, semak nama syarikat pemaju dan **rekod projek terdahulunya**.
 
-![Infografik: perkara utama yang perlu disemak sebelum membeli rumah](assets/articles/house-purchase-due-diligence.svg)
-
 TEDUH, portal Jabatan Perumahan Negara, menyediakan carian maklumat pemaju dan projek serta semakan Lesen Pemaju Perumahan dan Permit Iklan dan Jualan. KPKT juga menerangkan bahawa pemaju perumahan perlu mempunyai lesen yang sah dan permit iklan serta jualan yang sah. [TEDUH — Semakan Lesen & Permit](https://teduh.kpkt.gov.my/semakan-lesen-permit) · [KPKT — Pelesenan Pemajuan Perumahan](https://ehome.kpkt.gov.my/index.php/pages/view/29?mid=148)
 
 ### Mengapa rekod pemaju penting?
@@ -75,11 +73,15 @@ Semak perkara seperti:
 - Maklumat projek yang tersedia.
 - Status projek sakit atau terbengkalai jika berkaitan.
 
+![Contoh rujukan portal TEDUH/KPKT untuk semakan projek dan pemaju](assets/TEDUH.webp)
+
 Portal TEDUH menyediakan carian maklumat pemaju dan projek perumahan. [Portal TEDUH](https://teduh.kpkt.gov.my/)
 
 ## 4. Semak status tanah
 
 KPKT menyarankan pembeli menyemak status tanah, termasuk sama ada pegangan bebas atau pajakan, tempoh pajakan jika berkenaan, status Rezab Melayu dan bebanan tertentu. Semakan hakmilik dibuat melalui Pejabat Tanah atau Pejabat Pendaftar Negeri yang berkaitan. [KPKT — Tips Kepada Pembeli Rumah](https://ehome.kpkt.gov.my/index.php/pages/view/236)
+
+![Nasihat KPKT untuk pembeli rumah sebelum membuat komitmen](assets/Nasihat%20KPKT.webp)
 
 Untuk pembelian bernilai besar, dapatkan nasihat peguam hartanah supaya semakan hakmilik dan kepentingan lain dibuat dengan sewajarnya.
 
@@ -137,6 +139,8 @@ Satu perkara di bawah tidak semestinya bermaksud rumah itu patut dielakkan. Teta
 - Struktur syarikat atau pihak yang bertanggungjawab terhadap projek tidak jelas.
 
 **Red flag bukan keputusan muktamad. Ia adalah isyarat untuk berhenti dan semak.**
+
+![Checklist kajian sebelum membeli rumah](assets/House%20Research%20Checklist.webp)
 
 ## Checklist ringkas sebelum membeli
 
