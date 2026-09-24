@@ -853,3 +853,141 @@ a {
         padding: 55px 0;
     }
 }
+
+
+/* =========================
+   CALCULATOR PRIVACY + SHARING
+========================= */
+
+.calculator-data-tools {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--blue-light);
+}
+
+.calculator-data-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.calculator-data-actions button {
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.share-primary {
+    border: 1px solid var(--navy);
+    background: var(--navy);
+    color: var(--white);
+}
+
+.share-secondary {
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text);
+}
+
+.share-status {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.calculator-data-note {
+    margin: 9px 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.calculator-data-note a {
+    color: var(--green);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.footer-policies {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.footer-policies a {
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* =========================
+   LEGAL / POLICY PAGES
+========================= */
+
+.legal-page {
+    max-width: 860px;
+}
+
+.legal-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+    margin-bottom: 18px;
+}
+
+.legal-card h2 {
+    color: var(--navy);
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.legal-card p + p {
+    margin-top: 12px;
+}
+
+.legal-card code {
+    background: var(--background);
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+
+.legal-sources {
+    margin: 18px 0 24px;
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--blue-light);
+}
+
+.legal-sources h2 {
+    margin-bottom: 10px;
+    color: var(--navy);
+}
+
+.legal-sources a {
+    display: block;
+    color: var(--green);
+    font-weight: 700;
+    text-decoration: underline;
+    margin-top: 7px;
+}
+
+@media (max-width: 600px) {
+    .calculator-data-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calculator-data-actions button {
+        width: 100%;
+    }
+
+    .share-status {
+        display: block;
+    }
+}
