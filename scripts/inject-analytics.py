@@ -8,7 +8,10 @@ SNIPPET = f'''<!-- Google tag (gtag.js) -->
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
   gtag('config', '{MEASUREMENT_ID}', {{
-    anonymize_ip: true
+    anonymize_ip: true,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+    page_location: window.location.origin + window.location.pathname + window.location.search
   }});
 </script>'''
 
