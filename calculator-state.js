@@ -32,19 +32,54 @@
     return { v: 1, state };
   }
 
-  function encodeState(payload) {
-    const json = JSON.stringify(payload);
-    const bytes = new TextEncoder().encode(json);
+  function toBase64Url(value) {
+    const bytes = new TextEncoder().encode(value);
     let binary = "";
     for (const byte of bytes) binary += String.fromCharCode(byte);
     return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   }
 
-  function decodeState(encoded) {
+  function fromBase64Url(encoded) {
     const padded = encoded.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((encoded.length + 3) % 4);
     const binary = atob(padded);
     const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes));
+    return new TextDecoder().decode(bytes);
+  }
+
+  function encodeState() {
+    // Version 2: store only control values in DOM order instead of repeating field names.
+    const values = getControls().map(el => {
+      if (el.type === "radio" || el.type === "checkbox") return el.checked ? 1 : 0;
+      if (el.value === "") return "";
+      const numeric = Number(el.value);
+      return Number.isFinite(numeric) ? numeric : el.value;
+    });
+    return "2." + toBase64Url(JSON.stringify(values));
+  }
+
+  function decodeState(encoded) {
+    if (encoded.startsWith("2.")) {
+      const values = JSON.parse(fromBase64Url(encoded.slice(2)));
+      const state = {};
+
+      getControls().forEach((el, index) => {
+        const value = values[index];
+        if (value === undefined) return;
+
+        if (el.type === "radio") {
+          if (value === 1 && el.name) state["radio:" + el.name] = el.value;
+        } else if (el.type === "checkbox") {
+          state["check:" + el.id] = Boolean(value);
+        } else {
+          state["value:" + el.id] = String(value ?? "");
+        }
+      });
+
+      return { v: 1, state };
+    }
+
+    // Backward compatibility for existing v1 share links.
+    return JSON.parse(fromBase64Url(encoded));
   }
 
   function setRadioByName(name, value) {
@@ -200,7 +235,7 @@
       '<a href="privacy.html">Lihat Notis Privasi</a>.';
 
     share.addEventListener("click", async () => {
-      const encoded = encodeState(collectState());
+      const encoded = encodeState();
       const url = new URL(window.location.href);
       url.hash = HASH_PREFIX + encoded;
       history.replaceState(null, "", url.href);
