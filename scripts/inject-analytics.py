@@ -10,7 +10,7 @@ SNIPPET = f'''<!-- Google tag (gtag.js) -->
   gtag('config', '{MEASUREMENT_ID}');
 </script>'''
 
-POLICY_FOOTER = '''<p class="footer-policies"><a href="disclaimer.html">Penafian</a><a href="privacy.html">Privasi</a><a href="affiliate-disclosure.html">Pendedahan Affiliate</a></p>'''
+POLICY_FOOTER = '''<p class="footer-policies"><a href="tentang-kami.html#hubungi-kami">Hubungi Kami</a><a href="disclaimer.html">Penafian</a><a href="privacy.html">Privasi</a><a href="affiliate-disclosure.html">Pendedahan Affiliate</a></p>'''
 
 html_files = sorted(Path('.').glob('*.html'))
 if not html_files:
