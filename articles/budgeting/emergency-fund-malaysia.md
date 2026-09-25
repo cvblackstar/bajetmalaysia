@@ -17,6 +17,8 @@ Kereta rosak, kehilangan pekerjaan, ahli keluarga jatuh sakit atau perbelanjaan 
 
 Emergency fund ialah simpanan yang disediakan khusus untuk menghadapi kejadian tidak dijangka supaya anda tidak perlu bergantung sepenuhnya kepada kad kredit, pinjaman atau wang yang diperuntukkan untuk matlamat lain.
 
+![Infografik Emergency Fund: formula, contoh pengiraan dan rujukan BNM/PIDM](assets/emergency-infographic.png)
+
 ## Kenapa emergency fund penting?
 
 Tujuan emergency fund bukan untuk mengejar pulangan pelaburan yang tinggi. Tujuannya ialah **memberi kecairan dan masa** apabila berlaku kejutan kewangan.
