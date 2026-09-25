@@ -44,6 +44,33 @@ function renderMarkdown(markdown) {
   return out.join('');
 }
 
+function setMeta(meta) {
+  const title = `${meta.title} | Bajet MY`;
+  const url = new URL(`article.html?slug=${meta.slug}`, document.baseURI).href;
+
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageDescription').setAttribute('content', meta.description);
+  document.getElementById('canonicalLink').setAttribute('href', url);
+  document.getElementById('ogTitle').setAttribute('content', title);
+  document.getElementById('ogDescription').setAttribute('content', meta.description);
+  document.getElementById('ogUrl').setAttribute('content', url);
+
+  const jsonLd = document.createElement('script');
+  jsonLd.type = 'application/ld+json';
+  jsonLd.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: meta.title,
+    description: meta.description,
+    datePublished: meta.published,
+    dateModified: meta.updated,
+    articleSection: meta.category,
+    mainEntityOfPage: url,
+    publisher: { '@type': 'Organization', name: 'Bajet MY' }
+  });
+  document.head.appendChild(jsonLd);
+}
+
 async function loadArticle() {
   try {
     if (!slug) throw new Error('Pautan artikel tidak lengkap.');
@@ -57,6 +84,7 @@ async function loadArticle() {
     const raw = await articleResponse.text();
     const body = raw.replace(/^---[\s\S]*?---\s*/, '').trim();
     const calc = calculatorLinks[meta.calculator];
+    setMeta(meta);
     root.innerHTML = `<div class="eyebrow">${esc(meta.category)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
   } catch (error) {
     root.innerHTML = `<div class="article-error"><h1>Artikel tidak dapat dimuatkan</h1><p>${esc(error.message)}</p><p><a href="panduan.html">Kembali ke Panduan</a></p></div>`;
