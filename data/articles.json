@@ -130,5 +130,53 @@
     "description": "Panduan ringkas untuk menilai rumah dan projek perumahan, termasuk semakan lesen, status projek, tanah dan rekod pemaju sebelum membuat komitmen kewangan.",
     "calculator": "",
     "status": "published"
+  },
+  {
+    "title": "CTOS & CCRIS: Skor Kredit dan Kesannya Kepada Pinjaman Anda",
+    "slug": "skor-kredit-ctos-ccris",
+    "path": "articles/debt/skor-kredit-ctos-ccris.md",
+    "category": "Hutang & Pinjaman",
+    "tags": ["CTOS", "CCRIS", "Skor Kredit", "Pinjaman", "DSR"],
+    "published": "2026-09-25",
+    "updated": "2026-09-25",
+    "description": "Faham beza CTOS dan CCRIS, apa yang mempengaruhi skor kredit anda, dan cara ia menjejaskan kelulusan pinjaman rumah, kereta atau peribadi.",
+    "calculator": "dsr",
+    "status": "published"
+  },
+  {
+    "title": "Akaun KWSP: Persaraan, Sejahtera, Fleksibel — Apa Beza dan Bila Boleh Keluarkan?",
+    "slug": "akaun-kwsp-persaraan-sejahtera-fleksibel",
+    "path": "articles/financial-literacy/akaun-kwsp-persaraan-sejahtera-fleksibel.md",
+    "category": "Persaraan & Pelaburan",
+    "tags": ["KWSP", "EPF", "Akaun Fleksibel", "Persaraan"],
+    "published": "2026-09-25",
+    "updated": "2026-09-25",
+    "description": "Faham struktur tiga akaun KWSP — Persaraan, Sejahtera dan Fleksibel — termasuk peratusan caruman dan syarat pengeluaran setiap akaun.",
+    "calculator": "kwsp",
+    "status": "published"
+  },
+  {
+    "title": "ASB/ASNB: Panduan Asas Pelaburan Untuk Rakyat Malaysia",
+    "slug": "asb-asnb-panduan-pelaburan",
+    "path": "articles/savings/asb-asnb-panduan-pelaburan.md",
+    "category": "Simpanan & Pelaburan",
+    "tags": ["ASB", "ASNB", "Pelaburan", "Dividen"],
+    "published": "2026-09-25",
+    "updated": "2026-09-25",
+    "description": "Panduan asas melabur dalam ASB — cara ia berfungsi, dividen, pembiayaan ASB (ASB loan) dan risiko yang perlu difahami.",
+    "calculator": "pelaburan",
+    "status": "published"
+  },
+  {
+    "title": "Peraturan 50/30/20: Kaedah Mudah Bajet Bulanan",
+    "slug": "peraturan-50-30-20-bajet",
+    "path": "articles/budgeting/peraturan-50-30-20-bajet.md",
+    "category": "Bajet & Simpanan",
+    "tags": ["Bajet", "50/30/20", "Simpanan", "Perbelanjaan"],
+    "published": "2026-09-25",
+    "updated": "2026-09-25",
+    "description": "Kaedah bajet 50/30/20 — cara mudah membahagikan pendapatan bulanan kepada keperluan, kehendak dan simpanan.",
+    "calculator": "monthly-budget",
+    "status": "published"
   }
 ]
