@@ -4,6 +4,18 @@
   const STORAGE_PREFIX = "bajetmy:calculator:";
   const HASH_PREFIX = "#s=";
 
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat("ms-MY", {
+      style: "currency",
+      currency: "MYR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  }
+
+  window.BajetMY = window.BajetMY || {};
+  window.BajetMY.formatCurrency = formatCurrency;
+
   function calculatorKey() {
     const path = window.location.pathname.replace(/\/$/, "") || "/index.html";
     return path.split("/").pop() || "calculator";
