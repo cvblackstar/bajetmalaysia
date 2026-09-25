@@ -130,11 +130,7 @@ Emergency fund tidak menggantikan semua bentuk perlindungan kewangan. Ia bekerja
 
 Matlamatnya ialah membina beberapa lapisan perlindungan supaya satu kejadian tidak dijangka tidak terus menyebabkan masalah kewangan yang besar.
 
-## Kira emergency fund anda
-
-Gunakan kalkulator Emergency Fund Bajet MY untuk mengira sasaran berdasarkan **perbelanjaan bulanan, komitmen, jumlah simpanan semasa dan kemampuan menyimpan setiap bulan**.
-
-> **Nota:** Ini ialah anggaran pendidikan. Sasaran sebenar anda bergantung pada keadaan kewangan, pekerjaan, tanggungan dan tahap risiko yang anda selesa tanggung.
+> **Nota:** Kalkulator Emergency Fund di bawah ialah anggaran pendidikan berdasarkan perbelanjaan bulanan, komitmen, jumlah simpanan semasa dan kemampuan menyimpan setiap bulan. Sasaran sebenar anda bergantung pada keadaan kewangan, pekerjaan, tanggungan dan tahap risiko yang anda selesa tanggung.
 
 ## Ringkasan
 
