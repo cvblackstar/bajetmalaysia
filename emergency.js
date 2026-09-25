@@ -5,6 +5,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     calculateButton.addEventListener("click", calculateEmergencyFund);
 
+    document.querySelectorAll(
+        ".calculator-form-card input, .calculator-form-card select"
+    ).forEach(function (input) {
+
+        input.addEventListener("input", calculateEmergencyFund);
+        input.addEventListener("change", calculateEmergencyFund);
+
+    });
+
 
     /*
      * Run once on load so the pre-filled example values

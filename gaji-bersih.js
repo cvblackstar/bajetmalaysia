@@ -3,7 +3,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const calculateButton =
         document.getElementById("calculateButton");
 
-    calculateButton.addEventListener("click", function () {
+    const formError =
+        document.getElementById("gajiFormError");
+
+    function showFormError(message) {
+        if (!formError) return;
+        formError.hidden = !message;
+        formError.textContent = message || "";
+    }
+
+    calculateButton.addEventListener("click", calculateGaji);
+
+    document.querySelectorAll(
+        ".calculator-form-card input, .calculator-form-card select"
+    ).forEach(function (input) {
+
+        input.addEventListener("input", calculateGaji);
+        input.addEventListener("change", calculateGaji);
+
+    });
+
+    function calculateGaji() {
 
         const grossSalary =
             parseFloat(
@@ -46,10 +66,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!grossSalary || grossSalary <= 0 || !age || age <= 0) {
 
-            alert("Sila masukkan gaji dan umur yang sah.");
+            showFormError("Sila masukkan gaji dan umur yang sah.");
 
             return;
         }
+
+        showFormError("");
 
 
         /*
@@ -99,7 +121,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let socso = 0;
 
-        if (age < 60) {
+        /*
+         * Foreign workers (status "nonmalaysian") are covered only
+         * by the employer-paid Employment Injury Scheme — there is
+         * no employee SOCSO deduction for them.
+         */
+        if (status !== "nonmalaysian" && age < 60) {
 
             socso =
                 Math.min(grossSalary, 6000) * 0.005;
@@ -200,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("netSalary").textContent =
             formatRM(net);
 
-    });
+    }
 
 
     /*

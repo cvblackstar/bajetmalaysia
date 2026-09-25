@@ -1,4 +1,15 @@
-document.getElementById('calculateBtn').addEventListener('click', calculateCarLoan);
+document.addEventListener('DOMContentLoaded', () => {
+    const calculateBtn = document.getElementById('calculateBtn');
+    calculateBtn.addEventListener('click', calculateCarLoan);
+
+    const inputs = document.querySelectorAll('#carForm input, #carForm select');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculateCarLoan);
+        input.addEventListener('change', calculateCarLoan);
+    });
+
+    calculateCarLoan();
+});
 
 function calculateCarLoan() {
     const carPrice = parseFloat(document.getElementById('carPrice').value) || 0;
@@ -31,6 +42,3 @@ function calculateCarLoan() {
 function formatRM(amount) {
     return window.BajetMY.formatCurrency(amount);
 }
-
-// Jalankan pengiraan kali pertama apabila muka surat dibuka
-window.onload = calculateCarLoan;
