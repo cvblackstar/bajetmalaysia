@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const $ = (id) => document.getElementById(id);
     const calculateButton = $("calculateKwspButton");
+    const formError = $("kwspFormError");
     const balanceModeInputs = document.querySelectorAll('input[name="balanceMode"]');
     const totalBalanceGroup = $("totalBalanceGroup");
     const individualBalanceGroup = $("individualBalanceGroup");
@@ -9,6 +10,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function formatRM(amount) {
         return window.BajetMY.formatCurrency(Math.max(0, amount || 0));
+    }
+
+    function showFormError(message) {
+        if (!formError) return;
+        formError.hidden = !message;
+        formError.textContent = message || "";
     }
 
     function getBalanceMode() {
@@ -55,11 +62,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     balanceModeInputs.forEach(input => input.addEventListener("change", updateBalanceInputMode));
+    balanceModeInputs.forEach(input => input.addEventListener("change", () => calculateButton.click()));
     individualBalanceInputs.forEach(input => input.addEventListener("input", updateIndividualBalanceTotal));
     ["currentAge", "retireAge", "currentBalance", "currentPersaraan", "currentSejahtera", "currentFleksibel", "grossSalary", "salaryIncrement", "dividendRate", "retirementSpending", "inflationRate", "retirementEndAge", "voluntaryContribution"].forEach(id => {
         const input = $(id);
-        if (input) input.addEventListener("input", addRetirementPlannerLink);
-        if (input) input.addEventListener("change", addRetirementPlannerLink);
+        if (!input) return;
+        input.addEventListener("input", addRetirementPlannerLink);
+        input.addEventListener("change", addRetirementPlannerLink);
+        input.addEventListener("input", () => calculateButton.click());
+        input.addEventListener("change", () => calculateButton.click());
     });
     renameRetirementSpendingField();
     updateBalanceInputMode();
@@ -80,25 +91,27 @@ document.addEventListener("DOMContentLoaded", function () {
         const inflationRate = parseFloat($("inflationRate").value) || 0;
 
         if (!currentAge || currentAge < 16 || !grossSalaryStart || grossSalaryStart <= 0) {
-            alert("Sila masukkan umur dan gaji kasar bulanan yang sah.");
+            showFormError("Sila masukkan umur dan gaji kasar bulanan yang sah.");
             return;
         }
         if (retireAge <= currentAge) {
-            alert("Umur ingin bersara mestilah lebih besar daripada umur semasa.");
+            showFormError("Umur ingin bersara mestilah lebih besar daripada umur semasa.");
             return;
         }
         if (retirementEndAge <= retireAge) {
-            alert("Umur akhir persaraan mestilah lebih besar daripada umur persaraan.");
+            showFormError("Umur akhir persaraan mestilah lebih besar daripada umur persaraan.");
             return;
         }
         if (retirementSpending < 0 || inflationRate < 0 || dividendRate < 0 || salaryIncrement < 0 || voluntaryContribution < 0) {
-            alert("Nilai peratusan dan perbelanjaan tidak boleh negatif.");
+            showFormError("Nilai peratusan dan perbelanjaan tidak boleh negatif.");
             return;
         }
         if (balanceMode === "individual" && Object.values(individualBalances).some(v => v < 0)) {
-            alert("Baki setiap akaun KWSP tidak boleh negatif.");
+            showFormError("Baki setiap akaun KWSP tidak boleh negatif.");
             return;
         }
+
+        showFormError("");
 
         let persaraanBalance, sejahteraBalance, fleksibelBalance;
         if (balanceMode === "individual") {

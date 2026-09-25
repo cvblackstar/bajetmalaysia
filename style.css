@@ -600,6 +600,16 @@ a {
     font-size: 0.85rem;
 }
 
+.calc-form-error {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #fff1f1;
+    border: 1px solid #e5b5b5;
+    color: #9b3030;
+    font-size: 0.82rem;
+}
+
 /* =========================
    DSR BADGE + GAUGE
 ========================= */

@@ -25,12 +25,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /*
-     * Restore any previously saved budget for this device,
-     * then calculate once so the page never shows stale
-     * RM0.00 placeholders.
+     * calculator-state.js already restores previously saved input
+     * values for this page (it auto-detects every element with an
+     * id inside .calculator-form-card), so we just need to
+     * calculate once so the page never shows stale RM0.00
+     * placeholders.
      */
 
-    loadSavedBudget();
     calculateBudget();
 
 
@@ -58,17 +59,11 @@ document.addEventListener("DOMContentLoaded", function () {
         let totalWants = 0;
         let totalSavings = 0;
 
-        const budgetData = {
-            netSalary: netSalary,
-            items: {}
-        };
-
         needsInputs.forEach(function (input) {
 
             const val = parseFloat(input.value) || 0;
 
             totalNeeds += val;
-            budgetData.items[input.dataset.category] = val;
 
         });
 
@@ -77,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const val = parseFloat(input.value) || 0;
 
             totalWants += val;
-            budgetData.items[input.dataset.category] = val;
 
         });
 
@@ -86,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const val = parseFloat(input.value) || 0;
 
             totalSavings += val;
-            budgetData.items[input.dataset.category] = val;
 
         });
 
@@ -96,30 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const remaining =
             netSalary - totalExpenses;
-
-
-        /*
-         * ==========================================
-         * SAVE TO THIS DEVICE
-         * ==========================================
-         */
-
-        try {
-
-            localStorage.setItem(
-                "bajetMalaysia_monthlyBudget",
-                JSON.stringify(budgetData)
-            );
-
-        } catch (e) {
-
-            /*
-             * Storage can fail (private browsing, quota,
-             * disabled storage). Not saving locally should
-             * never break the calculator itself.
-             */
-
-        }
 
 
         /*
@@ -255,73 +224,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         insightEl.textContent = insightText;
-
-    }
-
-
-    /*
-     * ==========================================
-     * RESTORE SAVED BUDGET
-     * ==========================================
-     */
-
-    function loadSavedBudget() {
-
-        let savedData;
-
-        try {
-
-            savedData =
-                localStorage.getItem("bajetMalaysia_monthlyBudget");
-
-        } catch (e) {
-
-            return;
-
-        }
-
-        if (!savedData) {
-
-            return;
-
-        }
-
-        try {
-
-            const parsed = JSON.parse(savedData);
-
-            if (parsed.netSalary) {
-
-                netSalaryInput.value = parsed.netSalary;
-
-            }
-
-            if (parsed.items) {
-
-                Object.keys(parsed.items).forEach(function (key) {
-
-                    const input =
-                        document.querySelector(
-                            '[data-category="' + key + '"]'
-                        );
-
-                    if (input) {
-
-                        input.value = parsed.items[key];
-
-                    }
-
-                });
-
-            }
-
-        } catch (e) {
-
-            console.error(
-                "Gagal memuatkan data belanjawan tersimpan", e
-            );
-
-        }
 
     }
 

@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const working = age < retireAge;
             if (working) {
                 const employeeRate = age < 60 ? 0.11 : 0;
-                const employerRate = age < 60 ? (salary <= 5000 ? 0.13 : 0.12) : 0;
+                const employerRate = age < 60 ? (salary <= 5000 ? 0.13 : 0.12) : 0.04;
                 annualSaving = (salary * (employeeRate + employerRate) + voluntary) * 12;
                 dividend = (startBalance + annualSaving / 2) * dividendRate;
                 balance = startBalance + annualSaving + dividend;

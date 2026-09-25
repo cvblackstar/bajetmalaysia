@@ -3,7 +3,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const calculateButton =
         document.getElementById("calculateDsrButton");
 
-    calculateButton.addEventListener("click", function () {
+    const formError =
+        document.getElementById("dsrFormError");
+
+    function showFormError(message) {
+        if (!formError) return;
+        formError.hidden = !message;
+        formError.textContent = message || "";
+    }
+
+    calculateButton.addEventListener("click", calculateDsr);
+
+    document.querySelectorAll(
+        ".calculator-form-card input"
+    ).forEach(function (input) {
+
+        input.addEventListener("input", calculateDsr);
+        input.addEventListener("change", calculateDsr);
+
+    });
+
+    function calculateDsr() {
 
         /*
          * ==========================================
@@ -24,10 +44,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!grossIncome || grossIncome <= 0) {
 
-            alert("Sila masukkan gaji kasar bulanan yang sah.");
+            showFormError("Sila masukkan gaji kasar bulanan yang sah.");
 
             return;
         }
+
+        showFormError("");
 
 
         const totalIncome =
@@ -230,7 +252,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
-    });
+    }
 
 
     /*
