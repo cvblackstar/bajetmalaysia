@@ -15,6 +15,8 @@ status: "published"
 
 **Debt Service Ratio (DSR)** ialah ukuran yang membandingkan komitmen hutang bulanan dengan pendapatan bersih bulanan. Ia membantu anda melihat berapa banyak pendapatan yang sudah digunakan untuk membayar hutang.
 
+![Infografik DSR: formula, contoh pengiraan dan rujukan umum PIDM](assets/dsr-infographic.png)
+
 ## Formula DSR
 
 **DSR = Jumlah komitmen hutang bulanan ÷ Pendapatan bersih bulanan × 100%**
@@ -95,11 +97,7 @@ Antara pendekatan yang boleh dipertimbangkan:
 
 Matlamatnya bukan sekadar mendapatkan kelulusan pinjaman. Yang penting ialah memastikan bayaran balik masih mampu ditanggung bersama keperluan hidup dan simpanan.
 
-## Kira DSR anda
-
-Gunakan kalkulator DSR Bajet MY untuk memasukkan pendapatan dan komitmen bulanan anda.
-
-> **Nota:** Kalkulator ini ialah alat pendidikan dan anggaran. Ia tidak menjamin kelulusan mana-mana pinjaman atau pembiayaan.
+> **Nota:** Kalkulator DSR di bawah ialah alat pendidikan dan anggaran sahaja. Ia tidak menjamin kelulusan mana-mana pinjaman atau pembiayaan.
 
 ## Ringkasan
 

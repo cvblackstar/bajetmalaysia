@@ -82,7 +82,8 @@ async function loadArticle() {
     const articleResponse = await fetch(new URL(meta.path, document.baseURI).href, { cache: 'no-store' });
     if (!articleResponse.ok) throw new Error('Kandungan artikel tidak dapat dimuatkan.');
     const raw = await articleResponse.text();
-    const body = raw.replace(/^---[\s\S]*?---\s*/, '').trim();
+    const body = raw.replace(/^---[\s\S]*?---\s*/, '').trim()
+      .replace(/^#\s+.*(\r?\n)+/, ''); // drop leading H1: the template already renders meta.title as the page <h1>
     const calc = calculatorLinks[meta.calculator];
     setMeta(meta);
     root.innerHTML = `<div class="eyebrow">${esc(meta.category)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
