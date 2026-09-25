@@ -39,17 +39,7 @@ function calculateHousingLoan() {
     const totalInterest = Math.max(0, totalPayment - loanAmount);
 
     // Format currency helper
-    const formatRM = (num) => {
-        return new Intl.NumberFormat(
-            "ms-MY",
-            {
-                style: "currency",
-                currency: "MYR",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        ).format(num);
-    };
+    const formatRM = window.BajetMY.formatCurrency;
 
     // Update DOM elements
     document.getElementById('monthlyInstallment').textContent = formatRM(monthlyInstallment);

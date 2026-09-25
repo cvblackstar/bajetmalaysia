@@ -29,17 +29,7 @@ function calculateCarLoan() {
 }
 
 function formatRM(amount) {
-
-    return new Intl.NumberFormat(
-        "ms-MY",
-        {
-            style: "currency",
-            currency: "MYR",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }
-    ).format(amount);
-
+    return window.BajetMY.formatCurrency(amount);
 }
 
 // Jalankan pengiraan kali pertama apabila muka surat dibuka

@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const individualBalanceTotal = $("individualBalanceTotal");
 
     function formatRM(amount) {
-        return new Intl.NumberFormat("ms-MY", { style: "currency", currency: "MYR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, amount || 0));
+        return window.BajetMY.formatCurrency(Math.max(0, amount || 0));
     }
 
     function getBalanceMode() {

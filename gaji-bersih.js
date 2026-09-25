@@ -514,17 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
      */
 
     function formatRM(amount) {
-
-        return new Intl.NumberFormat(
-            "ms-MY",
-            {
-                style: "currency",
-                currency: "MYR",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        ).format(amount);
-
+        return window.BajetMY.formatCurrency(amount);
     }
 
 });
