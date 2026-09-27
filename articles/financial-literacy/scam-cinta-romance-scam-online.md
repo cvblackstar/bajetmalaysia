@@ -17,6 +17,8 @@ status: "published"
 
 Ia bermula dengan mesej mesra di Facebook, Instagram, atau aplikasi *dating*. Perbualan jadi rapat dalam masa singkat — panggilan video jarang atau tak pernah berlaku sebab "signal teruk" atau "kerja di luar negara". Beberapa minggu kemudian, satu permintaan kecil muncul: tambang penerbangan, yuran kastam untuk parcel, atau bantu selesaikan "kecemasan". Itu bukan cinta — itu **scam cinta (romance scam)**, dan ia salah satu scam kewangan paling menghancurkan dari segi emosi dan wang di Malaysia hari ini.
 
+!video[Contoh ringkas bagaimana scam cinta berlaku, dan tanda amaran utama untuk dikenali](assets/scam-cinta-video.mp4)
+
 ## Bagaimana scam cinta beroperasi
 
 Scam cinta biasanya melalui beberapa fasa yang direka dengan teliti:
