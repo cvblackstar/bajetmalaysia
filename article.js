@@ -14,6 +14,7 @@ function esc(value) {
 }
 function inline(value) {
   return esc(value)
+    .replace(/!video\[([^\]]*)\]\(([^)\s]+)\)/g, '<figure class="article-figure"><video controls playsinline preload="metadata" src="$2"></video><figcaption>$1</figcaption></figure>')
     .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<figure class="article-figure"><img src="$2" alt="$1" loading="lazy"><figcaption>$1</figcaption></figure>')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
