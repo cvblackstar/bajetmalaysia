@@ -17,6 +17,13 @@
 .category-filter button.active{background:var(--green-light);border-color:#b8e3d1;color:var(--green)}
 .article-count{margin-top:12px;color:var(--muted);font-size:.84rem}
 .article-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}.article-card{display:block;padding:1.5rem;border:1px solid rgba(0,0,0,.1);border-radius:16px;background:#fff;text-decoration:none;color:inherit}.article-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}.article-card .category{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65}.article-card h2{margin:.45rem 0 .65rem}.article-card p{opacity:.78;line-height:1.6}.article-card .read{display:inline-block;margin-top:.75rem;font-weight:700}.no-results{text-align:center;padding:30px;background:#fff;border:1px dashed var(--border);border-radius:16px;color:var(--muted)}
+.content-group{margin-bottom:2.5rem}.content-group[hidden]{display:none}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.group-head h2{font-size:1.35rem;color:var(--navy)}.group-head p{color:var(--muted);font-size:.9rem}
+.article-card .meta-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.article-card .date{font-size:.8rem;font-weight:700;color:var(--green)}
+.article-card.opinion{border-left:4px solid #FDB724}
+.article-card.opinion h2{font-style:italic}
 @media(max-width:700px){.article-search-row{grid-template-columns:1fr}.article-list{grid-template-columns:1fr}}
 </style>
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -32,7 +39,12 @@
 <header class="site-header"><div class="header-inner"><a href="index.html" class="logo">BAJET MY</a><nav class="main-nav"><a href="index.html">Utama</a><a href="index.html#kalkulator">Kalkulator</a><a href="panduan.html">Panduan</a><a href="tentang-kami.html">Tentang Kami</a></nav></div></header>
 <main><section class="section"><div class="container"><div class="section-heading"><span class="eyebrow">PANDUAN KEWANGAN</span><h1>Belajar Tentang Duit</h1><p>Panduan ringkas dan praktikal untuk membantu anda memahami kewangan peribadi di Malaysia.</p></div>
 <div class="article-tools" aria-label="Carian dan kategori artikel"><div class="article-search-row"><input id="articleSearch" type="search" placeholder="Cari artikel, contoh: KWSP, hutang, simpanan..." autocomplete="off" aria-label="Cari artikel"><select id="categorySelect" aria-label="Pilih kategori"><option value="all">Semua kategori</option></select><button id="clearSearch" type="button">Padam</button></div><div id="categoryFilter" class="category-filter" aria-label="Kategori artikel"></div><div id="articleCount" class="article-count"></div></div>
-<div id="articles" class="article-list" aria-live="polite"></div>
+<div id="articles" aria-live="polite">
+<section class="content-group" id="groupNews" hidden><div class="group-head"><h2>Berita Terkini</h2><p>Perkembangan terbaru yang memberi kesan kepada duit korang.</p></div><div class="article-list" id="listNews"></div></section>
+<section class="content-group" id="groupOpinion" hidden><div class="group-head"><h2>Sudut Pandang</h2><p>Persoalan untuk difikirkan tentang duit dan cara kita hidup.</p></div><div class="article-list" id="listOpinion"></div></section>
+<section class="content-group" id="groupGuides" hidden><div class="group-head"><h2>Panduan</h2><p>Asas kewangan peribadi, langkah demi langkah.</p></div><div class="article-list" id="listGuides"></div></section>
+<div id="noResults" class="no-results" hidden>Tiada artikel ditemui. Cuba kata kunci lain atau pilih kategori yang berbeza.</div>
+</div>
 </div></section></main>
 <footer class="site-footer"><div class="footer-inner"><p class="footer-brand">BAJET MY</p><p>Faham Duit. Urus Duit. Rancang Hidup.</p><p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p><p>© 2026 Bajet MY</p></div></footer>
 <script>
@@ -51,12 +63,28 @@ function articleMatches(article,query){
   const haystack=[article.title,article.description,article.category,...(article.tags||[])].join(' ').toLowerCase();
   return haystack.includes(query.toLowerCase());
 }
+const groups=[
+  {type:'berita',group:'groupNews',list:'listNews',read:'Baca berita',byDate:true},
+  {type:'sudut-pandang',group:'groupOpinion',list:'listOpinion',read:'Baca & fikirkan',byDate:true,cls:'opinion'},
+  {type:'panduan',group:'groupGuides',list:'listGuides',read:'Baca panduan',byDate:false}
+];
+const typeOf=a=>a.type==='berita'||a.type==='sudut-pandang'?a.type:'panduan';
+function formatDate(iso){const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'});}
+function card(a,g){
+  const date=g.byDate?`<span class="date">${escapeHtml(formatDate(a.published))}</span>`:'';
+  return `<a class="article-card${g.cls?' '+g.cls:''}" href="article.html?v=20260923&slug=${encodeURIComponent(a.slug)}"><div class="meta-row">${date}<span class="category">${escapeHtml(a.category)}</span></div><h2>${escapeHtml(a.title)}</h2><p>${escapeHtml(a.description)}</p><span class="read">${g.read} →</span></a>`;
+}
 function renderArticles(){
   const query=searchInput.value.trim();
   const filtered=articles.filter(a=>(activeCategory==='all'||a.category===activeCategory)&&articleMatches(a,query));
   articleCount.textContent=`${filtered.length} artikel${filtered.length===1?'':' tersedia'}`;
-  if(!filtered.length){articleContainer.innerHTML='<div class="no-results">Tiada artikel ditemui. Cuba kata kunci lain atau pilih kategori yang berbeza.</div>';return;}
-  articleContainer.innerHTML=filtered.map(a=>`<a class="article-card" href="article.html?v=20260923&slug=${encodeURIComponent(a.slug)}"><div class="category">${escapeHtml(a.category)}</div><h2>${escapeHtml(a.title)}</h2><p>${escapeHtml(a.description)}</p><span class="read">Baca panduan →</span></a>`).join('');
+  document.getElementById('noResults').hidden=filtered.length>0;
+  groups.forEach(g=>{
+    let items=filtered.filter(a=>typeOf(a)===g.type);
+    if(g.byDate)items=[...items].sort((x,y)=>String(y.published).localeCompare(String(x.published)));
+    document.getElementById(g.group).hidden=!items.length;
+    document.getElementById(g.list).innerHTML=items.map(a=>card(a,g)).join('');
+  });
 }
 function setCategory(category){activeCategory=category;categorySelect.value=category;[...categoryFilter.querySelectorAll('button')].forEach(b=>b.classList.toggle('active',b.dataset.category===category));renderArticles();}
 function renderCategories(){
