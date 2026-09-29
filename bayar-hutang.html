@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Bayar Hutang: Bila Saya Bebas Hutang? | Bajet MY</title>
+    <meta name="description" content="Kira berapa lama untuk selesaikan hutang kad kredit atau pinjaman, jumlah faedah yang dibayar, dan berapa anda jimat dengan bayaran tambahan setiap bulan.">
+    <link rel="stylesheet" href="style.css">
+<style>
+.chart-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:.75rem;background:rgba(0,0,0,.015);margin-top:1rem}#debtChart{width:100%;min-width:680px;height:auto;display:block}
+.chart-legend{display:flex;gap:1.5rem;flex-wrap:wrap;margin:.75rem 0 0;font-size:.85rem;opacity:.85}
+.chart-legend span{display:inline-flex;align-items:center;gap:.4rem}
+.chart-legend span[hidden]{display:none}
+.chart-legend .swatch{width:14px;height:3px;border-radius:2px;display:inline-block}
+.debt-compare{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1rem}
+.debt-box{border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:1rem}
+.debt-box h3{font-size:.9rem;margin:0 0 .6rem}
+.debt-box .result-row{padding:.35rem 0}
+.debt-box.highlight{border-color:rgba(15,139,95,.4);background:rgba(15,139,95,.06)}
+@media(max-width:600px){.debt-compare{grid-template-columns:1fr}}
+</style>
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Bila Saya Bebas Hutang?</h1>
+        <p>Kira berapa lama untuk selesaikan hutang, berapa faedah yang anda bayar, dan berapa banyak anda jimat dengan bayaran tambahan.</p>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Hutang</h2>
+
+            <div class="form-group">
+                <label for="debtBalance">Baki hutang semasa</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="debtBalance" value="10000" min="0" step="100">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="interestRate">Kadar faedah tahunan (%)</label>
+                <input type="number" id="interestRate" value="18" min="0" max="60" step="0.1">
+                <small>Kad kredit di Malaysia biasanya 15% hingga 18% setahun. Semak penyata anda untuk kadar sebenar.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="monthlyPayment">Bayaran bulanan semasa</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="monthlyPayment" value="500" min="0" step="10">
+                </div>
+                <small>Bayaran minimum kad kredit biasanya 5% daripada baki atau RM50, yang mana lebih tinggi. Bayar minimum sahaja boleh ambil masa bertahun-tahun.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="extraPayment">Bayaran tambahan sebulan (pilihan)</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="extraPayment" value="0" min="0" step="10">
+                </div>
+                <small>Berapa lebih yang anda mampu bayar setiap bulan? Kami bandingkan kesannya.</small>
+            </div>
+
+            <button type="button" id="calculateDebtButton" class="button primary calculate-button">Kira Tempoh Bebas Hutang</button>
+            <div id="debtError" class="calc-form-error" hidden></div>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Keputusan</h2>
+            <div id="debtResults">
+                <div class="take-home">
+                    <span>Bebas hutang dalam</span>
+                    <strong id="freeIn">-</strong>
+                </div>
+                <p style="margin-top:.4rem;font-size:.9rem;opacity:.8;" id="freeDate"></p>
+
+                <div class="debt-compare">
+                    <div class="debt-box">
+                        <h3>Bayaran semasa</h3>
+                        <div class="result-row"><span>Tempoh</span><strong id="baseDuration">-</strong></div>
+                        <div class="result-row"><span>Jumlah faedah</span><strong id="baseInterest">-</strong></div>
+                        <div class="result-row"><span>Jumlah dibayar</span><strong id="baseTotal">-</strong></div>
+                    </div>
+                    <div class="debt-box highlight" id="extraBlock" hidden>
+                        <h3 id="extraLabel">Dengan bayaran tambahan</h3>
+                        <div class="result-row"><span>Tempoh</span><strong id="extraDuration">-</strong></div>
+                        <div class="result-row"><span>Jumlah faedah</span><strong id="extraInterest">-</strong></div>
+                        <div class="result-row"><span>Jumlah dibayar</span><strong id="extraTotal">-</strong></div>
+                    </div>
+                </div>
+
+                <div class="pcb-notice" id="savingNote"></div>
+
+                <div class="chart-wrap">
+                    <svg id="debtChart" viewBox="0 0 900 360" role="img" aria-label="Graf baki hutang dari semasa ke semasa"></svg>
+                </div>
+                <div class="chart-legend">
+                    <span><i class="swatch" style="background:#98a2b3"></i>Bayaran semasa</span>
+                    <span id="legendExtra" hidden><i class="swatch" style="background:#0f8b5f"></i>Dengan bayaran tambahan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">STRATEGI</span>
+        <h2>Cara lebih cepat bebas hutang</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">🔥</div><div><h3>Bayar lebih daripada minimum</h3><p>Setiap ringgit tambahan terus mengurangkan pokok hutang, jadi faedah bulan seterusnya lebih kecil. Kesannya bertambah dari bulan ke bulan.</p></div></article>
+        <article class="topic"><div class="topic-icon">📉</div><div><h3>Selesaikan kadar tertinggi dahulu</h3><p>Jika ada beberapa hutang, bayar minimum pada semua dan salurkan duit lebihan kepada hutang dengan kadar faedah tertinggi (biasanya kad kredit). Ini kaedah paling jimat faedah.</p></div></article>
+        <article class="topic"><div class="topic-icon">🤝</div><div><h3>Dapatkan bantuan percuma</h3><p>Jika bayaran bulanan terlalu berat, AKPK (Agensi Kaunseling dan Pengurusan Kredit) menawarkan kaunseling dan Program Pengurusan Kredit secara percuma.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Sesuai untuk hutang berasaskan baki berkurangan</h2>
+        <p>Kalkulator ini mengira faedah setiap bulan atas baki yang tinggal, seperti kad kredit, pinjaman perumahan dan pembiayaan berasaskan baki berkurangan. Ia tidak tepat untuk pinjaman kadar rata seperti pinjaman kereta (sewa beli) dan kebanyakan pinjaman peribadi, kerana faedahnya ditetapkan di awal dan rebat penyelesaian awal dikira dengan cara berbeza. Kiraan mengandaikan tiada perbelanjaan baharu pada kad kredit dan kadar faedah tidak berubah.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+</footer>
+<script src="bayar-hutang.js"></script>
+</body>
+</html>

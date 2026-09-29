@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Kos Beli Rumah: Duti Setem &amp; Yuran Guaman | Bajet MY</title>
+    <meta name="description" content="Kira jumlah tunai yang diperlukan untuk beli rumah di Malaysia: deposit, duti setem MOT dan pinjaman, yuran guaman SPA dan pinjaman, termasuk pengecualian pembeli rumah pertama.">
+    <link rel="stylesheet" href="style.css">
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Kos Beli Rumah</h1>
+        <p>Berapa tunai sebenar yang perlu disediakan sebelum dapat kunci? Deposit, duti setem dan yuran guaman — semua dalam satu kiraan.</p>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Pembelian</h2>
+
+            <div class="form-group">
+                <label for="propertyPrice">Harga rumah</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="propertyPrice" value="450000" min="0" step="1000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="loanMargin">Margin pinjaman (%)</label>
+                <input type="number" id="loanMargin" value="90" min="0" max="100" step="5">
+                <small>Kebanyakan bank membiayai sehingga 90% untuk rumah pertama dan kedua. Letak 0 jika beli tunai.</small>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="firstHome">
+                    <span>Ini rumah pertama saya (warganegara, tidak pernah memiliki rumah kediaman)</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="otherCosts">Kos lain (disbursement)</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="otherCosts" value="2000" min="0" step="100">
+                </div>
+                <small>Anggaran caj carian, pendaftaran, cetakan dan penghantaran oleh peguam. Biasanya sekitar RM1,000 hingga RM3,000. Tanya peguam anda untuk angka tepat.</small>
+            </div>
+
+            <button type="button" id="calculateHouseCostButton" class="button primary calculate-button">Kira Kos Beli Rumah</button>
+            <div id="houseCostError" class="calc-form-error" hidden></div>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Tunai Yang Perlu Disediakan</h2>
+
+            <div class="take-home">
+                <span>Jumlah tunai awal</span>
+                <strong id="totalCash">RM 0.00</strong>
+            </div>
+
+            <div class="result-list">
+                <div class="result-row"><span>Bayaran muka (deposit)</span><strong id="resDownPayment">RM 0.00</strong></div>
+                <div class="result-row"><span>Duti setem pindah milik (MOT)</span><strong id="resMotDuty">RM 0.00</strong></div>
+                <div class="result-row"><span>Duti setem perjanjian pinjaman</span><strong id="resLoanDuty">RM 0.00</strong></div>
+                <div class="result-row"><span>Yuran guaman SPA &amp; pindah milik (+8% SST)</span><strong id="resSpaFee">RM 0.00</strong></div>
+                <div class="result-row"><span>Yuran guaman perjanjian pinjaman (+8% SST)</span><strong id="resLoanFee">RM 0.00</strong></div>
+                <div class="result-row"><span>Kos lain (disbursement)</span><strong id="resOther">RM 0.00</strong></div>
+                <div class="result-row total-row"><span>Jumlah kos selain deposit</span><strong id="resFees">RM 0.00</strong></div>
+            </div>
+            <p style="margin-top:.4rem;font-size:.85rem;opacity:.75;" id="resFeesPct"></p>
+            <p style="margin-top:.4rem;font-size:.85rem;opacity:.75;">Jumlah pinjaman: <strong id="resLoan">RM 0.00</strong></p>
+
+            <div class="pcb-notice" id="exemptNote"></div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">CARA KIRAAN</span>
+        <h2>Dari mana angka ini datang?</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">🧾</div><div><h3>Duti setem MOT</h3><p>Dikenakan atas harga rumah secara berperingkat: 1% bagi RM100,000 pertama, 2% bagi RM100,001 hingga RM500,000, 3% bagi RM500,001 hingga RM1 juta dan 4% bagi selebihnya.</p></div></article>
+        <article class="topic"><div class="topic-icon">🏦</div><div><h3>Duti setem pinjaman</h3><p>0.5% daripada jumlah pinjaman, dibayar atas perjanjian pinjaman dengan bank.</p></div></article>
+        <article class="topic"><div class="topic-icon">⚖️</div><div><h3>Yuran guaman</h3><p>Mengikut Solicitors' Remuneration Order 2023: 1.25% bagi RM500,000 pertama (minimum RM500) dan 1% bagi selebihnya. Dikira berasingan untuk SPA (atas harga rumah) dan perjanjian pinjaman (atas jumlah pinjaman), ditambah cukai perkhidmatan 8%.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Anggaran untuk pembeli warganegara Malaysia</h2>
+        <p>Kalkulator ini untuk warganegara dan pemastautin tetap. Pembeli asing dikenakan kadar duti setem rata yang lebih tinggi. Yuran guaman adalah kadar skala Semenanjung Malaysia; Sabah dan Sarawak menggunakan skala berbeza. Rumah baru daripada pemaju kadangkala menawarkan yuran guaman percuma atau diskaun, dan kos sebenar bergantung kepada sebut harga peguam anda.</p>
+        <p style="margin-top:0.8rem;">Kos lain yang tidak dimasukkan: yuran penilaian bank, insurans MRTA/MLTA, yuran utiliti dan penyelenggaraan awal.</p>
+        <p style="margin-top:0.8rem;">Sumber: Akta Setem 1949 (LHDN), Bajet 2026 (pengecualian pembeli rumah pertama sehingga 31 Disember 2027), Solicitors' Remuneration Order 2023.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+</footer>
+<script src="kos-beli-rumah.js"></script>
+</body>
+</html>

@@ -314,6 +314,10 @@ a {
     gap: 24px;
 }
 
+.calculator-layout > * {
+    min-width: 0;
+}
+
 .calculator-form-card,
 .calculator-result-card {
     background: var(--white);
