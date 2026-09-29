@@ -1,5 +1,31 @@
 [
   {
+    "title": "Kuota BUDI95 Kembali 300 Liter Mulai 1 September 2026",
+    "slug": "budi95-kuota-300-liter-september-2026",
+    "path": "articles/berita/budi95-kuota-300-liter-september-2026.md",
+    "category": "Kos Sara Hidup",
+    "type": "berita",
+    "tags": ["BUDI95", "Subsidi", "RON95", "Diesel", "Minyak"],
+    "published": "2026-09-29",
+    "updated": "2026-09-29",
+    "description": "Kuota bulanan BUDI95 dinaikkan semula daripada 200 kepada 300 liter mulai 1 September 2026, dan kuota BUDI Diesel turut bertambah. Ini maksudnya untuk bajet minyak korang.",
+    "calculator": "fuel",
+    "status": "published"
+  },
+  {
+    "title": "Gaji Naik, Tapi Kenapa Rasa Makin Sempit?",
+    "slug": "gaji-naik-tapi-rasa-makin-sempit",
+    "path": "articles/sudut-pandang/gaji-naik-tapi-rasa-makin-sempit.md",
+    "category": "Bajet & Simpanan",
+    "type": "sudut-pandang",
+    "tags": ["Gaya Hidup", "Gaji", "Simpanan", "Lifestyle Inflation"],
+    "published": "2026-09-29",
+    "updated": "2026-09-29",
+    "description": "Gaji dah naik beberapa kali, tapi hujung bulan tetap sama sempit. Mungkin masalahnya bukan berapa banyak kita dapat, tapi ke mana kenaikan itu pergi.",
+    "calculator": "monthly-budget",
+    "status": "published"
+  },
+  {
     "title": "Ringgit Lemah: Apa Kesannya Pada Poket Kita?",
     "slug": "ringgit-lemah-kesan-pada-poket",
     "path": "articles/economy/ringgit-lemah-kesan-pada-poket.md",
