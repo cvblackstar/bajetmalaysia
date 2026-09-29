@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator B40, M40, T20, T10, T5 Mengikut Negeri | Bajet MY</title>
+    <meta name="description" content="Semak sama ada pendapatan isi rumah anda B40, M40, T20, T10 atau T5 mengikut negeri dan peringkat Malaysia, berdasarkan data DOSM 2024.">
+    <link rel="stylesheet" href="style.css">
+<style>
+.ig-panel{border:1px solid rgba(0,0,0,.1);border-radius:16px;padding:1.1rem 1.2rem;margin-top:1rem;background:#fff}
+.ig-panel h3{margin:0 0 .6rem;font-size:1rem}
+.ig-head{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.ig-badge{display:inline-block;min-width:76px;text-align:center;padding:.55rem 1rem;border-radius:12px;font-size:1.6rem;font-weight:800;letter-spacing:.02em}
+.g-b40{background:#fdeadb;color:#9a3412}
+.g-m40{background:#dbeafe;color:#1e40af}
+.g-t20{background:#d5f0e3;color:#0b6b49}
+.g-t10{background:#0f8b5f;color:#fff}
+.g-t5{background:#00224B;color:#FDB724}
+.ig-desc{flex:1;min-width:180px;font-size:.92rem;opacity:.85}
+.ig-rows{margin-top:.9rem;display:grid;gap:.35rem}
+.ig-row{display:flex;justify-content:space-between;gap:1rem;padding:.45rem .7rem;border-radius:9px;font-size:.9rem;border:1px solid transparent}
+.ig-row span:first-child{font-weight:700}
+.ig-row.ig-active{background:rgba(15,139,95,.1);border-color:rgba(15,139,95,.35)}
+.ig-next{margin-top:.8rem;font-size:.9rem;font-weight:600}
+.ig-compare{margin-top:1rem}
+.ig-table-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.1);border-radius:14px}
+#thresholdTable{width:100%;border-collapse:collapse;min-width:640px;font-size:.9rem}
+#thresholdTable th,#thresholdTable td{padding:.65rem .8rem;text-align:left;border-bottom:1px solid rgba(0,0,0,.08);white-space:nowrap}
+#thresholdTable thead th{background:rgba(0,0,0,.035);font-weight:700}
+#thresholdTable tbody tr.ig-active{background:rgba(15,139,95,.12);font-weight:700}
+#thresholdTable tbody tr:last-child td{border-bottom:0}
+</style>
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Kumpulan Pendapatan: B40, M40, T20, T10, T5</h1>
+        <p>Masukkan pendapatan isi rumah bulanan dan negeri anda. Kami tunjukkan kumpulan anda di negeri itu dan di peringkat Malaysia.</p>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Anda</h2>
+
+            <div class="form-group">
+                <label for="income">Pendapatan isi rumah kasar bulanan</label>
+                <div class="input-wrapper">
+                    <span>RM</span>
+                    <input type="number" id="income" value="8000" min="0" step="100">
+                </div>
+                <small>Pengelasan DOSM berdasarkan pendapatan <strong>isi rumah</strong>, bukan individu. Jika pasangan atau ahli lain juga bekerja, masukkan jumlah gaji kasar mereka bersama.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="state">Negeri / Wilayah</label>
+                <select id="state">
+                    <option value="Johor">Johor</option>
+                    <option value="Kedah">Kedah</option>
+                    <option value="Kelantan">Kelantan</option>
+                    <option value="Melaka">Melaka</option>
+                    <option value="Negeri Sembilan">Negeri Sembilan</option>
+                    <option value="Pahang">Pahang</option>
+                    <option value="Pulau Pinang">Pulau Pinang</option>
+                    <option value="Perak">Perak</option>
+                    <option value="Perlis">Perlis</option>
+                    <option value="Selangor" selected>Selangor</option>
+                    <option value="Terengganu">Terengganu</option>
+                    <option value="Sabah">Sabah</option>
+                    <option value="Sarawak">Sarawak</option>
+                    <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+                    <option value="W.P. Labuan">W.P. Labuan</option>
+                    <option value="W.P. Putrajaya">W.P. Putrajaya</option>
+                </select>
+                <small>Had setiap negeri berbeza kerana dikira daripada taburan pendapatan di negeri itu.</small>
+            </div>
+
+            <button type="button" id="calculateIncomeGroupButton" class="button primary calculate-button">Kira Kumpulan Pendapatan</button>
+            <div id="incomeGroupError" class="calc-form-error" hidden></div>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Kumpulan Anda</h2>
+            <p>Pendapatan isi rumah <strong id="incomeShown">RM0</strong> sebulan</p>
+
+            <div class="ig-panel">
+                <h3>Di <span id="stateName">Selangor</span></h3>
+                <div class="ig-head">
+                    <span id="stBadge" class="ig-badge g-m40">M40</span>
+                    <span id="stDesc" class="ig-desc"></span>
+                </div>
+                <div class="ig-rows">
+                    <div class="ig-row" id="stRowB40"><span>B40</span><span id="stRangeB40"></span></div>
+                    <div class="ig-row" id="stRowM40"><span>M40</span><span id="stRangeM40"></span></div>
+                    <div class="ig-row" id="stRowT20"><span>T20</span><span id="stRangeT20"></span></div>
+                    <div class="ig-row" id="stRowT10"><span>T10 (anggaran)</span><span id="stRangeT10"></span></div>
+                    <div class="ig-row" id="stRowT5"><span>T5 (anggaran)</span><span id="stRangeT5"></span></div>
+                </div>
+                <p class="ig-next" id="stNext"></p>
+            </div>
+
+            <div class="ig-panel">
+                <h3>Di peringkat Malaysia</h3>
+                <div class="ig-head">
+                    <span id="natBadge" class="ig-badge g-m40">M40</span>
+                    <span id="natDesc" class="ig-desc"></span>
+                </div>
+                <div class="ig-rows">
+                    <div class="ig-row" id="natRowB40"><span>B40</span><span id="natRangeB40"></span></div>
+                    <div class="ig-row" id="natRowM40"><span>M40</span><span id="natRangeM40"></span></div>
+                    <div class="ig-row" id="natRowT20"><span>T20</span><span id="natRangeT20"></span></div>
+                    <div class="ig-row" id="natRowT10"><span>T10 (anggaran)</span><span id="natRangeT10"></span></div>
+                    <div class="ig-row" id="natRowT5"><span>T5 (anggaran)</span><span id="natRangeT5"></span></div>
+                </div>
+                <p class="ig-next" id="natNext"></p>
+            </div>
+
+            <div class="pcb-notice ig-compare">
+                <strong>Negeri berbanding Malaysia</strong>
+                <p id="compareNote"></p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">RUJUKAN</span>
+        <h2>Had pendapatan isi rumah bulanan mengikut negeri, 2024</h2>
+        <p>Pendapatan isi rumah kasar bulanan. B40, M40 dan T20 ialah angka rasmi DOSM. T10 dan T5 ialah anggaran Bajet MY.</p>
+    </div>
+    <div class="ig-table-wrap">
+        <table id="thresholdTable">
+            <thead><tr><th>Negeri</th><th>B40</th><th>M40</th><th>T20</th><th>T10 (anggaran)</th><th>T5 (anggaran)</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">CARA MEMBACA</span>
+        <h2>Apa maksud B40, M40, T20, T10 dan T5?</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">📊</div><div><h3>B40, M40, T20</h3><p>DOSM menyusun semua isi rumah daripada pendapatan terendah ke tertinggi, kemudian membahagikannya kepada 10 kumpulan sama besar (desil). B40 ialah desil 1 hingga 4, M40 desil 5 hingga 8 dan T20 desil 9 hingga 10.</p></div></article>
+        <article class="topic"><div class="topic-icon">📍</div><div><h3>Setiap negeri berbeza</h3><p>DOSM menerbitkan had B40, M40 dan T20 bagi setiap negeri. Isi rumah berpendapatan RM9,000 ialah T20 di Kelantan, M40 di Malaysia dan B40 di Selangor. Kedudukan itu relatif kepada isi rumah lain di negeri yang sama.</p></div></article>
+        <article class="topic"><div class="topic-icon">🎯</div><div><h3>T10 dan T5 ialah anggaran</h3><p>DOSM tidak menerbitkan had T10 (10% teratas) dan T5 (5% teratas). Kami menganggarkannya daripada taburan isi rumah mengikut kelas pendapatan DOSM 2024. Kaedah yang sama menghasilkan semula had B40 dan T20 rasmi dalam lingkungan 3%, tetapi angka T10 dan T5 kurang tepat, terutama T5.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Kumpulan pendapatan bukan kelayakan bantuan</h2>
+        <p>Kalkulator ini menunjukkan kedudukan pendapatan isi rumah anda berbanding isi rumah lain di negeri dan negara. Ia tidak menentukan kelayakan untuk STR, SARA, BUDI95 atau skim kerajaan lain yang menggunakan kriteria tersendiri. Data hanya merangkumi isi rumah warganegara Malaysia dan menggunakan pendapatan kasar sebelum potongan.</p>
+        <p style="margin-top:0.8rem;">Sumber: Jabatan Perangkaan Malaysia (DOSM), <strong>Laporan Survei Pendapatan Isi Rumah 2024</strong>, Jadual 5 dan Jadual 2.14.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+</footer>
+<script src="kumpulan-pendapatan.js"></script>
+</body>
+</html>
