@@ -6,7 +6,8 @@ const calculatorLinks = {
   'emergency-fund': { href: 'emergency.html', label: 'Kira Dana Kecemasan Anda' },
   'monthly-budget': { href: 'budget.html', label: 'Kira Bajet Bulanan Anda' },
   kwsp: { href: 'kwsp.html', label: 'Kira Simpanan KWSP Anda' },
-  pelaburan: { href: 'pelaburan.html', label: 'Kira Pertumbuhan Pelaburan Anda' }
+  pelaburan: { href: 'pelaburan.html', label: 'Kira Pertumbuhan Pelaburan Anda' },
+  'kumpulan-pendapatan': { href: 'kumpulan-pendapatan.html', label: 'Semak Kumpulan Pendapatan Anda' }
 };
 
 function esc(value) {
