@@ -2,6 +2,7 @@
 title: "Ringgit Lemah: Apa Kesannya Pada Poket Kita?"
 slug: "ringgit-lemah-kesan-pada-poket"
 category: "Ekonomi & OPR"
+type: "berita"
 tags: ["Ringgit", "Kadar Pertukaran", "Inflasi", "Kos Sara Hidup"]
 published: "2026-09-29"
 updated: "2026-09-29"
