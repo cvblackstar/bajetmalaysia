@@ -1,5 +1,18 @@
 [
   {
+    "title": "Ekonomi Kukuh, Tapi Kenapa Kita Tak Rasa?",
+    "slug": "ekonomi-kukuh-kenapa-tak-rasa",
+    "path": "articles/sudut-pandang/ekonomi-kukuh-kenapa-tak-rasa.md",
+    "category": "Ekonomi & OPR",
+    "type": "sudut-pandang",
+    "tags": ["Ekonomi", "Inflasi", "Kos Sara Hidup", "Pengangguran"],
+    "published": "2026-09-30",
+    "updated": "2026-09-30",
+    "description": "Ekonomi berkembang 5.4%, pengangguran paling rendah dalam sedekad, inflasi cuma 1.6%. Tapi ramai masih rasa sempit. Ini kenapa angka negara dan poket kita selalu tak sama.",
+    "calculator": "monthly-budget",
+    "status": "published"
+  },
+  {
     "title": "Berapa Sebenarnya Kos Beli Rumah? Bukan Deposit 10% Je",
     "slug": "kos-sebenar-beli-rumah",
     "path": "articles/property/kos-sebenar-beli-rumah.md",
