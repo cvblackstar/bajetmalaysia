@@ -8,7 +8,8 @@ const calculatorLinks = {
   kwsp: { href: 'kwsp.html', label: 'Kira Simpanan KWSP Anda' },
   pelaburan: { href: 'pelaburan.html', label: 'Kira Pertumbuhan Pelaburan Anda' },
   'kumpulan-pendapatan': { href: 'kumpulan-pendapatan.html', label: 'Semak Kumpulan Pendapatan Anda' },
-  fuel: { href: 'fuel.html', label: 'Kira Kos Minyak Anda' }
+  fuel: { href: 'fuel.html', label: 'Kira Kos Minyak Anda' },
+  'kos-beli-rumah': { href: 'kos-beli-rumah.html', label: 'Kira Kos Beli Rumah Anda' }
 };
 const typeLabels = { berita: 'Berita', 'sudut-pandang': 'Sudut Pandang' };
 
