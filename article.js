@@ -9,7 +9,8 @@ const calculatorLinks = {
   pelaburan: { href: 'pelaburan.html', label: 'Kira Pertumbuhan Pelaburan Anda' },
   'kumpulan-pendapatan': { href: 'kumpulan-pendapatan.html', label: 'Semak Kumpulan Pendapatan Anda' },
   fuel: { href: 'fuel.html', label: 'Kira Kos Minyak Anda' },
-  'kos-beli-rumah': { href: 'kos-beli-rumah.html', label: 'Kira Kos Beli Rumah Anda' }
+  'kos-beli-rumah': { href: 'kos-beli-rumah.html', label: 'Kira Kos Beli Rumah Anda' },
+  'bayar-hutang': { href: 'bayar-hutang.html', label: 'Kira Pelan Bayar Hutang Anda' }
 };
 const typeLabels = { berita: 'Berita', 'sudut-pandang': 'Sudut Pandang' };
 

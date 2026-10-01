@@ -12,10 +12,10 @@
 - Cite official sources (DOSM, BNM, SC, KWSP, LHDN) where figures are used.
 
 ## Threads writing style (the "phone price" thread is the reference)
-- Open with a curious, relatable question, not a headline ("Harga phone makin mahal, tapi kenapa queue tetap panjang?").
+- Open with a curious, relatable question, not a headline ("Harga phone makin mahal, tapi kenapa queue tetap panjang? Ini adalah bebenang.").
 - One idea per post, short and conversational, like talking to a friend. No lists of facts, no infodump.
 - Use real, sourced numbers (prices, dates, percentages) but keep them light, and say who they come from when it matters.
 - Be honest and balanced: if the popular take is only half true, say so instead of just agreeing with it.
 - Include one small calculation or concrete example the reader can picture (e.g. RM5,499 over 24 months is about RM229 a month).
 - Finish with a reflective question or a genuine engagement prompt ("Korang upgrade phone setiap berapa tahun?"), not a sales line.
-- Casual one-off threads: no links unless asked. Keep each post under 500 characters. At most one emoji (the thread emoji on the opener).
+- Casual one-off threads: no links unless asked. Keep each post under 500 characters. No emoji. Do not use the thread emoji; end the opener with the words "Ini adalah bebenang." instead, so it sounds natural.
