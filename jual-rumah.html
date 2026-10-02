@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Untung Jual Rumah Subsale: RPGT &amp; ROI | Bajet MY</title>
+    <meta name="description" content="Kira sama ada jual rumah subsale betul-betul untung selepas baki pinjaman, faedah, komisen ejen, yuran guaman, RPGT dan kos pegangan. Dapatkan harga jual pulang modal.">
+    <link rel="stylesheet" href="style.css">
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+<style>
+.form-section-title{font-size:.95rem;margin:1.6rem 0 .8rem;padding-top:1.2rem;border-top:1px solid rgba(0,0,0,.08)}
+.form-section-title:first-of-type{margin-top:.4rem;padding-top:0;border-top:0}
+.take-home.loss{background:#fdecec}
+.take-home.loss strong{color:#c0392b}
+.sale-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:1rem 0}
+.sale-stats div{border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:.7rem;text-align:center}
+.sale-stats span{display:block;font-size:.75rem;opacity:.7}
+.sale-stats strong{font-size:1.05rem}
+.result-subhead{font-size:.9rem;margin:1.2rem 0 .3rem}
+.result-note{margin-top:.4rem;font-size:.85rem;opacity:.75}
+@media(max-width:600px){.sale-stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Untung Jual Rumah</h1>
+        <p>Harga naik RM100,000 tak semestinya untung RM100,000. Kira berapa sebenarnya masuk poket selepas baki pinjaman, faedah, komisen ejen, yuran guaman dan RPGT.</p>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Rumah</h2>
+
+            <h3 class="form-section-title">1. Semasa beli</h3>
+            <div class="form-group">
+                <label for="buyPrice">Harga beli</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="buyPrice" value="450000" min="0" step="1000"></div>
+            </div>
+            <div class="form-group">
+                <label for="buyDate">Bulan beli (tarikh SPA)</label>
+                <input type="month" id="buyDate" value="2022-01">
+            </div>
+            <div class="form-group">
+                <label for="loanAmount">Jumlah pinjaman asal</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="loanAmount" value="405000" min="0" step="1000"></div>
+                <small>Letak 0 jika beli tunai.</small>
+            </div>
+            <div class="form-group">
+                <label for="loanRate">Kadar faedah pinjaman (% setahun)</label>
+                <input type="number" id="loanRate" value="4" min="0" max="20" step="0.05">
+            </div>
+            <div class="form-group">
+                <label for="loanTenure">Tempoh pinjaman (tahun)</label>
+                <input type="number" id="loanTenure" value="35" min="1" max="40" step="1">
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="firstHome">
+                    <span>Saya dapat pengecualian duti setem pembeli rumah pertama semasa beli</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="buyOther">Kos lain semasa beli (disbursement)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="buyOther" value="2000" min="0" step="100"></div>
+                <small>Duti setem dan yuran guaman beli dikira automatik. Masukkan di sini caj carian, pendaftaran dan lain-lain.</small>
+            </div>
+
+            <h3 class="form-section-title">2. Sepanjang memiliki</h3>
+            <div class="form-group">
+                <label for="renovation">Kos renovasi / pengubahsuaian</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="renovation" value="20000" min="0" step="1000"></div>
+            </div>
+            <div class="form-group">
+                <label for="monthlyCost">Yuran penyelenggaraan &amp; sinking fund (sebulan)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="monthlyCost" value="250" min="0" step="10"></div>
+                <small>Letak 0 untuk rumah landed tanpa yuran.</small>
+            </div>
+            <div class="form-group">
+                <label for="yearlyCost">Cukai tanah, cukai taksiran &amp; insurans (setahun)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="yearlyCost" value="1200" min="0" step="50"></div>
+            </div>
+            <div class="form-group">
+                <label for="monthlyRent">Sewa diterima (sebulan)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="monthlyRent" value="0" min="0" step="50"></div>
+                <small>Jika anda duduk sendiri, boleh masukkan anggaran sewa rumah serupa sebagai sewa yang dijimatkan.</small>
+            </div>
+
+            <h3 class="form-section-title">3. Semasa jual</h3>
+            <div class="form-group">
+                <label for="sellPrice">Anggaran harga jual</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="sellPrice" value="550000" min="0" step="1000"></div>
+                <small>Semak harga transaksi sebenar rumah serupa di kawasan anda, bukan harga iklan.</small>
+            </div>
+            <div class="form-group">
+                <label for="sellDate">Bulan jual</label>
+                <input type="month" id="sellDate" value="2026-10">
+            </div>
+            <div class="form-group">
+                <label for="agentFee">Komisen ejen (%)</label>
+                <input type="number" id="agentFee" value="2" min="0" max="3" step="0.25">
+                <small>Maksimum 3% mengikut Lembaga Penilai, Pentaksir, Ejen Harta Tanah dan Pengurus Harta, ditambah 8% SST. Letak 0 jika jual sendiri.</small>
+            </div>
+            <div class="form-group">
+                <label for="penalty">Penalti selesai awal pinjaman (%)</label>
+                <input type="number" id="penalty" value="0" min="0" max="5" step="0.5">
+                <small>Biasanya 2% hingga 3% daripada baki pinjaman jika masih dalam tempoh lock-in (selalunya 3 hingga 5 tahun pertama). Semak surat tawaran pinjaman anda.</small>
+            </div>
+            <div class="form-group">
+                <label for="sellOther">Kos lain semasa jual</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="sellOther" value="1500" min="0" step="100"></div>
+                <small>Disbursement peguam, kos pelepasan gadaian dan lain-lain.</small>
+            </div>
+            <div class="form-group">
+                <label for="balanceOverride">Baki pinjaman sebenar (pilihan)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="balanceOverride" value="" min="0" step="100" placeholder="Kira automatik"></div>
+                <small>Isi jika anda tahu baki daripada penyata bank. Jika kosong, baki dianggarkan daripada jadual bayaran pinjaman.</small>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="lifetimeExempt">
+                    <span>Guna pengecualian RPGT sekali seumur hidup untuk rumah kediaman ini</span>
+                </label>
+            </div>
+
+            <button type="button" id="calculateSaleButton" class="button primary calculate-button">Kira Untung Jual Rumah</button>
+            <div id="saleError" class="calc-form-error" hidden></div>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Untung Atau Rugi?</h2>
+
+            <div class="take-home" id="verdict">
+                <span id="verdictLabel">Untung bersih jika jual</span>
+                <strong id="netResult">RM 0.00</strong>
+            </div>
+
+            <div class="sale-stats">
+                <div><span>Pulangan atas modal</span><strong id="resRoi">—</strong></div>
+                <div><span>Pulangan setahun</span><strong id="resAnnual">—</strong></div>
+                <div><span>Tempoh pegangan</span><strong id="resHeld">—</strong></div>
+            </div>
+
+            <h3 class="result-subhead">Tunai diterima semasa jual</h3>
+            <div class="result-list">
+                <div class="result-row"><span>Harga jual</span><strong id="resSellPrice">RM 0.00</strong></div>
+                <div class="result-row"><span>Baki pinjaman dilunaskan</span><strong id="resBalance">RM 0.00</strong></div>
+                <div class="result-row"><span>Komisen ejen (+8% SST)</span><strong id="resAgent">RM 0.00</strong></div>
+                <div class="result-row"><span>Yuran guaman penjual (+8% SST)</span><strong id="resSellLegal">RM 0.00</strong></div>
+                <div class="result-row"><span>Kos lain semasa jual</span><strong id="resSellOther">RM 0.00</strong></div>
+                <div class="result-row"><span>Penalti selesai awal</span><strong id="resPenalty">RM 0.00</strong></div>
+                <div class="result-row"><span>RPGT</span><strong id="resRpgt">RM 0.00</strong></div>
+                <div class="result-row total-row"><span>Tunai masuk poket</span><strong id="resCashBack">RM 0.00</strong></div>
+            </div>
+            <p class="result-note" id="resRpgtRate"></p>
+
+            <h3 class="result-subhead">Tunai yang telah anda keluarkan</h3>
+            <div class="result-list">
+                <div class="result-row"><span>Bayaran muka (deposit)</span><strong id="resDown">RM 0.00</strong></div>
+                <div class="result-row"><span>Duti setem &amp; yuran guaman beli</span><strong id="resPurchase">RM 0.00</strong></div>
+                <div class="result-row"><span>Renovasi</span><strong id="resReno">RM 0.00</strong></div>
+                <div class="result-row"><span>Ansuran bulanan dibayar</span><strong id="resInstalments">RM 0.00</strong></div>
+                <div class="result-row"><span>Yuran, cukai &amp; insurans</span><strong id="resHolding">RM 0.00</strong></div>
+                <div class="result-row"><span>Sewa diterima</span><strong id="resRent">RM 0.00</strong></div>
+                <div class="result-row total-row"><span>Jumlah modal bersih</span><strong id="resInvested">RM 0.00</strong></div>
+            </div>
+            <p class="result-note">Daripada ansuran itu, faedah yang dibayar kepada bank: <strong id="resInterest">RM 0.00</strong></p>
+
+            <div class="pcb-notice">
+                <strong>Harga jual pulang modal: <span id="resBreakEven">RM 0.00</span></strong>
+                <p>Jual di bawah harga ini, anda rugi selepas semua kos. Guna angka ini sebagai had bawah semasa berunding.</p>
+            </div>
+            <div class="pcb-notice" id="rpgtTip" hidden></div>
+            <div class="pcb-notice" id="rentHint">
+                <strong>Duduk sendiri di rumah ini?</strong>
+                <p>Kiraan ini belum ambil kira sewa yang anda jimat. Untuk perbandingan yang adil dengan menyewa, masukkan anggaran sewa rumah serupa dalam ruangan "Sewa diterima".</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">CARA KIRAAN</span>
+        <h2>Dari mana angka ini datang?</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">💰</div><div><h3>Untung bersih</h3><p>Tunai masuk poket semasa jual, tolak semua tunai yang telah anda keluarkan sejak beli: deposit, kos beli, renovasi, ansuran dan kos pegangan, tolak sewa yang diterima.</p></div></article>
+        <article class="topic"><div class="topic-icon">🏛️</div><div><h3>RPGT</h3><p>Untuk warganegara dan PR: 30% jika jual dalam tahun 1 hingga 3, 20% tahun ke-4, 15% tahun ke-5 dan 0% mulai tahun ke-6. Keuntungan dikurangkan dahulu dengan pengecualian RM10,000 atau 10%, mana lebih tinggi.</p></div></article>
+        <article class="topic"><div class="topic-icon">📈</div><div><h3>Pulangan setahun</h3><p>Kadar pulangan dalaman (IRR) berdasarkan bila setiap ringgit dikeluarkan dan diterima. Sesuai untuk dibandingkan dengan ASB, FD atau KWSP.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Anggaran untuk penjual warganegara Malaysia</h2>
+        <p>Kalkulator ini untuk individu warganegara dan pemastautin tetap. Tahun pelupusan dianggarkan mengikut bulan; LHDN mengira berdasarkan tarikh perjanjian jual beli sebenar. Untuk kiraan RPGT, kos pinjaman (faedah, duti setem dan yuran guaman pinjaman, penalti) tidak ditolak, manakala renovasi dianggap kos menambah nilai. Simpan resit renovasi untuk tuntutan.</p>
+        <p style="margin-top:0.8rem;">Semasa jual, peguam pembeli akan menahan 3% daripada harga jual dan hantar kepada LHDN. Jumlah ini dikira semula dengan RPGT sebenar dan lebihan dipulangkan, jadi ia isu masa aliran tunai, bukan kos tambahan. Yuran guaman mengikut skala Semenanjung; Sabah dan Sarawak berbeza.</p>
+        <p style="margin-top:0.8rem;">Sumber: <a href="https://www.hasil.gov.my/en/rpgt/real-property-gains-tax-rpgt-rates/" target="_blank" rel="noopener noreferrer">LHDN — Kadar Cukai Keuntungan Harta Tanah (RPGT)</a>, Akta Setem 1949, Solicitors' Remuneration Order 2023.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+</footer>
+<script src="property-fees.js"></script>
+<script src="jual-rumah.js"></script>
+</body>
+</html>
