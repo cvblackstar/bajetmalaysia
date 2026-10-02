@@ -1,31 +1,10 @@
-// Duti setem pindah milik (MOT) untuk warganegara/PR: 1% hingga RM100k, 2% hingga RM500k, 3% hingga RM1j, 4% selebihnya.
-// Duti setem perjanjian pinjaman: 0.5% daripada jumlah pinjaman.
+// Kadar duti setem dan yuran guaman: lihat property-fees.js.
 // Pengecualian pembeli rumah pertama (i-MILIKI, Bajet 2026): 100% bagi MOT dan perjanjian pinjaman,
 // harga sehingga RM500,000, SPA ditandatangani 1 Jan 2026 hingga 31 Dis 2027.
-// Yuran guaman: Solicitors' Remuneration Order 2023, Jadual A (Semenanjung) — 1.25% bagi RM500k pertama
-// (minimum RM500), 1% selebihnya. Cukai perkhidmatan 8% atas yuran guaman.
 const FIRST_HOME_CAP = 500000;
-const SST_RATE = 0.08;
+const { SST_RATE, motStampDuty, loanStampDuty, legalScaleFee } = window.BajetMY.propertyFees;
 
 const money = value => window.BajetMY.formatCurrency(value);
-
-function motStampDuty(price) {
-    const tiers = [[100000, 0.01], [500000, 0.02], [1000000, 0.03], [Infinity, 0.04]];
-    let duty = 0;
-    let lower = 0;
-    for (const [upper, rate] of tiers) {
-        if (price <= lower) break;
-        duty += (Math.min(price, upper) - lower) * rate;
-        lower = upper;
-    }
-    return Math.ceil(duty);
-}
-
-function legalScaleFee(value) {
-    if (value <= 0) return 0;
-    if (value <= 500000) return Math.max(500, value * 0.0125);
-    return 6250 + (value - 500000) * 0.01;
-}
 
 function showError(message) {
     const el = document.getElementById("houseCostError");
@@ -58,7 +37,7 @@ function calculateHouseCost() {
     const exempt = firstHome && price <= FIRST_HOME_CAP;
 
     const motDuty = exempt ? 0 : motStampDuty(price);
-    const loanDuty = exempt ? 0 : Math.ceil(loan * 0.005);
+    const loanDuty = exempt ? 0 : loanStampDuty(loan);
     const spaFee = legalScaleFee(price) * (1 + SST_RATE);
     const loanFee = legalScaleFee(loan) * (1 + SST_RATE);
     const fees = motDuty + loanDuty + spaFee + loanFee + otherCosts;
@@ -76,7 +55,7 @@ function calculateHouseCost() {
     setText("resFeesPct", `${(fees / price * 100).toFixed(1)}% daripada harga rumah`);
 
     const note = document.getElementById("exemptNote");
-    const fullDuty = motStampDuty(price) + Math.ceil(loan * 0.005);
+    const fullDuty = motStampDuty(price) + loanStampDuty(loan);
     if (exempt) {
         note.innerHTML = `<strong>Pengecualian pembeli rumah pertama digunakan.</strong><p>Anda jimat ${money(fullDuty)} duti setem. Syarat: warganegara yang tidak pernah memiliki rumah kediaman, harga sehingga RM500,000, dan SPA ditandatangani antara 1 Januari 2026 hingga 31 Disember 2027.</p>`;
     } else if (price <= FIRST_HOME_CAP) {
