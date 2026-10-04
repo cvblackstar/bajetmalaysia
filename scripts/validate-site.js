@@ -23,7 +23,7 @@ function stripQueryAndHash(value) {
 }
 
 function checkLocalReference(sourceFile, value, kind) {
-  if (!value || isExternal(value)) return;
+  if (!value || isExternal(value) || value.includes('${')) return; // skip JS template literals
   const clean = stripQueryAndHash(value);
   if (!clean) return;
   const sourceDir = path.dirname(sourceFile);
@@ -75,24 +75,32 @@ for (const article of articles) {
   }
 }
 
-// 2. Ensure calculator CTAs referenced by article metadata exist in article.js.
-const articleJsPath = path.join(root, 'article.js');
-const articleJs = fs.readFileSync(articleJsPath, 'utf8');
-const calculatorBlock = articleJs.match(/const calculatorLinks\s*=\s*\{([\s\S]*?)\n\};/);
-const calculatorLinks = new Map();
-if (!calculatorBlock) {
-  fail('article.js: calculatorLinks mapping not found');
-} else {
-  const entryRegex = /["']?([\w-]+)["']?\s*:\s*\{\s*href:\s*["']([^"']+)["']/g;
-  let match;
-  while ((match = entryRegex.exec(calculatorBlock[1]))) calculatorLinks.set(match[1], match[2]);
-  for (const article of articles) {
-    if (article.status === 'published' && article.calculator && !calculatorLinks.has(article.calculator)) {
-      fail(`${article.slug}: calculator "${article.calculator}" is not defined in article.js`);
-    }
+// 2. Ensure calculator CTAs referenced by article metadata exist in scripts/build-articles.js,
+// and that the generated artikel/<slug>.html pages match what the build script would write now.
+const { calculatorLinks, buildArticlePages, OUT_DIR } = require('./build-articles.js');
+for (const article of articles) {
+  if (article.status === 'published' && article.calculator && !calculatorLinks[article.calculator]) {
+    fail(`${article.slug}: calculator "${article.calculator}" is not defined in scripts/build-articles.js`);
   }
-  for (const [key, href] of calculatorLinks) {
-    if (!exists(stripQueryAndHash(href))) fail(`article.js: calculator "${key}" points to missing file -> ${href}`);
+}
+for (const [key, link] of Object.entries(calculatorLinks)) {
+  if (!exists(stripQueryAndHash(link.href))) fail(`scripts/build-articles.js: calculator "${key}" points to missing file -> ${link.href}`);
+}
+const articleNote = 'run node scripts/build-articles.js';
+let expectedPages = [];
+try {
+  expectedPages = buildArticlePages();
+} catch (error) {
+  fail(`scripts/build-articles.js: ${error.message}`);
+}
+for (const page of expectedPages) {
+  if (!exists(page.file)) fail(`${page.file}: missing (${articleNote})`);
+  else if (fs.readFileSync(path.join(root, page.file), 'utf8') !== page.html) fail(`${page.file}: out of date (${articleNote})`);
+}
+if (exists(OUT_DIR)) {
+  const expected = new Set(expectedPages.map(page => page.file));
+  for (const name of fs.readdirSync(path.join(root, OUT_DIR))) {
+    if (name.endsWith('.html') && !expected.has(`${OUT_DIR}/${name}`)) fail(`${OUT_DIR}/${name}: no published article with this slug (${articleNote})`);
   }
 }
 
@@ -105,7 +113,7 @@ for (const page of fs.readdirSync(root).filter(name => name.endsWith('.html'))) 
   if (!sitemap.includes(`<loc>${loc}</loc>`)) fail(`sitemap.xml: missing ${page} (${sitemapNote})`);
 }
 for (const article of articles) {
-  if (article.status === 'published' && !sitemap.includes(`<loc>https://bajetmy.my/article.html?slug=${article.slug}</loc>`)) {
+  if (article.status === 'published' && !sitemap.includes(`<loc>https://bajetmy.my/${OUT_DIR}/${article.slug}.html</loc>`)) {
     fail(`sitemap.xml: missing article ${article.slug} (${sitemapNote})`);
   }
 }

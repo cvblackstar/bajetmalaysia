@@ -1,7 +1,7 @@
 # Bajet MY — content & social media guidelines
 
 ## Publishing a new topic
-1. Article on the website (`articles/<category>/<slug>.md` + entry at top of `data/articles.json`, run `node scripts/build-sitemap.js` then `node scripts/validate-site.js`), deploy via `main`. New root HTML pages also need `python3 scripts/inject-analytics.py` (adds GA4 + policy footer) plus a canonical link and og:/twitter: title/description tags in `<head>`.
+1. Article on the website (`articles/<category>/<slug>.md` + entry at top of `data/articles.json`, run `node scripts/build-articles.js` (writes the static page `artikel/<slug>.html`), `node scripts/build-sitemap.js`, then `node scripts/validate-site.js`), deploy via `main`. Share article links as `https://bajetmy.my/artikel/<slug>.html` so Facebook/WhatsApp previews show the article's own title and infographic. New root HTML pages also need `python3 scripts/inject-analytics.py` (adds GA4 + policy footer) plus a canonical link and og:/twitter: title/description tags in `<head>`.
 2. Facebook Page post: infographic + caption, then first comment with the article link (and relevant calculator link).
 3. Instagram: **always carousel format** (multiple 1080×1080 slides), link-in-bio in caption.
 4. Threads: **multi-post thread (main post + chained replies)**, text-first — no infographic, no single long infodump.
