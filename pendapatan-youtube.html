@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pendapatan YouTube Malaysia | Bajet MY</title>
+    <meta name="description" content="Anggarkan pendapatan saluran YouTube dalam ringgit: tampal pautan saluran atau video, pilih niche dan penonton, dan lihat anggaran pendapatan iklan video panjang dan Shorts selepas cukai AS.">
+    <link rel="stylesheet" href="style.css">
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+<style>
+.yt-lookup{max-width:760px;margin:0 auto 2rem;border:1px solid rgba(0,0,0,.1);border-radius:18px;padding:1.4rem;background:#fff}
+.yt-lookup h2{font-size:1.1rem;margin:0 0 .4rem}
+.yt-lookup p{margin:0 0 .9rem;font-size:.9rem;opacity:.8}
+.yt-search{display:flex;gap:.6rem}
+.yt-search input{flex:1;min-width:0;padding:.8rem 1rem;border:1px solid rgba(0,0,0,.18);border-radius:12px;font:inherit}
+.yt-search .button{white-space:nowrap}
+#ytStatus{margin-top:.8rem;font-size:.9rem}
+.yt-channel{display:grid;grid-template-columns:64px 1fr;gap:1rem;align-items:center;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid rgba(0,0,0,.08)}
+.yt-channel img{width:64px;height:64px;border-radius:50%;object-fit:cover;background:rgba(0,0,0,.06)}
+.yt-channel a{font-weight:700;font-size:1.05rem;color:inherit}
+.yt-stats{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.85rem;margin-top:.3rem;opacity:.85}
+.yt-channel .yt-method{grid-column:1/-1;margin:0;font-size:.82rem}
+.range-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:1rem 0}
+.range-stats div{border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:.7rem;text-align:center}
+.range-stats span{display:block;font-size:.75rem;opacity:.7}
+.range-stats strong{font-size:1rem}
+.result-note{margin-top:.4rem;font-size:.85rem;opacity:.75}
+.ypp-list{margin:.5rem 0;padding-left:1.1rem;font-size:.88rem}
+.ypp-list li{margin:.35rem 0}
+.ypp-tag{display:inline-block;font-weight:700;font-size:.75rem;padding:.05rem .45rem;border-radius:6px;margin-right:.3rem;background:rgba(0,0,0,.08)}
+.ypp-tag.ok{background:#e8f7f1;color:#0f8b5f}
+.ypp-tag.no{background:#fdecec;color:#c0392b}
+@media(max-width:600px){.yt-search{flex-direction:column}.range-stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Utama</a>
+            <a href="index.html#kalkulator">Kalkulator</a>
+            <a href="panduan.html">Panduan</a>
+            <a href="tentang-kami.html">Tentang Kami</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">KALKULATOR</span>
+        <h1>Pendapatan YouTube</h1>
+        <p>Berapa agaknya saluran YouTube boleh jana sebulan? Tampal pautan saluran atau video, dan dapatkan anggaran dalam ringgit, selepas cukai AS.</p>
+    </div>
+
+    <div class="yt-lookup" id="ytLookupCard" hidden>
+        <h2>Semak saluran melalui pautan</h2>
+        <p>Tampal pautan saluran (contoh youtube.com/@namasaluran) atau pautan mana-mana video daripada saluran itu.</p>
+        <div class="yt-search">
+            <input type="text" id="ytUrl" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/@namasaluran" aria-label="Pautan saluran atau video YouTube">
+            <button type="button" id="ytLookup" class="button primary">Semak Saluran</button>
+        </div>
+        <div id="ytStatus" hidden></div>
+        <div class="yt-channel" id="ytChannel" hidden>
+            <img id="ytThumb" src="" alt="" width="64" height="64">
+            <div>
+                <a id="ytName" href="#" target="_blank" rel="noopener noreferrer">Saluran</a>
+                <div class="yt-stats">
+                    <span><strong id="ytSubs">0</strong> subscriber</span>
+                    <span><strong id="ytViews">0</strong> jumlah tontonan</span>
+                    <span><strong id="ytVideos">0</strong> video</span>
+                </div>
+            </div>
+            <p class="yt-method" id="ytMethod"></p>
+        </div>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Maklumat Saluran</h2>
+
+            <div class="form-group">
+                <label for="longViews">Tontonan video panjang sebulan</label>
+                <input type="number" id="longViews" value="50000" min="0" step="1000">
+            </div>
+            <div class="form-group">
+                <label for="shortsViews">Tontonan Shorts sebulan</label>
+                <input type="number" id="shortsViews" value="200000" min="0" step="10000">
+                <small>Shorts dibayar jauh lebih rendah daripada video panjang, jadi kedua-duanya dikira berasingan.</small>
+            </div>
+            <div class="form-group">
+                <label for="niche">Niche kandungan</label>
+                <select id="niche">
+                    <option value="kewangan">Kewangan, bisnes &amp; hartanah</option>
+                    <option value="teknologi">Teknologi &amp; review produk</option>
+                    <option value="pendidikan">Pendidikan &amp; tutorial</option>
+                    <option value="lifestyle" selected>Lifestyle, vlog, makanan &amp; travel</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="hiburan">Hiburan, muzik &amp; komedi</option>
+                </select>
+                <small>Pengiklan bayar lebih untuk penonton niche kewangan dan teknologi.</small>
+            </div>
+            <div class="form-group">
+                <label for="audience">Penonton utama</label>
+                <select id="audience">
+                    <option value="malaysia" selected>Kebanyakannya Malaysia</option>
+                    <option value="campuran">Campuran Malaysia &amp; luar negara</option>
+                    <option value="global">Kebanyakannya global / AS (kandungan Bahasa Inggeris)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="customRpm">RPM sebenar anda (pilihan)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="customRpm" value="" min="0" step="0.1" placeholder="Guna anggaran"></div>
+                <small>Pemilik saluran boleh semak RPM dalam YouTube Studio → Analitik → Hasil. Jika diisi, ia menggantikan anggaran untuk video panjang.</small>
+            </div>
+            <div class="form-group">
+                <label for="sponsorship">Tajaan &amp; pendapatan lain sebulan</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="sponsorship" value="0" min="0" step="100"></div>
+                <small>Contoh: tajaan jenama, affiliate, membership. Tidak dikenakan cukai AS oleh Google.</small>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="taxInfo" checked>
+                    <span>Saya sudah hantar maklumat cukai AS (W-8BEN) dalam AdSense</span>
+                </label>
+            </div>
+
+            <button type="button" id="calculateYoutubeButton" class="button primary calculate-button">Kira Pendapatan YouTube</button>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Anggaran Pendapatan</h2>
+
+            <div class="take-home">
+                <span>Anggaran biasa sebulan</span>
+                <strong id="netMonthly">RM 0.00</strong>
+            </div>
+
+            <div class="range-stats">
+                <div><span>Rendah</span><strong id="resLow">RM 0.00</strong></div>
+                <div><span>Biasa</span><strong id="resMid">RM 0.00</strong></div>
+                <div><span>Tinggi</span><strong id="resHigh">RM 0.00</strong></div>
+            </div>
+
+            <div class="result-list">
+                <div class="result-row"><span>Iklan video panjang</span><strong id="resLongAds">RM 0.00</strong></div>
+                <div class="result-row"><span>Iklan Shorts</span><strong id="resShortsAds">RM 0.00</strong></div>
+                <div class="result-row"><span>Cukai AS ditahan Google</span><strong id="resWithholding">RM 0.00</strong></div>
+                <div class="result-row"><span>Tajaan &amp; lain-lain</span><strong id="resSponsor">RM 0.00</strong></div>
+                <div class="result-row total-row"><span>Anggaran bersih sebulan</span><strong id="resNet">RM 0.00</strong></div>
+            </div>
+            <p class="result-note">Setahun: <strong id="resYearly">RM 0.00</strong></p>
+            <p class="result-note" id="resRpm"></p>
+            <p class="result-note" id="resTaxNote"></p>
+
+            <div class="pcb-notice" id="yppBox"></div>
+            <div class="pcb-notice">
+                <strong>Jangan lupa LHDN</strong>
+                <p>Pendapatan YouTube ialah pendapatan perniagaan dan perlu diisytihar dalam borang cukai pendapatan (Borang B untuk individu). Cukai AS yang ditahan Google tidak menggantikan cukai Malaysia.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">CARA KIRAAN</span>
+        <h2>Dari mana angka ini datang?</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">📺</div><div><h3>RPM</h3><p>Pendapatan pencipta bagi setiap 1,000 tontonan, selepas YouTube ambil bahagiannya. Anggaran = tontonan ÷ 1,000 × RPM. RPM sebenar berbeza ikut niche, negara penonton, musim dan panjang video.</p></div></article>
+        <article class="topic"><div class="topic-icon">🔗</div><div><h3>Data pautan</h3><p>Subscriber, tontonan dan tempoh video diambil daripada YouTube Data API secara awam. Tontonan sebulan dianggar daripada video terkini; pendapatan dan jam tontonan sebenar hanya boleh dilihat pemilik saluran.</p></div></article>
+        <article class="topic"><div class="topic-icon">🇺🇸</div><div><h3>Cukai AS</h3><p>Malaysia tiada perjanjian cukai dengan AS, jadi Google tahan 30% daripada pendapatan penonton AS. Tanpa maklumat cukai, sehingga 24% daripada semua pendapatan boleh ditahan.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">NOTA PENTING</span>
+        <h2>Ini anggaran, bukan angka sebenar</h2>
+        <p>YouTube tidak mendedahkan pendapatan mana-mana saluran secara awam. Julat RPM di sini ialah anggaran kasar Bajet MY berdasarkan julat yang dilaporkan pencipta, dan boleh berbeza jauh daripada pendapatan sebenar. Shorts dikenal pasti sebagai video 3 minit atau kurang. Saluran perlu diterima masuk YouTube Partner Program sebelum boleh menjana pendapatan iklan.</p>
+        <p style="margin-top:0.8rem;">Carian pautan dibuat terus dari pelayar anda ke YouTube Data API (Google). Bajet MY tidak menyimpan pautan yang anda cari.</p>
+        <p style="margin-top:0.8rem;">Sumber: <a href="https://support.google.com/youtube/answer/72851" target="_blank" rel="noopener noreferrer">YouTube Help — Syarat YouTube Partner Program</a>, <a href="https://support.google.com/youtube/answer/10391362" target="_blank" rel="noopener noreferrer">YouTube Help — Keperluan cukai AS</a>, LHDN.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Faham Duit. Urus Duit. Rancang Hidup.</p>
+        <p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+</footer>
+<script src="youtube-key.js"></script>
+<script src="pendapatan-youtube.js"></script>
+</body>
+</html>
