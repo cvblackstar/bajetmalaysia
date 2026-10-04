@@ -59,10 +59,15 @@ function setMeta(meta) {
 
   document.getElementById('pageTitle').textContent = title;
   document.getElementById('pageDescription').setAttribute('content', meta.description);
-  document.getElementById('canonicalLink').setAttribute('href', url);
+  const canonical = document.createElement('link');
+  canonical.rel = 'canonical';
+  canonical.href = url;
+  const ogUrl = document.createElement('meta');
+  ogUrl.setAttribute('property', 'og:url');
+  ogUrl.content = url;
+  document.head.append(canonical, ogUrl);
   document.getElementById('ogTitle').setAttribute('content', title);
   document.getElementById('ogDescription').setAttribute('content', meta.description);
-  document.getElementById('ogUrl').setAttribute('content', url);
 
   const jsonLd = document.createElement('script');
   jsonLd.type = 'application/ld+json';
@@ -100,6 +105,10 @@ async function loadArticle() {
     const opinionNote = meta.type === 'sudut-pandang' ? '<blockquote>Sudut Pandang ialah tulisan renungan untuk membuka perbincangan, bukan nasihat kewangan peribadi. Keadaan setiap orang berbeza.</blockquote>' : '';
     root.innerHTML = `<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}${opinionNote}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
   } catch (error) {
+    const noindex = document.createElement('meta');
+    noindex.name = 'robots';
+    noindex.content = 'noindex';
+    document.head.append(noindex);
     root.innerHTML = `<div class="article-error"><h1>Artikel tidak dapat dimuatkan</h1><p>${esc(error.message)}</p><p><a href="panduan.html">Kembali ke Panduan</a></p></div>`;
   }
 }
