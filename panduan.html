@@ -90,7 +90,7 @@ const typeOf=a=>a.type==='berita'||a.type==='sudut-pandang'?a.type:'panduan';
 function formatDate(iso){const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'});}
 function card(a,g){
   const date=g.byDate?`<span class="date">${escapeHtml(formatDate(a.published))}</span>`:'';
-  return `<a class="article-card${g.cls?' '+g.cls:''}" href="article.html?v=20260923&slug=${encodeURIComponent(a.slug)}"><div class="meta-row">${date}<span class="category">${escapeHtml(a.category)}</span></div><h2>${escapeHtml(a.title)}</h2><p>${escapeHtml(a.description)}</p><span class="read">${g.read} →</span></a>`;
+  return `<a class="article-card${g.cls?' '+g.cls:''}" href="artikel/${encodeURIComponent(a.slug)}.html"><div class="meta-row">${date}<span class="category">${escapeHtml(a.category)}</span></div><h2>${escapeHtml(a.title)}</h2><p>${escapeHtml(a.description)}</p><span class="read">${g.read} →</span></a>`;
 }
 function renderArticles(){
   const query=searchInput.value.trim();

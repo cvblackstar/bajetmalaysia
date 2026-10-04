@@ -28,7 +28,7 @@ const articles = JSON.parse(fs.readFileSync(path.join(root, 'data', 'articles.js
 
 const urls = [
   ...pages.map(page => ({ loc: page === 'index.html' ? SITE : SITE + page, lastmod: lastCommitDate(page) })),
-  ...articles.map(article => ({ loc: `${SITE}article.html?slug=${article.slug}`, lastmod: article.updated || article.published }))
+  ...articles.map(article => ({ loc: `${SITE}artikel/${article.slug}.html`, lastmod: article.updated || article.published }))
 ];
 
 const xml = [
