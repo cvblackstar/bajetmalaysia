@@ -65,6 +65,7 @@
 .yt-channel a{font-weight:700;font-size:1.05rem;color:inherit}
 .yt-stats{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.85rem;margin-top:.3rem;opacity:.85}
 .yt-channel .yt-method{grid-column:1/-1;margin:0;font-size:.82rem}
+.yt-share{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem .9rem}
 .range-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:1rem 0}
 .range-stats div{border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:.7rem;text-align:center}
 .range-stats span{display:block;font-size:.75rem;opacity:.7}
@@ -120,7 +121,7 @@
             <input type="text" id="ytUrl" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/@namasaluran" aria-label="Pautan saluran atau video YouTube">
             <button type="button" id="ytLookup" class="button primary">Semak Saluran</button>
         </div>
-        <div id="ytStatus" hidden></div>
+        <div id="ytStatus" role="status" aria-live="polite" hidden></div>
         <div class="yt-channel" id="ytChannel" hidden>
             <img id="ytThumb" src="" alt="" width="64" height="64">
             <div>
@@ -132,6 +133,10 @@
                 </div>
             </div>
             <p class="yt-method" id="ytMethod"></p>
+            <div class="yt-share">
+                <button type="button" id="ytShare" class="button primary">Kongsi Hasil</button>
+                <span id="ytShareStatus" class="share-status" aria-live="polite"></span>
+            </div>
         </div>
     </div>
 

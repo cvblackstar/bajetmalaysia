@@ -28,6 +28,7 @@ const money = value => window.BajetMY.formatCurrency(value);
 const fmt = new Intl.NumberFormat("ms-MY", { maximumFractionDigits: 0 });
 const num = id => Math.max(0, Number(document.getElementById(id).value) || 0);
 let channelInfo = null; // diisi selepas carian pautan
+let sharedChannel = null; // { id, title } saluran yang sedang dipaparkan, untuk pautan kongsi
 
 function setText(id, value) {
     document.getElementById(id).textContent = value;
@@ -246,9 +247,61 @@ function renderChannel(channel, analysis) {
     setText("ytMethod", `Anggaran tontonan sebulan dikira daripada ${analysis.method}. Ini anggaran kasar; ubah angka di bawah jika anda tahu angka sebenar dari YouTube Studio.`);
 }
 
+// ---------- Kongsi hasil ----------
+// Pautan kongsi: pendapatan-youtube.html?saluran=@handle&niche=...&penonton=...
+// Pelawat yang buka pautan ini terus nampak anggaran saluran yang sama.
+const SHARE_PARAMS = ["saluran", "niche", "penonton"];
+
+function setShareParams(url) {
+    SHARE_PARAMS.forEach(key => url.searchParams.delete(key));
+    if (sharedChannel) {
+        url.searchParams.set("saluran", sharedChannel.id);
+        url.searchParams.set("niche", document.getElementById("niche").value);
+        url.searchParams.set("penonton", document.getElementById("audience").value);
+    }
+    return url;
+}
+
+// "@" sah dalam query string; biarkan ia supaya pautan nampak kemas (?saluran=@nama, bukan %40nama).
+const shareHref = url => setShareParams(url).href.replace("saluran=%40", "saluran=@");
+
+// Kemas kini bar alamat supaya pautan yang disalin terus dari pelayar juga boleh dikongsi.
+function syncShareUrl() {
+    history.replaceState(history.state, "", shareHref(new URL(window.location.href)));
+}
+
+async function shareResult() {
+    if (!sharedChannel) return;
+    const status = document.getElementById("ytShareStatus");
+    const url = shareHref(new URL(window.location.pathname, window.location.origin));
+    const mid = estimate(readInput())[1];
+    const text = `Anggaran pendapatan YouTube ${sharedChannel.title}: lebih kurang ${money(mid.net)} sebulan (anggaran kasar Bajet MY). Cuba semak channel favourite korang:`;
+    if (typeof window.gtag === "function") window.gtag("event", "youtube_share", { channel: sharedChannel.id });
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: document.title, text, url });
+            status.textContent = "";
+            return;
+        } catch (error) {
+            if (error.name === "AbortError") return; // pengguna tutup menu kongsi
+        }
+    }
+    try {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        status.textContent = "Pautan disalin. Tampal di WhatsApp, Threads atau mana-mana.";
+    } catch {
+        status.textContent = `Salin pautan ini: ${url}`;
+    }
+}
+
 // Sembunyikan saluran carian sebelumnya supaya ralat carian baharu tidak kelihatan seperti hasil lama.
 function clearChannel() {
     document.getElementById("ytChannel").hidden = true;
+    document.getElementById("ytShareStatus").textContent = "";
+    if (sharedChannel) {
+        sharedChannel = null;
+        syncShareUrl();
+    }
     if (channelInfo) {
         channelInfo = null;
         calculateYoutube();
@@ -281,7 +334,13 @@ async function lookupChannel() {
             avgLongMinutes: analysis.avgLongMinutes,
             shorts90: analysis.shorts90
         };
+        const handle = channel.snippet?.customUrl || "";
+        sharedChannel = {
+            id: /^@[\w.-]{3,}$/.test(handle) ? handle : channel.id,
+            title: channel.snippet?.title || "saluran ini"
+        };
         renderChannel(channel, analysis);
+        syncShareUrl();
         document.getElementById("longViews").value = Math.round(analysis.longMonthly);
         document.getElementById("shortsViews").value = Math.round(analysis.shortsMonthly);
         document.getElementById("longViews").dispatchEvent(new Event("input", { bubbles: true }));
@@ -293,12 +352,39 @@ async function lookupChannel() {
     }
 }
 
+// Buka pautan kongsi: isi niche dan penonton daripada pautan, kemudian cari saluran secara automatik.
+// Dijalankan selepas calculator-state.js memulihkan input tersimpan pelawat (juga pada DOMContentLoaded).
+function applySharedLink() {
+    const params = new URLSearchParams(window.location.search);
+    const saluran = params.get("saluran");
+    if (!saluran) return;
+    const setSelect = (id, value) => {
+        const el = document.getElementById(id);
+        if (value && [...el.options].some(option => option.value === value)) el.value = value;
+    };
+    setSelect("niche", params.get("niche"));
+    setSelect("audience", params.get("penonton"));
+    // Pautan kongsi menunjukkan anggaran saluran itu, bukan RPM atau tajaan peribadi pelawat.
+    document.getElementById("customRpm").value = "";
+    document.getElementById("sponsorship").value = 0;
+    document.getElementById("taxInfo").checked = true;
+    document.getElementById("ytUrl").value = saluran;
+    calculateYoutube();
+    lookupChannel();
+}
+
 if (API_KEY) {
     document.getElementById("ytLookupCard").hidden = false;
     document.getElementById("ytLookup").addEventListener("click", lookupChannel);
     document.getElementById("ytUrl").addEventListener("keydown", event => {
         if (event.key === "Enter") { event.preventDefault(); lookupChannel(); }
     });
+    document.getElementById("ytShare").addEventListener("click", shareResult);
+    ["niche", "audience"].forEach(id => document.getElementById(id).addEventListener("change", () => {
+        if (sharedChannel) syncShareUrl();
+    }));
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applySharedLink);
+    else applySharedLink();
 }
 
 document.getElementById("calculateYoutubeButton").addEventListener("click", calculateYoutube);
