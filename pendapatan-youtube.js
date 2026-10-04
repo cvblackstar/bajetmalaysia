@@ -123,7 +123,13 @@ function parseYouTubeInput(text) {
 
 async function api(endpoint, params) {
     const query = new URLSearchParams({ ...params, key: API_KEY });
-    const response = await fetch(`${API}${endpoint}?${query}`);
+    let response;
+    try {
+        response = await fetch(`${API}${endpoint}?${query}`);
+    } catch {
+        // Ralat rangkaian (tiada internet, ad blocker atau rangkaian pejabat/sekolah yang sekat Google API)
+        throw new Error("Tidak dapat menghubungi YouTube. Semak sambungan internet atau matikan ad blocker untuk laman ini, kemudian cuba lagi. Anda juga boleh masukkan tontonan secara manual.");
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.error) {
         const reason = data.error?.errors?.[0]?.reason || "";
@@ -187,22 +193,33 @@ function analyseUploads(channel, videos, now = Date.now()) {
         windowDays = Math.max(7, Math.min(windowDays, oldest));
     }
 
-    let longMonthly, shortsMonthly, method;
+    // 1. Video baharu: tontonan video yang dimuat naik dalam tempoh terkini, dibahagi ikut bulan.
+    let longMonthly = 0, shortsMonthly = 0;
+    const recent = windowDays ? items.filter(v => v.ageDays <= windowDays) : [];
     if (windowDays) {
-        const recent = items.filter(v => v.ageDays <= windowDays);
         const months = windowDays / 30.44;
         longMonthly = sum(recent, false) / months;
         shortsMonthly = sum(recent, true) / months;
-        method = `${recent.length} video yang dimuat naik dalam ${Math.round(windowDays)} hari lepas`;
-    } else {
-        const ageMonths = Math.max(1, (now - Date.parse(channel.snippet.publishedAt)) / 864e5 / 30.44);
-        const total = Number(channel.statistics?.viewCount || 0);
-        const sampleLong = sum(items, false), sampleShort = sum(items, true);
-        const shortShare = sampleLong + sampleShort > 0 ? sampleShort / (sampleLong + sampleShort) : 0;
-        longMonthly = total * (1 - shortShare) / ageMonths;
-        shortsMonthly = total * shortShare / ageMonths;
-        method = "purata jumlah tontonan sejak saluran dibuka (tiada muat naik dalam 12 bulan lepas)";
     }
+
+    // 2. Video lama: kaedah 1 tidak nampak tontonan video lama (contohnya lagu atau tutorial yang masih
+    // ditonton bertahun-tahun). Purata sepanjang hayat saluran dijadikan lantai: jika lebih tinggi,
+    // bezanya dianggap tontonan video panjang lama, kerana Shorts jarang terus ditonton lama selepas
+    // dimuat naik. Hanya saluran yang muat naik terkininya semua Shorts dikira sebagai Shorts.
+    const ageMonths = Math.max(1, (now - Date.parse(channel.snippet.publishedAt)) / 864e5 / 30.44);
+    const lifetimeMonthly = Number(channel.statistics?.viewCount || 0) / ageMonths;
+    const recentMonthly = longMonthly + shortsMonthly;
+    const backCatalog = Math.max(0, lifetimeMonthly - recentMonthly);
+    const shortsOnly = items.length > 0 && items.every(v => v.isShort);
+    if (shortsOnly) shortsMonthly += backCatalog;
+    else longMonthly += backCatalog;
+
+    const recentText = `${recent.length} video yang dimuat naik dalam ${Math.round(windowDays)} hari lepas (${fmt.format(recentMonthly)} tontonan sebulan)`;
+    const lifetimeText = `purata sepanjang hayat saluran (${fmt.format(lifetimeMonthly)} tontonan sebulan)`;
+    let method;
+    if (!windowDays) method = `${lifetimeText}, kerana tiada muat naik dalam 12 bulan lepas`;
+    else if (backCatalog > 0) method = `angka lebih tinggi antara ${lifetimeText} dan ${recentText}, kerana video lama saluran ini masih ditonton`;
+    else method = recentText;
     return { longMonthly, shortsMonthly, avgLongMinutes, shorts90, method };
 }
 
@@ -229,8 +246,18 @@ function renderChannel(channel, analysis) {
     setText("ytMethod", `Anggaran tontonan sebulan dikira daripada ${analysis.method}. Ini anggaran kasar; ubah angka di bawah jika anda tahu angka sebenar dari YouTube Studio.`);
 }
 
+// Sembunyikan saluran carian sebelumnya supaya ralat carian baharu tidak kelihatan seperti hasil lama.
+function clearChannel() {
+    document.getElementById("ytChannel").hidden = true;
+    if (channelInfo) {
+        channelInfo = null;
+        calculateYoutube();
+    }
+}
+
 async function lookupChannel() {
     const target = parseYouTubeInput(document.getElementById("ytUrl").value);
+    clearChannel();
     if (!target) {
         showLookupStatus("Pautan tidak dikenali. Contoh: https://www.youtube.com/@namasaluran atau pautan mana-mana video.", true);
         return;
