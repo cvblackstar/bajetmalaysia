@@ -96,7 +96,31 @@ if (!calculatorBlock) {
   }
 }
 
-// 3. Check local HTML/CSS references across the site.
+// 3. Ensure every public page and published article is listed in sitemap.xml.
+const sitemap = exists('sitemap.xml') ? fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8') : '';
+const sitemapNote = 'run node scripts/build-sitemap.js';
+for (const page of fs.readdirSync(root).filter(name => name.endsWith('.html'))) {
+  if (page === '404.html' || page === 'article.html') continue;
+  const loc = page === 'index.html' ? 'https://bajetmy.my/' : `https://bajetmy.my/${page}`;
+  if (!sitemap.includes(`<loc>${loc}</loc>`)) fail(`sitemap.xml: missing ${page} (${sitemapNote})`);
+}
+for (const article of articles) {
+  if (article.status === 'published' && !sitemap.includes(`<loc>https://bajetmy.my/article.html?slug=${article.slug}</loc>`)) {
+    fail(`sitemap.xml: missing article ${article.slug} (${sitemapNote})`);
+  }
+}
+
+// 4. Ensure every root page carries the GA4 tag and policy footer in source. GitHub Pages also publishes
+// straight from the branch, so tags added only at deploy time can be overwritten.
+const analyticsScript = fs.readFileSync(path.join(root, 'scripts', 'inject-analytics.py'), 'utf8');
+const measurementId = (analyticsScript.match(/MEASUREMENT_ID\s*=\s*"([^"]+)"/) || [])[1];
+for (const page of fs.readdirSync(root).filter(name => name.endsWith('.html'))) {
+  const text = fs.readFileSync(path.join(root, page), 'utf8');
+  if (measurementId && !text.includes(measurementId)) fail(`${page}: missing GA4 tag (run python3 scripts/inject-analytics.py)`);
+  if (/<\/footer>/i.test(text) && !text.includes('footer-policies')) fail(`${page}: missing policy footer links (run python3 scripts/inject-analytics.py)`);
+}
+
+// 5. Check local HTML/CSS references across the site.
 walk(root);
 
 if (failures.length) {

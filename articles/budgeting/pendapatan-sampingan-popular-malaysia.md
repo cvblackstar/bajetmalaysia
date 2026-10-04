@@ -26,7 +26,7 @@ Grab, InDrive, foodpanda, Lalamove — antara pilihan paling fleksibel kerana bo
 Jualan di Shopee, TikTok Shop, dan Lazada membolehkan sesiapa mula berniaga tanpa stok besar melalui model dropship, atau jual produk sendiri (kraf tangan, pakaian, produk niche). Modal permulaan rendah berbanding kedai fizikal.
 
 **3. Penciptaan kandungan & affiliate marketing**
-TikTok Shop Affiliate, program affiliate Shopee, dan YouTube Partner Program membolehkan pendapatan daripada komisen jualan atau iklan. Live selling di TikTok juga semakin popular sebagai saluran jualan terus.
+TikTok Shop Affiliate, program affiliate Shopee, dan YouTube Partner Program membolehkan pendapatan daripada komisen jualan atau iklan. Nak tahu berapa agaknya sebuah saluran YouTube boleh jana? Cuba [Kalkulator Pendapatan YouTube](https://bajetmy.my/pendapatan-youtube.html). Live selling di TikTok juga semakin popular sebagai saluran jualan terus.
 
 **4. Kerja bebas (freelance)**
 Platform seperti Fiverr dan Upwork antarabangsa, atau platform tempatan, membuka peluang untuk kemahiran seperti reka bentuk grafik, penulisan, terjemahan, dan pembangunan web — dilakukan sepenuhnya dari rumah mengikut jadual sendiri.
