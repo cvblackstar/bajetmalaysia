@@ -22,7 +22,8 @@ const calculatorLinks = {
   'kos-beli-rumah': { href: 'kos-beli-rumah.html', label: 'Kira Kos Beli Rumah Anda' },
   'jual-rumah': { href: 'jual-rumah.html', label: 'Kira Untung Jual Rumah Anda' },
   'pendapatan-youtube': { href: 'pendapatan-youtube.html', label: 'Anggarkan Pendapatan YouTube' },
-  'bayar-hutang': { href: 'bayar-hutang.html', label: 'Kira Pelan Bayar Hutang Anda' }
+  'bayar-hutang': { href: 'bayar-hutang.html', label: 'Kira Pelan Bayar Hutang Anda' },
+  'gaji-bersih': { href: 'gaji-bersih.html', label: 'Kira Gaji Bersih Anda' }
 };
 const typeLabels = { berita: 'Berita', 'sudut-pandang': 'Sudut Pandang' };
 
