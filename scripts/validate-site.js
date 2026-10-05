@@ -77,7 +77,7 @@ for (const article of articles) {
 
 // 2. Ensure calculator CTAs referenced by article metadata exist in scripts/build-articles.js,
 // and that the generated artikel/<slug>.html pages match what the build script would write now.
-const { calculatorLinks, buildArticlePages, OUT_DIR } = require('./build-articles.js');
+const { calculatorLinks, buildArticlePages, buildPanduanPage, OUT_DIR } = require('./build-articles.js');
 for (const article of articles) {
   if (article.status === 'published' && article.calculator && !calculatorLinks[article.calculator]) {
     fail(`${article.slug}: calculator "${article.calculator}" is not defined in scripts/build-articles.js`);
@@ -90,6 +90,8 @@ const articleNote = 'run node scripts/build-articles.js';
 let expectedPages = [];
 try {
   expectedPages = buildArticlePages();
+  const panduan = buildPanduanPage();
+  if (fs.readFileSync(path.join(root, panduan.file), 'utf8') !== panduan.html) fail(`${panduan.file}: static article list out of date (${articleNote})`);
 } catch (error) {
   fail(`scripts/build-articles.js: ${error.message}`);
 }
