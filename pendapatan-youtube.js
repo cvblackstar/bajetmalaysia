@@ -24,8 +24,12 @@ const RETENTION = 0.35; // anggaran purata peratus video ditonton
 const API = "https://www.googleapis.com/youtube/v3/";
 const API_KEY = window.BAJETMY_YOUTUBE_KEY || "";
 
+// Halaman yang sama dalam BM (pendapatan-youtube.html) dan English (youtube-income-calculator.html), ikut <html lang>.
+const EN = document.documentElement.lang === "en";
+const t = (ms, en) => EN ? en : ms;
+
 const money = value => window.BajetMY.formatCurrency(value);
-const fmt = new Intl.NumberFormat("ms-MY", { maximumFractionDigits: 0 });
+const fmt = new Intl.NumberFormat(t("ms-MY", "en-MY"), { maximumFractionDigits: 0 });
 const num = id => Math.max(0, Number(document.getElementById(id).value) || 0);
 let channelInfo = null; // diisi selepas carian pautan
 let sharedChannel = null; // { id, title } saluran yang sedang dipaparkan, untuk pautan kongsi
@@ -69,12 +73,18 @@ function yppStatus(input) {
     const subs = channelInfo && !channelInfo.hiddenSubs ? channelInfo.subs : null;
     const subsOk = subs === null ? null : subs >= 1000;
     const viewsOk = watchHours >= 4000 || shorts90 >= 10000000;
-    const line = (ok, text) => `<li><span class="ypp-tag ${ok === null ? "" : ok ? "ok" : "no"}">${ok === null ? "Tidak diketahui" : ok ? "Lepas" : "Belum"}</span> ${text}</li>`;
-    return `<strong>Syarat YouTube Partner Program (pendapatan iklan)</strong><ul class="ypp-list">` +
-        line(subsOk, subs === null ? "1,000 subscriber (semak dalam YouTube Studio)" : `1,000 subscriber: saluran ini ada ${fmt.format(subs)}`) +
-        line(watchHours >= 4000, `4,000 jam tontonan dalam 12 bulan: anggaran kasar ${fmt.format(watchHours)} jam`) +
-        line(shorts90 >= 10000000, `atau 10 juta tontonan Shorts dalam 90 hari: anggaran ${fmt.format(shorts90)}`) +
-        `</ul><p>${subsOk !== false && viewsOk ? "Berdasarkan anggaran, saluran ini mungkin layak. " : "Pendapatan iklan hanya bermula selepas diterima masuk YPP. "}Jam tontonan sebenar hanya boleh dilihat oleh pemilik saluran dalam YouTube Studio. YouTube juga mengumumkan kemas kini YPP mulai 1 Februari 2027.</p>`;
+    const line = (ok, text) => `<li><span class="ypp-tag ${ok === null ? "" : ok ? "ok" : "no"}">${ok === null ? t("Tidak diketahui", "Unknown") : ok ? t("Lepas", "Met") : t("Belum", "Not yet")}</span> ${text}</li>`;
+    return `<strong>${t("Syarat YouTube Partner Program (pendapatan iklan)", "YouTube Partner Program requirements (ad revenue)")}</strong><ul class="ypp-list">` +
+        line(subsOk, subs === null
+            ? t("1,000 subscriber (semak dalam YouTube Studio)", "1,000 subscribers (check in YouTube Studio)")
+            : t(`1,000 subscriber: saluran ini ada ${fmt.format(subs)}`, `1,000 subscribers: this channel has ${fmt.format(subs)}`)) +
+        line(watchHours >= 4000, t(`4,000 jam tontonan dalam 12 bulan: anggaran kasar ${fmt.format(watchHours)} jam`, `4,000 watch hours in 12 months: rough estimate ${fmt.format(watchHours)} hours`)) +
+        line(shorts90 >= 10000000, t(`atau 10 juta tontonan Shorts dalam 90 hari: anggaran ${fmt.format(shorts90)}`, `or 10 million Shorts views in 90 days: estimate ${fmt.format(shorts90)}`)) +
+        `</ul><p>${subsOk !== false && viewsOk
+            ? t("Berdasarkan anggaran, saluran ini mungkin layak. ", "Based on these estimates, this channel may qualify. ")
+            : t("Pendapatan iklan hanya bermula selepas diterima masuk YPP. ", "Ad revenue only starts after the channel is accepted into YPP. ")}${t(
+            "Jam tontonan sebenar hanya boleh dilihat oleh pemilik saluran dalam YouTube Studio. YouTube juga mengumumkan kemas kini YPP mulai 1 Februari 2027.",
+            "Actual watch hours are only visible to the channel owner in YouTube Studio. YouTube has also announced YPP changes from 1 February 2027.")}</p>`;
 }
 
 function calculateYoutube() {
@@ -92,11 +102,13 @@ function calculateYoutube() {
     setText("resNet", money(mid.net));
     setText("resYearly", money(mid.net * 12));
     setText("resRpm", input.customRpm > 0
-        ? `RPM video panjang anda: ${money(input.customRpm)} setiap 1,000 tontonan.`
-        : `Anggaran RPM video panjang: ${money(low.rpm)} hingga ${money(high.rpm)} setiap 1,000 tontonan.`);
+        ? t(`RPM video panjang anda: ${money(input.customRpm)} setiap 1,000 tontonan.`, `Your long-form RPM: ${money(input.customRpm)} per 1,000 views.`)
+        : t(`Anggaran RPM video panjang: ${money(low.rpm)} hingga ${money(high.rpm)} setiap 1,000 tontonan.`, `Estimated long-form RPM: ${money(low.rpm)} to ${money(high.rpm)} per 1,000 views.`));
     setText("resTaxNote", input.taxInfo
-        ? "Google tahan 30% daripada pendapatan penonton AS kerana Malaysia tiada perjanjian cukai dengan AS."
-        : "Tanpa maklumat cukai, Google boleh tahan sehingga 24% daripada SEMUA pendapatan. Hantar borang W-8BEN dalam AdSense.");
+        ? t("Google tahan 30% daripada pendapatan penonton AS kerana Malaysia tiada perjanjian cukai dengan AS.",
+            "Google withholds 30% of earnings from US viewers because Malaysia has no tax treaty with the US.")
+        : t("Tanpa maklumat cukai, Google boleh tahan sehingga 24% daripada SEMUA pendapatan. Hantar borang W-8BEN dalam AdSense.",
+            "Without tax info, Google may withhold up to 24% of ALL earnings. Submit the W-8BEN form in AdSense."));
     document.getElementById("yppBox").innerHTML = yppStatus(input);
 }
 
@@ -129,15 +141,18 @@ async function api(endpoint, params) {
         response = await fetch(`${API}${endpoint}?${query}`);
     } catch {
         // Ralat rangkaian (tiada internet, ad blocker atau rangkaian pejabat/sekolah yang sekat Google API)
-        throw new Error("Tidak dapat menghubungi YouTube. Semak sambungan internet atau matikan ad blocker untuk laman ini, kemudian cuba lagi. Anda juga boleh masukkan tontonan secara manual.");
+        throw new Error(t("Tidak dapat menghubungi YouTube. Semak sambungan internet atau matikan ad blocker untuk laman ini, kemudian cuba lagi. Anda juga boleh masukkan tontonan secara manual.",
+            "Couldn't reach YouTube. Check your internet connection or turn off your ad blocker for this site, then try again. You can also enter views manually."));
     }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.error) {
         const reason = data.error?.errors?.[0]?.reason || "";
         if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
-            throw new Error("Had carian harian YouTube telah habis. Cuba lagi esok, atau masukkan tontonan secara manual.");
+            throw new Error(t("Had carian harian YouTube telah habis. Cuba lagi esok, atau masukkan tontonan secara manual.",
+                "The daily YouTube lookup limit has been reached. Try again tomorrow, or enter views manually."));
         }
-        throw new Error("YouTube tidak dapat dihubungi sekarang. Cuba lagi sebentar, atau masukkan tontonan secara manual.");
+        throw new Error(t("YouTube tidak dapat dihubungi sekarang. Cuba lagi sebentar, atau masukkan tontonan secara manual.",
+            "YouTube can't be reached right now. Try again shortly, or enter views manually."));
     }
     return data;
 }
@@ -157,17 +172,17 @@ async function findChannel(target) {
     else if (target.type === "video") {
         const video = await api("videos", { part: "snippet", id: target.value });
         const channelId = video.items?.[0]?.snippet?.channelId;
-        if (!channelId) throw new Error("Video tidak ditemui. Semak semula pautan.");
+        if (!channelId) throw new Error(t("Video tidak ditemui. Semak semula pautan.", "Video not found. Check the link."));
         params = { id: channelId };
     } else {
         const found = await api("search", { part: "snippet", type: "channel", q: target.value, maxResults: 1 });
         const channelId = found.items?.[0]?.snippet?.channelId;
-        if (!channelId) throw new Error("Saluran tidak ditemui. Cuba pautan @nama saluran.");
+        if (!channelId) throw new Error(t("Saluran tidak ditemui. Cuba pautan @nama saluran.", "Channel not found. Try the channel's @handle link."));
         params = { id: channelId };
     }
     const data = await api("channels", { part, ...params });
     const channel = data.items?.[0];
-    if (!channel) throw new Error("Saluran tidak ditemui. Semak semula pautan.");
+    if (!channel) throw new Error(t("Saluran tidak ditemui. Semak semula pautan.", "Channel not found. Check the link."));
     return channel;
 }
 
@@ -215,11 +230,14 @@ function analyseUploads(channel, videos, now = Date.now()) {
     if (shortsOnly) shortsMonthly += backCatalog;
     else longMonthly += backCatalog;
 
-    const recentText = `${recent.length} video yang dimuat naik dalam ${Math.round(windowDays)} hari lepas (${fmt.format(recentMonthly)} tontonan sebulan)`;
-    const lifetimeText = `purata sepanjang hayat saluran (${fmt.format(lifetimeMonthly)} tontonan sebulan)`;
+    const recentText = t(`${recent.length} video yang dimuat naik dalam ${Math.round(windowDays)} hari lepas (${fmt.format(recentMonthly)} tontonan sebulan)`,
+        `${recent.length} ${recent.length === 1 ? "video" : "videos"} uploaded in the last ${Math.round(windowDays)} days (${fmt.format(recentMonthly)} views a month)`);
+    const lifetimeText = t(`purata sepanjang hayat saluran (${fmt.format(lifetimeMonthly)} tontonan sebulan)`,
+        `the channel's lifetime average (${fmt.format(lifetimeMonthly)} views a month)`);
     let method;
-    if (!windowDays) method = `${lifetimeText}, kerana tiada muat naik dalam 12 bulan lepas`;
-    else if (backCatalog > 0) method = `angka lebih tinggi antara ${lifetimeText} dan ${recentText}, kerana video lama saluran ini masih ditonton`;
+    if (!windowDays) method = t(`${lifetimeText}, kerana tiada muat naik dalam 12 bulan lepas`, `${lifetimeText}, because there were no uploads in the last 12 months`);
+    else if (backCatalog > 0) method = t(`angka lebih tinggi antara ${lifetimeText} dan ${recentText}, kerana video lama saluran ini masih ditonton`,
+        `the higher of ${lifetimeText} and ${recentText}, because this channel's older videos are still being watched`);
     else method = recentText;
     return { longMonthly, shortsMonthly, avgLongMinutes, shorts90, method };
 }
@@ -239,12 +257,13 @@ function renderChannel(channel, analysis) {
     img.src = channel.snippet?.thumbnails?.default?.url || "";
     img.alt = channel.snippet?.title || "";
     const link = document.getElementById("ytName");
-    link.textContent = channel.snippet?.title || "Saluran YouTube";
+    link.textContent = channel.snippet?.title || t("Saluran YouTube", "YouTube channel");
     link.href = channel.snippet?.customUrl ? `https://www.youtube.com/${channel.snippet.customUrl}` : `https://www.youtube.com/channel/${channel.id}`;
-    setText("ytSubs", s.hiddenSubscriberCount ? "Disembunyikan" : fmt.format(Number(s.subscriberCount || 0)));
+    setText("ytSubs", s.hiddenSubscriberCount ? t("Disembunyikan", "Hidden") : fmt.format(Number(s.subscriberCount || 0)));
     setText("ytViews", fmt.format(Number(s.viewCount || 0)));
     setText("ytVideos", fmt.format(Number(s.videoCount || 0)));
-    setText("ytMethod", `Anggaran tontonan sebulan dikira daripada ${analysis.method}. Ini anggaran kasar; ubah angka di bawah jika anda tahu angka sebenar dari YouTube Studio.`);
+    setText("ytMethod", t(`Anggaran tontonan sebulan dikira daripada ${analysis.method}. Ini anggaran kasar; ubah angka di bawah jika anda tahu angka sebenar dari YouTube Studio.`,
+        `Monthly views are estimated from ${analysis.method}. This is a rough estimate; change the numbers below if you know the real figures from YouTube Studio.`));
 }
 
 // ---------- Kongsi hasil ----------
@@ -266,8 +285,11 @@ function setShareParams(url) {
 const shareHref = url => setShareParams(url).href.replace("saluran=%40", "saluran=@");
 
 // Kemas kini bar alamat supaya pautan yang disalin terus dari pelayar juga boleh dikongsi.
+// Butang BM/English bawa saluran yang sama ke halaman bahasa lain.
 function syncShareUrl() {
     history.replaceState(history.state, "", shareHref(new URL(window.location.href)));
+    const langSwitch = document.querySelector("[data-lang-switch]");
+    if (langSwitch) langSwitch.href = shareHref(new URL(langSwitch.getAttribute("href").split("?")[0], window.location.href));
 }
 
 async function shareResult() {
@@ -275,8 +297,9 @@ async function shareResult() {
     const status = document.getElementById("ytShareStatus");
     const url = shareHref(new URL(window.location.pathname, window.location.origin));
     const mid = estimate(readInput())[1];
-    const text = `Anggaran pendapatan YouTube ${sharedChannel.title}: lebih kurang ${money(mid.net)} sebulan (anggaran kasar Bajet MY). Cuba semak channel favourite korang:`;
-    if (typeof window.gtag === "function") window.gtag("event", "youtube_share", { channel: sharedChannel.id });
+    const text = t(`Anggaran pendapatan YouTube ${sharedChannel.title}: lebih kurang ${money(mid.net)} sebulan (anggaran kasar Bajet MY). Cuba semak channel favourite korang:`,
+        `Estimated YouTube income for ${sharedChannel.title}: about ${money(mid.net)} a month (rough estimate by Bajet MY). Check your favourite channel:`);
+    if (typeof window.gtag === "function") window.gtag("event", "youtube_share", { channel: sharedChannel.id, language: t("ms", "en") });
     if (navigator.share) {
         try {
             await navigator.share({ title: document.title, text, url });
@@ -288,9 +311,9 @@ async function shareResult() {
     }
     try {
         await navigator.clipboard.writeText(`${text} ${url}`);
-        status.textContent = "Pautan disalin. Tampal di WhatsApp, Threads atau mana-mana.";
+        status.textContent = t("Pautan disalin. Tampal di WhatsApp, Threads atau mana-mana.", "Link copied. Paste it in WhatsApp, Threads or anywhere.");
     } catch {
-        status.textContent = `Salin pautan ini: ${url}`;
+        status.textContent = t(`Salin pautan ini: ${url}`, `Copy this link: ${url}`);
     }
 }
 
@@ -312,12 +335,13 @@ async function lookupChannel() {
     const target = parseYouTubeInput(document.getElementById("ytUrl").value);
     clearChannel();
     if (!target) {
-        showLookupStatus("Pautan tidak dikenali. Contoh: https://www.youtube.com/@namasaluran atau pautan mana-mana video.", true);
+        showLookupStatus(t("Pautan tidak dikenali. Contoh: https://www.youtube.com/@namasaluran atau pautan mana-mana video.",
+            "Link not recognised. Example: https://www.youtube.com/@channelname or a link to any video."), true);
         return;
     }
     const button = document.getElementById("ytLookup");
     button.disabled = true;
-    showLookupStatus("Mencari saluran...", false);
+    showLookupStatus(t("Mencari saluran...", "Looking up channel..."), false);
     try {
         const channel = await findChannel(target);
         const uploads = channel.contentDetails?.relatedPlaylists?.uploads;
@@ -337,7 +361,7 @@ async function lookupChannel() {
         const handle = channel.snippet?.customUrl || "";
         sharedChannel = {
             id: /^@[\w.-]{3,}$/.test(handle) ? handle : channel.id,
-            title: channel.snippet?.title || "saluran ini"
+            title: channel.snippet?.title || t("saluran ini", "this channel")
         };
         renderChannel(channel, analysis);
         syncShareUrl();

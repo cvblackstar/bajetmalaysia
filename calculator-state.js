@@ -13,6 +13,10 @@
     }).format(amount);
   }
 
+  // Halaman English (contoh youtube-income-calculator.html) guna <html lang="en">.
+  const EN = document.documentElement.lang === "en";
+  const t = (ms, en) => EN ? en : ms;
+
   window.BajetMY = window.BajetMY || {};
   window.BajetMY.formatCurrency = formatCurrency;
 
@@ -229,12 +233,12 @@
     const share = document.createElement("button");
     share.type = "button";
     share.className = "share-primary";
-    share.textContent = "Kongsi Senario";
+    share.textContent = t("Kongsi Senario", "Share Scenario");
 
     const clear = document.createElement("button");
     clear.type = "button";
     clear.className = "share-secondary";
-    clear.textContent = "Padam Simpanan";
+    clear.textContent = t("Padam Simpanan", "Clear Saved Inputs");
 
     const status = document.createElement("span");
     status.className = "share-status";
@@ -242,9 +246,11 @@
 
     const note = document.createElement("p");
     note.className = "calculator-data-note";
-    note.innerHTML =
+    note.innerHTML = t(
       'Input anda disimpan dalam browser anda by default. Pautan kongsi menggunakan encoded state, <strong>bukan encryption</strong>. ' +
-      '<a href="privacy.html">Lihat Notis Privasi</a>.';
+      '<a href="privacy.html">Lihat Notis Privasi</a>.',
+      'Your inputs are saved in your browser by default. Share links use encoded state, <strong>not encryption</strong>. ' +
+      '<a href="privacy.html">Read the Privacy Notice (Malay)</a>.');
 
     share.addEventListener("click", async () => {
       const encoded = encodeState();
@@ -256,9 +262,9 @@
 
       try {
         await navigator.clipboard.writeText(url.href);
-        status.textContent = "Pautan berjaya disalin.";
+        status.textContent = t("Pautan berjaya disalin.", "Link copied.");
       } catch (error) {
-        status.textContent = "Pautan dijana. Salin URL daripada bar alamat untuk berkongsi.";
+        status.textContent = t("Pautan dijana. Salin URL daripada bar alamat untuk berkongsi.", "Link created. Copy the URL from the address bar to share it.");
       }
     });
 
@@ -267,7 +273,7 @@
       const cleanUrl = new URL(window.location.href);
       cleanUrl.hash = "";
       history.replaceState(null, "", cleanUrl.href);
-      status.textContent = "Simpanan tempatan dipadam.";
+      status.textContent = t("Simpanan tempatan dipadam.", "Saved inputs cleared.");
     });
 
     actions.append(share, clear, status);
