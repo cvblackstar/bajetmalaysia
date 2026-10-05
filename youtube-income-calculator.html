@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Income Calculator Malaysia (RM) | Bajet MY</title>
+    <meta name="description" content="Estimate YouTube income in ringgit. Paste a channel link, pick a niche and see long-form and Shorts earnings after US tax, built for Malaysian creators.">
+    <link rel="stylesheet" href="style.css">
+<script src="calculator-state.js"></script>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="canonical" href="https://bajetmy.my/youtube-income-calculator.html">
+<link rel="alternate" hreflang="ms-MY" href="https://bajetmy.my/pendapatan-youtube.html">
+<link rel="alternate" hreflang="en-MY" href="https://bajetmy.my/youtube-income-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://bajetmy.my/pendapatan-youtube.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bajet MY">
+<meta property="og:locale" content="en_MY">
+<meta property="og:locale:alternate" content="ms_MY">
+<meta property="og:url" content="https://bajetmy.my/youtube-income-calculator.html">
+<meta property="og:title" content="YouTube Income Calculator Malaysia (RM) | Bajet MY">
+<meta property="og:description" content="Estimate YouTube income in ringgit. Paste a channel link, pick a niche and see long-form and Shorts earnings after US tax, built for Malaysian creators.">
+<meta name="twitter:title" content="YouTube Income Calculator Malaysia (RM) | Bajet MY">
+<meta name="twitter:description" content="Estimate YouTube income in ringgit. Paste a channel link, pick a niche and see long-form and Shorts earnings after US tax, built for Malaysian creators.">
+<meta property="og:image" content="https://bajetmy.my/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bajetmy.my/assets/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "YouTube Income Calculator Malaysia",
+      "url": "https://bajetmy.my/youtube-income-calculator.html",
+      "description": "Estimate YouTube income in ringgit. Paste a channel link, pick a niche and see long-form and Shorts earnings after US tax, built for Malaysian creators.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Any",
+      "inLanguage": "en-MY",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "MYR" },
+      "publisher": { "@type": "Organization", "name": "Bajet MY", "url": "https://bajetmy.my/" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bajetmy.my/" },
+        { "@type": "ListItem", "position": 2, "name": "Calculators", "item": "https://bajetmy.my/#kalkulator" },
+        { "@type": "ListItem", "position": 3, "name": "YouTube Income", "item": "https://bajetmy.my/youtube-income-calculator.html" }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+.yt-lookup{max-width:760px;margin:0 auto 2rem;border:1px solid rgba(0,0,0,.1);border-radius:18px;padding:1.4rem;background:#fff}
+.yt-lookup h2{font-size:1.1rem;margin:0 0 .4rem}
+.yt-lookup p{margin:0 0 .9rem;font-size:.9rem;opacity:.8}
+.yt-search{display:flex;gap:.6rem}
+.yt-search input{flex:1;min-width:0;padding:.8rem 1rem;border:1px solid rgba(0,0,0,.18);border-radius:12px;font:inherit}
+.yt-search .button{white-space:nowrap}
+#ytStatus{margin-top:.8rem;font-size:.9rem}
+.yt-channel[hidden]{display:none}
+.yt-channel{display:grid;grid-template-columns:64px 1fr;gap:1rem;align-items:center;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid rgba(0,0,0,.08)}
+.yt-channel img{width:64px;height:64px;border-radius:50%;object-fit:cover;background:rgba(0,0,0,.06)}
+.yt-channel a{font-weight:700;font-size:1.05rem;color:inherit}
+.yt-stats{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.85rem;margin-top:.3rem;opacity:.85}
+.yt-channel .yt-method{grid-column:1/-1;margin:0;font-size:.82rem}
+.yt-share{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem .9rem}
+.range-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:1rem 0}
+.range-stats div{border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:.7rem;text-align:center}
+.range-stats span{display:block;font-size:.75rem;opacity:.7}
+.range-stats strong{font-size:1rem}
+.result-note{margin-top:.4rem;font-size:.85rem;opacity:.75}
+.ypp-list{margin:.5rem 0;padding-left:1.1rem;font-size:.88rem}
+.ypp-list li{margin:.35rem 0}
+.ypp-tag{display:inline-block;font-weight:700;font-size:.75rem;padding:.05rem .45rem;border-radius:6px;margin-right:.3rem;background:rgba(0,0,0,.08)}
+.ypp-tag.ok{background:#e8f7f1;color:#0f8b5f}
+.ypp-tag.no{background:#fdecec;color:#c0392b}
+.yt-faq{max-width:820px;margin:0 auto}
+.yt-faq details{border:1px solid rgba(0,0,0,.1);border-radius:14px;background:#fff;margin-bottom:.75rem}
+.yt-faq summary{cursor:pointer;padding:1rem 1.2rem;font-weight:700;color:var(--navy)}
+.yt-faq details p{margin:0;padding:0 1.2rem 1.1rem;line-height:1.6}
+.yt-faq-more{max-width:820px;margin:1.2rem auto 0;text-align:center}
+.lang-switch{display:flex;justify-content:center;gap:.4rem;margin:0 0 1rem;font-size:.85rem}
+.lang-switch a,.lang-switch span{padding:.25rem .7rem;border:1px solid rgba(0,0,0,.15);border-radius:999px;color:inherit;text-decoration:none}
+.lang-switch span{font-weight:700;background:rgba(0,0,0,.06)}
+@media(max-width:600px){.yt-search{flex-direction:column}.range-stats{grid-template-columns:1fr}}
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SKRD4Q889Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SKRD4Q889Y');
+</script>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">BAJET MY</a>
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="index.html#kalkulator">Calculators</a>
+            <a href="panduan.html">Guides</a>
+            <a href="tentang-kami.html">About</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+<section class="section">
+<div class="container">
+    <nav class="lang-switch" aria-label="Language / Bahasa"><a href="pendapatan-youtube.html" hreflang="ms" lang="ms" data-lang-switch>BM</a><span aria-current="page">English</span></nav>
+    <div class="section-heading">
+        <span class="eyebrow">YOUTUBE &amp; SHORTS</span>
+        <h1>YouTube Income Calculator Malaysia</h1>
+        <p>How much can a YouTube channel make in a month? Paste a channel or video link and get an estimate in ringgit, after US tax.</p>
+    </div>
+
+    <div class="yt-lookup" id="ytLookupCard" hidden>
+        <h2>Check a channel by link</h2>
+        <p>Paste a channel link (for example youtube.com/@channelname) or a link to any video from that channel.</p>
+        <div class="yt-search">
+            <input type="text" id="ytUrl" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/@channelname" aria-label="YouTube channel or video link">
+            <button type="button" id="ytLookup" class="button primary">Check Channel</button>
+        </div>
+        <div id="ytStatus" role="status" aria-live="polite" hidden></div>
+        <div class="yt-channel" id="ytChannel" hidden>
+            <img id="ytThumb" src="" alt="" width="64" height="64">
+            <div>
+                <a id="ytName" href="#" target="_blank" rel="noopener noreferrer">Channel</a>
+                <div class="yt-stats">
+                    <span><strong id="ytSubs">0</strong> subscribers</span>
+                    <span><strong id="ytViews">0</strong> total views</span>
+                    <span><strong id="ytVideos">0</strong> videos</span>
+                </div>
+            </div>
+            <p class="yt-method" id="ytMethod"></p>
+            <div class="yt-share">
+                <button type="button" id="ytShare" class="button primary">Share Result</button>
+                <span id="ytShareStatus" class="share-status" aria-live="polite"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="calculator-layout">
+        <div class="calculator-form-card">
+            <h2>Channel Details</h2>
+
+            <div class="form-group">
+                <label for="longViews">Long-form video views per month</label>
+                <input type="number" id="longViews" value="50000" min="0" step="1000">
+            </div>
+            <div class="form-group">
+                <label for="shortsViews">Shorts views per month</label>
+                <input type="number" id="shortsViews" value="200000" min="0" step="10000">
+                <small>Shorts pay far less than long-form videos, so the two are calculated separately.</small>
+            </div>
+            <div class="form-group">
+                <label for="niche">Content niche</label>
+                <select id="niche">
+                    <option value="kewangan">Finance, business &amp; property</option>
+                    <option value="teknologi">Tech &amp; product reviews</option>
+                    <option value="pendidikan">Education &amp; tutorials</option>
+                    <option value="lifestyle" selected>Lifestyle, vlogs, food &amp; travel</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="hiburan">Entertainment, music &amp; comedy</option>
+                </select>
+                <small>Advertisers pay more to reach finance and tech audiences.</small>
+            </div>
+            <div class="form-group">
+                <label for="audience">Main audience</label>
+                <select id="audience">
+                    <option value="malaysia" selected>Mostly Malaysia</option>
+                    <option value="campuran">Mix of Malaysia &amp; overseas</option>
+                    <option value="global">Mostly global / US (English content)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="customRpm">Your actual RPM (optional)</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="customRpm" value="" min="0" step="0.1" placeholder="Use estimate"></div>
+                <small>Channel owners can find RPM in YouTube Studio → Analytics → Revenue. If filled in, it replaces the long-form estimate.</small>
+            </div>
+            <div class="form-group">
+                <label for="sponsorship">Sponsorships &amp; other income per month</label>
+                <div class="input-wrapper"><span>RM</span><input type="number" id="sponsorship" value="0" min="0" step="100"></div>
+                <small>For example brand deals, affiliate links, memberships. Google does not withhold US tax on these.</small>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="taxInfo" checked>
+                    <span>I have submitted my US tax info (W-8BEN) in AdSense</span>
+                </label>
+            </div>
+
+            <button type="button" id="calculateYoutubeButton" class="button primary calculate-button">Calculate YouTube Income</button>
+        </div>
+
+        <div class="calculator-result-card" aria-live="polite">
+            <h2>Estimated Income</h2>
+
+            <div class="take-home">
+                <span>Typical estimate per month</span>
+                <strong id="netMonthly">RM 0.00</strong>
+            </div>
+
+            <div class="range-stats">
+                <div><span>Low</span><strong id="resLow">RM 0.00</strong></div>
+                <div><span>Typical</span><strong id="resMid">RM 0.00</strong></div>
+                <div><span>High</span><strong id="resHigh">RM 0.00</strong></div>
+            </div>
+
+            <div class="result-list">
+                <div class="result-row"><span>Long-form ads</span><strong id="resLongAds">RM 0.00</strong></div>
+                <div class="result-row"><span>Shorts ads</span><strong id="resShortsAds">RM 0.00</strong></div>
+                <div class="result-row"><span>US tax withheld by Google</span><strong id="resWithholding">RM 0.00</strong></div>
+                <div class="result-row"><span>Sponsorships &amp; other</span><strong id="resSponsor">RM 0.00</strong></div>
+                <div class="result-row total-row"><span>Estimated net per month</span><strong id="resNet">RM 0.00</strong></div>
+            </div>
+            <p class="result-note">Per year: <strong id="resYearly">RM 0.00</strong></p>
+            <p class="result-note" id="resRpm"></p>
+            <p class="result-note" id="resTaxNote"></p>
+
+            <div class="pcb-notice" id="yppBox"></div>
+            <div class="pcb-notice">
+                <strong>Don't forget LHDN</strong>
+                <p>YouTube income is business income and must be declared in your Malaysian income tax return (Form B for individuals). US tax withheld by Google does not replace Malaysian tax.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">HOW IT WORKS</span>
+        <h2>Where do these numbers come from?</h2>
+    </div>
+    <div class="topic-grid">
+        <article class="topic"><div class="topic-icon">📺</div><div><h3>RPM</h3><p>What a creator earns per 1,000 views, after YouTube takes its share. Estimate = views ÷ 1,000 × RPM. Real RPM varies by niche, viewer country, season and video length.</p></div></article>
+        <article class="topic"><div class="topic-icon">🔗</div><div><h3>Link data</h3><p>Subscribers, views and video lengths come from the public YouTube Data API. Monthly views are estimated from recent uploads, or the channel's lifetime average if that is higher (for channels whose older videos are still watched). Real revenue and watch hours are only visible to the channel owner.</p></div></article>
+        <article class="topic"><div class="topic-icon">🇺🇸</div><div><h3>US tax</h3><p>Malaysia has no tax treaty with the US, so Google withholds 30% of earnings from US viewers. Without tax info, up to 24% of all earnings can be withheld.</p></div></article>
+    </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+    <div class="section-heading">
+        <span class="eyebrow">FAQ</span>
+        <h2>Common questions about YouTube income</h2>
+    </div>
+    <div class="yt-faq">
+        <details>
+            <summary>How much does YouTube pay per 1,000 views in Malaysia?</summary>
+            <p>For long-form videos with a mostly Malaysian audience, a rough estimate is RM1 to RM15 per 1,000 views, depending on the niche. Entertainment and gaming usually sit at the low end, while finance and tech pay more because advertisers are willing to pay more. Example: 100,000 views on a lifestyle video at RM3 per 1,000 views is about RM300. This figure is called RPM, which is what the creator earns after YouTube takes its share.</p>
+        </details>
+        <details>
+            <summary>How many subscribers do I need to start earning from ads?</summary>
+            <p>To join the YouTube Partner Program and get a share of ad revenue, a channel needs 1,000 subscribers and either 4,000 public watch hours in 12 months or 10 million Shorts views in 90 days. Until it is accepted, the channel does not earn ad revenue even if ads appear on its videos.</p>
+        </details>
+        <details>
+            <summary>Why do Shorts pay so much less than long-form videos?</summary>
+            <p>Shorts ads run between videos in the feed, not inside your video. The revenue is pooled, split by each creator's share of views, and creators keep 45% of their share. That is why a million Shorts views with a Malaysian audience is estimated at only around RM30 to RM180.</p>
+        </details>
+        <details>
+            <summary>Do Malaysian YouTubers pay US tax?</summary>
+            <p>Yes, on views from the US. Malaysia has no tax treaty with the US, so Google withholds 30% of earnings from US viewers if you have submitted your tax info (the W-8BEN form in AdSense). If you have not, Google may withhold up to 24% of all your earnings, not just the US portion.</p>
+        </details>
+        <details>
+            <summary>Do I need to declare YouTube income to LHDN?</summary>
+            <p>Yes. YouTube income, sponsorships and affiliate earnings count as business income, so declare them in Form B (for individuals with business income). US tax withheld by Google does not replace Malaysian income tax. Keep records of AdSense payments and related expenses such as recording equipment.</p>
+        </details>
+        <details>
+            <summary>Can I find out how much another channel really earns?</summary>
+            <p>No. YouTube does not publish any channel's earnings, so every calculator online, including this one, only gives an estimate based on views. Only the channel owner can see the real figures in YouTube Studio. If you own the channel, enter your actual RPM in the calculator above for a more accurate estimate.</p>
+        </details>
+    </div>
+    <p class="yt-faq-more">Looking for other ways to earn more? Check <a href="kumpulan-pendapatan.html">your household income group (B40, M40, T20)</a> or read <a href="artikel/pendapatan-sampingan-popular-malaysia.html">our side income guide</a> (both in Malay).</p>
+</div>
+</section>
+
+<section class="section light-section">
+<div class="container">
+    <div class="principle-box">
+        <span class="eyebrow">IMPORTANT NOTE</span>
+        <h2>This is an estimate, not real earnings</h2>
+        <p>YouTube does not publish any channel's earnings. The RPM ranges here are Bajet MY's rough estimates based on ranges reported by creators, and can differ a lot from real earnings. Shorts are identified as videos of 3 minutes or less. A channel must be accepted into the YouTube Partner Program before it can earn ad revenue.</p>
+        <p style="margin-top:0.8rem;">Link lookups go directly from your browser to the YouTube Data API (Google). Bajet MY does not store the links you search.</p>
+        <p style="margin-top:0.8rem;">Sources: <a href="https://support.google.com/youtube/answer/72851" target="_blank" rel="noopener noreferrer">YouTube Help — YouTube Partner Program eligibility</a>, <a href="https://support.google.com/youtube/answer/10391362" target="_blank" rel="noopener noreferrer">YouTube Help — US tax requirements</a>, LHDN.</p>
+    </div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <p class="footer-brand">BAJET MY</p>
+        <p>Understand money. Manage money. Plan your life.</p>
+        <p>Information on this site is for educational and general reference purposes only.</p>
+        <p>© 2026 Bajet MY</p>
+    </div>
+<p class="footer-policies"><a href="tentang-kami.html#hubungi-kami">Contact Us</a><a href="disclaimer.html">Disclaimer</a><a href="privacy.html">Privacy</a><a href="affiliate-disclosure.html">Affiliate Disclosure</a></p>
+</footer>
+<script src="youtube-key.js"></script>
+<script src="pendapatan-youtube.js"></script>
+</body>
+</html>
