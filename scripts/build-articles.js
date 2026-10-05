@@ -78,9 +78,30 @@ function relocate(html) {
   return html.replace(/\b(href|src)="(?!https?:|mailto:|tel:|data:|#|\/|\.\.\/)([^"]*)"/g, '$1="../$2"');
 }
 
-function renderPage(template, meta, markdown) {
+// Google memotong tajuk melebihi ~65 aksara, jadi akhiran jenama digugurkan untuk tajuk panjang.
+function pageTitle(title) {
+  const branded = `${title} | Bajet MY`;
+  return branded.length <= 65 ? branded : title;
+}
+
+// Pilih sehingga 3 artikel lain: kategori sama dahulu, kemudian paling banyak tag dikongsi, kemudian terbaru.
+function relatedArticles(meta, published) {
+  const tags = new Set(meta.tags || []);
+  return published
+    .filter(other => other.slug !== meta.slug)
+    .map(other => ({
+      other,
+      score: (other.category === meta.category ? 10 : 0) + (other.tags || []).filter(tag => tags.has(tag)).length
+    }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score || String(b.other.published).localeCompare(String(a.other.published)))
+    .slice(0, 3)
+    .map(item => item.other);
+}
+
+function renderPage(template, meta, markdown, published = []) {
   const url = articleUrl(meta.slug);
-  const title = `${meta.title} | Bajet MY`;
+  const title = pageTitle(meta.title);
   const body = markdown.replace(/^---[\s\S]*?---\s*/, '').trim()
     .replace(/^#\s+.*(\r?\n)+/, ''); // buang H1 di awal: templat sudah papar meta.title sebagai <h1>
   const image = (body.match(/!\[[^\]]*\]\(([^)\s]+)\)/) || [])[1];
@@ -88,8 +109,10 @@ function renderPage(template, meta, markdown) {
   const calc = calculatorLinks[meta.calculator];
   const typeLabel = typeLabels[meta.type];
   const eyebrow = typeLabel ? `${typeLabel} · ${meta.category}` : meta.category;
+  const related = relatedArticles(meta, published);
+  const relatedHtml = related.length ? `<nav class="article-related" aria-label="Artikel berkaitan"><h2>Artikel berkaitan</h2><ul>${related.map(other => `<li><a href="${OUT_DIR}/${encodeURIComponent(other.slug)}.html">${esc(other.title)}</a></li>`).join('')}</ul></nav>` : '';
   const opinionNote = meta.type === 'sudut-pandang' ? '<blockquote>Sudut Pandang ialah tulisan renungan untuk membuka perbincangan, bukan nasihat kewangan peribadi. Keadaan setiap orang berbeza.</blockquote>' : '';
-  const article = `<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}${opinionNote}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}`;
+  const article = `<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}${opinionNote}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}${relatedHtml}`;
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': meta.type === 'berita' ? 'NewsArticle' : meta.type === 'sudut-pandang' ? 'OpinionNewsArticle' : 'Article',
@@ -130,16 +153,49 @@ function renderPage(template, meta, markdown) {
 
 function buildArticlePages() {
   const template = fs.readFileSync(path.join(root, 'article.html'), 'utf8');
-  const articles = JSON.parse(fs.readFileSync(path.join(root, 'data', 'articles.json'), 'utf8'));
-  return articles
-    .filter(article => article.status === 'published')
-    .map(meta => ({
-      file: `${OUT_DIR}/${meta.slug}.html`,
-      html: renderPage(template, meta, fs.readFileSync(path.join(root, meta.path), 'utf8'))
-    }));
+  const published = publishedArticles();
+  return published.map(meta => ({
+    file: `${OUT_DIR}/${meta.slug}.html`,
+    html: renderPage(template, meta, fs.readFileSync(path.join(root, meta.path), 'utf8'), published)
+  }));
 }
 
-module.exports = { calculatorLinks, buildArticlePages, OUT_DIR };
+function publishedArticles() {
+  const articles = JSON.parse(fs.readFileSync(path.join(root, 'data', 'articles.json'), 'utf8'));
+  return articles.filter(article => article.status === 'published');
+}
+
+// panduan.html memuatkan senarai artikel dengan JavaScript. Kad yang sama ditulis terus ke dalam HTML
+// supaya enjin carian nampak pautan ke setiap artikel tanpa menjalankan skrip; skrip menggantikannya bila dimuatkan.
+const PANDUAN = 'panduan.html';
+const panduanGroups = [
+  { type: 'berita', group: 'groupNews', list: 'listNews', read: 'Baca berita', byDate: true },
+  { type: 'sudut-pandang', group: 'groupOpinion', list: 'listOpinion', read: 'Baca &amp; fikirkan', byDate: true, cls: 'opinion' },
+  { type: 'panduan', group: 'groupGuides', list: 'listGuides', read: 'Baca panduan', byDate: false }
+];
+function formatDate(iso) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return isNaN(d) ? iso : d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+function buildPanduanPage() {
+  let html = fs.readFileSync(path.join(root, PANDUAN), 'utf8');
+  const published = publishedArticles();
+  const typeOf = a => (a.type === 'berita' || a.type === 'sudut-pandang' ? a.type : 'panduan');
+  for (const g of panduanGroups) {
+    let items = published.filter(a => typeOf(a) === g.type);
+    if (g.byDate) items = [...items].sort((x, y) => String(y.published).localeCompare(String(x.published)));
+    const cards = items.map(a => {
+      const date = g.byDate ? `<span class="date">${esc(formatDate(a.published))}</span>` : '';
+      return `<a class="article-card${g.cls ? ' ' + g.cls : ''}" href="${OUT_DIR}/${encodeURIComponent(a.slug)}.html"><div class="meta-row">${date}<span class="category">${esc(a.category)}</span></div><h2>${esc(a.title)}</h2><p>${esc(a.description)}</p><span class="read">${g.read} →</span></a>`;
+    }).join('');
+    const pattern = new RegExp(`<section class="content-group" id="${g.group}"( hidden)?>([\\s\\S]*?)<div class="article-list" id="${g.list}">[\\s\\S]*?</div></section>`);
+    if (!pattern.test(html)) throw new Error(`${PANDUAN}: list marker not found (${g.list})`);
+    html = html.replace(pattern, (_, __, head) => `<section class="content-group" id="${g.group}"${items.length ? '' : ' hidden'}>${head}<div class="article-list" id="${g.list}">${cards}</div></section>`);
+  }
+  return { file: PANDUAN, html };
+}
+
+module.exports = { calculatorLinks, buildArticlePages, buildPanduanPage, OUT_DIR };
 
 if (require.main === module) {
   const pages = buildArticlePages();
@@ -154,4 +210,7 @@ if (require.main === module) {
   }
   for (const page of pages) fs.writeFileSync(path.join(root, page.file), page.html);
   console.log(`${OUT_DIR}/: ${pages.length} article page(s) written.`);
+  const panduan = buildPanduanPage();
+  fs.writeFileSync(path.join(root, panduan.file), panduan.html);
+  console.log(`${panduan.file}: static article list written.`);
 }
