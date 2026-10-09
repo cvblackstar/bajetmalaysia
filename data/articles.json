@@ -1,5 +1,18 @@
 [
   {
+    "title": "Belanjawan 2027: Ringkasan Apa Yang Masuk Poket Korang",
+    "slug": "belanjawan-2027-ringkasan",
+    "path": "articles/economy/belanjawan-2027-ringkasan.md",
+    "category": "Kos Sara Hidup",
+    "type": "berita",
+    "tags": ["Bajet 2027", "Gaji Minimum", "STR", "SARA", "Cukai", "PTPTN"],
+    "published": "2026-10-09",
+    "updated": "2026-10-09",
+    "description": "Gaji minimum naik ke RM2,000, STR dan SARA RM16 bilion, pelepasan cukai individu RM12,000 dan duti setem rumah pertama. Ringkasan Belanjawan 2027 untuk orang biasa.",
+    "calculator": "gaji-bersih",
+    "status": "published"
+  },
+  {
     "title": "Bajet 2027 dan KKM: Duit Ada, Rumah Ada, Kenapa Doktor Tak Sampai?",
     "slug": "bajet-2027-kkm-kuarters-jawatan-kosong",
     "path": "articles/economy/bajet-2027-kkm-kuarters-jawatan-kosong.md",
