@@ -85,6 +85,9 @@ function pageTitle(title) {
 }
 
 // Pilih sehingga 3 artikel lain: kategori sama dahulu, kemudian paling banyak tag dikongsi, kemudian terbaru.
+// AdSense display unit "Adver1"; adsbygoogle.js itself is loaded in <head> by scripts/inject-analytics.py.
+const AD_UNIT = '<div class="article-ad" aria-label="Iklan"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9164251614891507" data-ad-slot="9152811060" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>';
+
 function relatedArticles(meta, published) {
   const tags = new Set(meta.tags || []);
   return published
@@ -112,7 +115,7 @@ function renderPage(template, meta, markdown, published = []) {
   const related = relatedArticles(meta, published);
   const relatedHtml = related.length ? `<nav class="article-related" aria-label="Artikel berkaitan"><h2>Artikel berkaitan</h2><ul>${related.map(other => `<li><a href="${OUT_DIR}/${encodeURIComponent(other.slug)}.html">${esc(other.title)}</a></li>`).join('')}</ul></nav>` : '';
   const opinionNote = meta.type === 'sudut-pandang' ? '<blockquote>Sudut Pandang ialah tulisan renungan untuk membuka perbincangan, bukan nasihat kewangan peribadi. Keadaan setiap orang berbeza.</blockquote>' : '';
-  const article = `<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}${opinionNote}</div>${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}${relatedHtml}`;
+  const article = `<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(meta.title)}</h1><div class="article-meta">Diterbitkan ${esc(meta.published)} · Dikemas kini ${esc(meta.updated)}</div><div class="article-content">${renderMarkdown(body)}${opinionNote}</div>${AD_UNIT}${calc ? `<div class="article-cta"><strong>🧮 Kira berdasarkan angka anda sendiri</strong><p>Gunakan kalkulator Bajet MY yang berkaitan dengan panduan ini.</p><a href="${calc.href}">${calc.label} →</a></div>` : ''}${relatedHtml}`;
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': meta.type === 'berita' ? 'NewsArticle' : meta.type === 'sudut-pandang' ? 'OpinionNewsArticle' : 'Article',
