@@ -1,11 +1,35 @@
 [
   {
+    "title": "Bajet 2027: Apa Yang Rakyat Dapat dan Apa Yang Anda Perlu Buat",
+    "slug": "bajet-2027-apa-rakyat-dapat",
+    "path": "articles/berita/bajet-2027-apa-rakyat-dapat.md",
+    "category": "Kos Sara Hidup",
+    "type": "berita",
+    "tags": [
+      "Bajet 2027",
+      "STR",
+      "SARA",
+      "Rumah Pertama",
+      "KWSP"
+    ],
+    "published": "2026-10-18",
+    "updated": "2026-10-18",
+    "description": "Ringkasan Bajet 2027 untuk rakyat: STR sehingga RM150 sebulan, SARA MADANI RM200, pengecualian duti setem rumah pertama, KWSP dan apa yang anda patut buat sekarang.",
+    "calculator": "kos-beli-rumah",
+    "status": "published"
+  },
+  {
     "title": "BNPL Belia Cecah RM2.4 Bilion: Kecil Setiap Transaksi, Besar Bila Dicampur",
     "slug": "bnpl-belia-rm2-4-bilion",
     "path": "articles/debt/bnpl-belia-rm2-4-bilion.md",
     "category": "Hutang & Pinjaman",
     "type": "berita",
-    "tags": ["BNPL", "Hutang", "Belia", "Akta Kredit Pengguna"],
+    "tags": [
+      "BNPL",
+      "Hutang",
+      "Belia",
+      "Akta Kredit Pengguna"
+    ],
     "published": "2026-10-14",
     "updated": "2026-10-14",
     "description": "Baki BNPL pengguna 30 tahun ke bawah cecah RM2.4 bilion. Purata RM82 satu transaksi, tunggakan 4%. Apa maksudnya dan cara pastikan BNPL tak makan gaji korang.",
@@ -18,7 +42,14 @@
     "path": "articles/economy/belanjawan-2027-ringkasan.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Bajet 2027", "Gaji Minimum", "STR", "SARA", "Cukai", "PTPTN"],
+    "tags": [
+      "Bajet 2027",
+      "Gaji Minimum",
+      "STR",
+      "SARA",
+      "Cukai",
+      "PTPTN"
+    ],
     "published": "2026-10-09",
     "updated": "2026-10-09",
     "description": "Gaji minimum naik ke RM2,000, STR dan SARA RM16 bilion, pelepasan cukai individu RM12,000 dan duti setem rumah pertama. Ringkasan Belanjawan 2027 untuk orang biasa.",
@@ -31,7 +62,13 @@
     "path": "articles/economy/bajet-2027-kkm-kuarters-jawatan-kosong.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Bajet 2027", "KKM", "Kuarters", "Doktor", "Jawatan Kosong"],
+    "tags": [
+      "Bajet 2027",
+      "KKM",
+      "Kuarters",
+      "Doktor",
+      "Jawatan Kosong"
+    ],
     "published": "2026-10-07",
     "updated": "2026-10-07",
     "description": "2,725 unit kuarters KKM rosak, 1,606 kosong dan elok, dan RM500 juta peruntukan gaji jawatan kosong disekat tahun ini. Apa angka KKM sendiri cakap sebelum Bajet 2027 dibentang pada 9 Oktober.",
@@ -43,7 +80,13 @@
     "path": "articles/economy/myeg-jpj-tunggakan-rm314-juta.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["MyEG", "JPJ", "Roadtax", "Zetrix AI", "Penipuan"],
+    "tags": [
+      "MyEG",
+      "JPJ",
+      "Roadtax",
+      "Zetrix AI",
+      "Penipuan"
+    ],
     "published": "2026-10-06",
     "updated": "2026-10-06",
     "description": "MyEG dan Zetrix AI gagal serahkan RM314 juta hasil kutipan JPJ dari Mei hingga September 2026. Apa yang berlaku, berapa besar jumlahnya sehari, dan cara renew roadtax atau lesen sekarang.",
@@ -55,7 +98,14 @@
     "path": "articles/economy/doktor-sabah-sarawak-elaun-pindah.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["KKM", "Doktor", "Elaun Pindah", "Sabah", "Sarawak", "Bajet 2027"],
+    "tags": [
+      "KKM",
+      "Doktor",
+      "Elaun Pindah",
+      "Sabah",
+      "Sarawak",
+      "Bajet 2027"
+    ],
     "published": "2026-10-05",
     "updated": "2026-10-05",
     "description": "4,255 doktor baru dapat lantikan tetap, tapi ada hospital di Sabah dan Sarawak yang tak terima seorang pun. Kos pindah, tuntutan elaun yang ditolak dan insentif wilayah: apa sebenarnya isu duitnya?",
@@ -68,7 +118,13 @@
     "path": "articles/budgeting/graduan-gaji-adil-bajet-2027.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Gaji Graduan", "Guna Tenaga Tidak Penuh", "DOSM", "Bajet 2027", "Gaji Bersih"],
+    "tags": [
+      "Gaji Graduan",
+      "Guna Tenaga Tidak Penuh",
+      "DOSM",
+      "Bajet 2027",
+      "Gaji Bersih"
+    ],
     "published": "2026-10-05",
     "updated": "2026-10-05",
     "description": "Gaji median graduan RM4,521, tapi 66% graduan bawah 25 tahun kerja di bawah kelayakan. Apa kata data DOSM, berapa gaji bersih sebenar, dan apa yang dijanjikan untuk Bajet 2027.",
@@ -81,7 +137,13 @@
     "path": "articles/economy/minyak-dunia-naik-ron95-subsidi.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Harga Minyak", "BUDI95", "Subsidi", "RON95", "Bajet 2027"],
+    "tags": [
+      "Harga Minyak",
+      "BUDI95",
+      "Subsidi",
+      "RON95",
+      "Bajet 2027"
+    ],
     "published": "2026-10-04",
     "updated": "2026-10-04",
     "description": "Harga minyak mentah Brent naik ke US$102 setong pada 2 Oktober 2026, tapi BUDI95 kekal RM1.99 seliter. Berapa sebenarnya nilai subsidi untuk korang, dan apa yang perlu diperhatikan minggu ini?",
@@ -93,7 +155,12 @@
     "slug": "pak-man-telo-skim-ponzi-pertama",
     "path": "articles/financial-literacy/pak-man-telo-skim-ponzi-pertama.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["Pak Man Telo", "Skim Ponzi", "Skim Cepat Kaya", "Scam Pelaburan"],
+    "tags": [
+      "Pak Man Telo",
+      "Skim Ponzi",
+      "Skim Cepat Kaya",
+      "Scam Pelaburan"
+    ],
     "published": "2026-10-03",
     "updated": "2026-10-03",
     "description": "Kisah Pak Man Telo, salah satu skim cepat kaya paling terkenal di Malaysia. Bagaimana janji pulangan 10% sebulan berfungsi, kenapa ramai percaya, dan tanda amaran yang masih sama hari ini.",
@@ -105,7 +172,13 @@
     "slug": "gig-vs-kerja-gaji-apa-beza",
     "path": "articles/savings/gig-vs-kerja-gaji-apa-beza.md",
     "category": "Persaraan & Pelaburan",
-    "tags": ["Pekerja Gig", "KWSP", "PERKESO", "i-Saraan Plus", "Cuti"],
+    "tags": [
+      "Pekerja Gig",
+      "KWSP",
+      "PERKESO",
+      "i-Saraan Plus",
+      "Cuti"
+    ],
     "published": "2026-10-03",
     "updated": "2026-10-03",
     "description": "Pendapatan RM4,000 sebulan sebagai pekerja gig dan sebagai pekerja bergaji tidak sama nilainya. Perbandingan KWSP, cuti dan perlindungan, serta apa yang boleh dibuat oleh pekerja gig.",
@@ -118,7 +191,12 @@
     "path": "articles/berita/pra-bajet-2027-10-fokus.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Bajet 2027", "Pra-Bajet", "Kos Sara Hidup", "Subsidi"],
+    "tags": [
+      "Bajet 2027",
+      "Pra-Bajet",
+      "Kos Sara Hidup",
+      "Subsidi"
+    ],
     "published": "2026-10-02",
     "updated": "2026-10-02",
     "description": "Kementerian Kewangan sudah umum 10 fokus Bajet 2027. Kami kumpulkan mengikut kesannya kepada isi rumah: kos sara hidup, pendapatan dan kerja, serta perkhidmatan awam.",
@@ -130,7 +208,12 @@
     "slug": "snowball-vs-avalanche-bayar-hutang",
     "path": "articles/debt/snowball-vs-avalanche-bayar-hutang.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["Snowball", "Avalanche", "Bayar Hutang", "Kad Kredit"],
+    "tags": [
+      "Snowball",
+      "Avalanche",
+      "Bayar Hutang",
+      "Kad Kredit"
+    ],
     "published": "2026-10-01",
     "updated": "2026-10-01",
     "description": "Dua kaedah popular untuk habiskan banyak hutang: snowball dan avalanche. Contoh kiraan sebenar, apa bezanya, dan kenapa jumlah bayaran tambahan lebih penting daripada kaedah.",
@@ -142,7 +225,12 @@
     "slug": "instalmen-0-peratus-bukan-percuma",
     "path": "articles/debt/instalmen-0-peratus-bukan-percuma.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["Instalmen 0%", "Easy Payment Plan", "Kad Kredit", "Yuran Pemprosesan"],
+    "tags": [
+      "Instalmen 0%",
+      "Easy Payment Plan",
+      "Kad Kredit",
+      "Yuran Pemprosesan"
+    ],
     "published": "2026-10-01",
     "updated": "2026-10-01",
     "description": "Instalmen 0% nampak macam beli tanpa kos. Tapi ada yuran pemprosesan, risiko kadar faedah biasa bila terlewat bayar, dan satu kesan psikologi yang lebih besar.",
@@ -155,7 +243,12 @@
     "path": "articles/sudut-pandang/ekonomi-kukuh-kenapa-tak-rasa.md",
     "category": "Ekonomi & OPR",
     "type": "sudut-pandang",
-    "tags": ["Ekonomi", "Inflasi", "Kos Sara Hidup", "Pengangguran"],
+    "tags": [
+      "Ekonomi",
+      "Inflasi",
+      "Kos Sara Hidup",
+      "Pengangguran"
+    ],
     "published": "2026-09-30",
     "updated": "2026-09-30",
     "description": "Ekonomi berkembang 5.4%, pengangguran paling rendah dalam sedekad, inflasi cuma 1.6%. Tapi ramai masih rasa sempit. Ini kenapa angka negara dan poket kita selalu tak sama.",
@@ -167,7 +260,12 @@
     "slug": "kos-sebenar-beli-rumah",
     "path": "articles/property/kos-sebenar-beli-rumah.md",
     "category": "Rumah & Hartanah",
-    "tags": ["Beli Rumah", "Duti Setem", "Yuran Guaman", "Rumah Pertama"],
+    "tags": [
+      "Beli Rumah",
+      "Duti Setem",
+      "Yuran Guaman",
+      "Rumah Pertama"
+    ],
     "published": "2026-09-30",
     "updated": "2026-09-30",
     "description": "Selain deposit 10%, pembeli rumah perlu sediakan duti setem dan yuran guaman. Contoh pengiraan untuk rumah RM400,000, termasuk pengecualian pembeli rumah pertama.",
@@ -180,7 +278,12 @@
     "path": "articles/berita/opr-kekal-275-apa-maksud.md",
     "category": "Ekonomi & OPR",
     "type": "berita",
-    "tags": ["OPR", "Bank Negara", "Pinjaman Rumah", "Simpanan"],
+    "tags": [
+      "OPR",
+      "Bank Negara",
+      "Pinjaman Rumah",
+      "Simpanan"
+    ],
     "published": "2026-09-30",
     "updated": "2026-09-30",
     "description": "Bank Negara mengekalkan OPR pada 2.75% sepanjang 2026. Apa kesannya pada ansuran pinjaman, simpanan tetap, dan apa nak tengok pada keputusan 5 November.",
@@ -193,7 +296,12 @@
     "path": "articles/berita/bajet-2027-apa-nak-tengok.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["Bajet 2027", "Belanjawan", "Kos Sara Hidup", "Subsidi"],
+    "tags": [
+      "Bajet 2027",
+      "Belanjawan",
+      "Kos Sara Hidup",
+      "Subsidi"
+    ],
     "published": "2026-09-30",
     "updated": "2026-09-30",
     "description": "Bajet 2027 akan dibentang pada 9 Oktober 2026. Ini 5 perkara yang dijangka dan patut diperhatikan oleh isi rumah — daripada bantuan kos sara hidup hingga reformasi subsidi.",
@@ -206,7 +314,13 @@
     "path": "articles/berita/budi95-kuota-300-liter-september-2026.md",
     "category": "Kos Sara Hidup",
     "type": "berita",
-    "tags": ["BUDI95", "Subsidi", "RON95", "Diesel", "Minyak"],
+    "tags": [
+      "BUDI95",
+      "Subsidi",
+      "RON95",
+      "Diesel",
+      "Minyak"
+    ],
     "published": "2026-09-29",
     "updated": "2026-09-29",
     "description": "Kuota bulanan BUDI95 dinaikkan semula daripada 200 kepada 300 liter mulai 1 September 2026, dan kuota BUDI Diesel turut bertambah. Ini maksudnya untuk bajet minyak korang.",
@@ -219,7 +333,12 @@
     "path": "articles/sudut-pandang/gaji-naik-tapi-rasa-makin-sempit.md",
     "category": "Bajet & Simpanan",
     "type": "sudut-pandang",
-    "tags": ["Gaya Hidup", "Gaji", "Simpanan", "Lifestyle Inflation"],
+    "tags": [
+      "Gaya Hidup",
+      "Gaji",
+      "Simpanan",
+      "Lifestyle Inflation"
+    ],
     "published": "2026-09-29",
     "updated": "2026-09-29",
     "description": "Gaji dah naik beberapa kali, tapi hujung bulan tetap sama sempit. Mungkin masalahnya bukan berapa banyak kita dapat, tapi ke mana kenaikan itu pergi.",
@@ -232,7 +351,12 @@
     "path": "articles/economy/ringgit-lemah-kesan-pada-poket.md",
     "category": "Ekonomi & OPR",
     "type": "berita",
-    "tags": ["Ringgit", "Kadar Pertukaran", "Inflasi", "Kos Sara Hidup"],
+    "tags": [
+      "Ringgit",
+      "Kadar Pertukaran",
+      "Inflasi",
+      "Kos Sara Hidup"
+    ],
     "published": "2026-09-29",
     "updated": "2026-09-29",
     "description": "Ringgit turun sekitar 1.2% sepanjang September 2026. Apa maksudnya untuk harga barang, percutian luar negara, yuran belajar anak dan simpanan anda?",
@@ -244,7 +368,13 @@
     "slug": "maksud-b40-m40-t20",
     "path": "articles/financial-literacy/maksud-b40-m40-t20.md",
     "category": "Bajet & Simpanan",
-    "tags": ["B40", "M40", "T20", "Pendapatan Isi Rumah", "DOSM"],
+    "tags": [
+      "B40",
+      "M40",
+      "T20",
+      "Pendapatan Isi Rumah",
+      "DOSM"
+    ],
     "published": "2026-09-29",
     "updated": "2026-09-29",
     "description": "Penjelasan mudah tentang B40, M40 dan T20 — cara ia dikira, kenapa had berbeza ikut negeri, dan kenapa kumpulan anda penting untuk bantuan kerajaan.",
@@ -256,7 +386,12 @@
     "slug": "pendapatan-sampingan-popular-malaysia",
     "path": "articles/budgeting/pendapatan-sampingan-popular-malaysia.md",
     "category": "Bajet & Simpanan",
-    "tags": ["Pendapatan Sampingan", "Side Income", "Gig Economy", "Freelance"],
+    "tags": [
+      "Pendapatan Sampingan",
+      "Side Income",
+      "Gig Economy",
+      "Freelance"
+    ],
     "published": "2026-09-28",
     "updated": "2026-09-28",
     "description": "Jenis-jenis pendapatan sampingan popular di Malaysia — daripada e-hailing hingga jualan digital — serta perkara penting seperti cukai dan KWSP yang ramai terlepas pandang.",
@@ -268,7 +403,12 @@
     "slug": "panduan-simpanan-emas-malaysia",
     "path": "articles/savings/panduan-simpanan-emas-malaysia.md",
     "category": "Simpanan & Pelaburan",
-    "tags": ["Emas", "Simpanan Emas", "Pelaburan", "Gold Investment"],
+    "tags": [
+      "Emas",
+      "Simpanan Emas",
+      "Pelaburan",
+      "Gold Investment"
+    ],
     "published": "2026-09-28",
     "updated": "2026-09-28",
     "description": "Panduan lengkap simpanan emas di Malaysia — jenis-jenis akaun emas, cara semak platform berlesen, dan perkara yang perlu dipertimbangkan sebelum mula melabur.",
@@ -280,7 +420,13 @@
     "slug": "kajian-kes-quantum-metal-amaran-sc-bnm",
     "path": "articles/financial-literacy/kajian-kes-quantum-metal-amaran-sc-bnm.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["Quantum Metal", "SC Malaysia", "BNM", "Skim Pelaburan", "Emas"],
+    "tags": [
+      "Quantum Metal",
+      "SC Malaysia",
+      "BNM",
+      "Skim Pelaburan",
+      "Emas"
+    ],
     "published": "2026-09-28",
     "updated": "2026-09-28",
     "description": "Kajian kes Quantum Metal — syarikat emas digital Malaysia yang menerima arahan berhenti daripada SC dan kenyataan jarak daripada BNM. Apa pengajaran untuk pelabur?",
@@ -292,7 +438,12 @@
     "slug": "scam-cinta-romance-scam-online",
     "path": "articles/financial-literacy/scam-cinta-romance-scam-online.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["Scam Cinta", "Romance Scam", "Scam Online", "Keselamatan Kewangan"],
+    "tags": [
+      "Scam Cinta",
+      "Romance Scam",
+      "Scam Online",
+      "Keselamatan Kewangan"
+    ],
     "published": "2026-09-27",
     "updated": "2026-09-27",
     "description": "Kenali cara scam cinta (romance scam) beroperasi sepenuhnya secara online — daripada kenalan di media sosial sehingga permintaan wang — dan cara melindungi diri.",
@@ -304,7 +455,12 @@
     "slug": "skim-piramid-rekrut-bukan-jualan",
     "path": "articles/financial-literacy/skim-piramid-rekrut-bukan-jualan.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["Skim Piramid", "MLM", "Scam", "Get Rich Quick"],
+    "tags": [
+      "Skim Piramid",
+      "MLM",
+      "Scam",
+      "Get Rich Quick"
+    ],
     "published": "2026-09-27",
     "updated": "2026-09-27",
     "description": "Kenali perbezaan antara perniagaan direct selling yang sah dengan skim piramid — di mana pendapatan sebenar datang dari rekrut ahli baru, bukan jualan produk.",
@@ -316,7 +472,12 @@
     "slug": "e-wallet-dan-bnpl-guna-bijak",
     "path": "articles/debt/e-wallet-dan-bnpl-guna-bijak.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["E-Wallet", "BNPL", "Digital Payment", "Hutang"],
+    "tags": [
+      "E-Wallet",
+      "BNPL",
+      "Digital Payment",
+      "Hutang"
+    ],
     "published": "2026-09-27",
     "updated": "2026-09-27",
     "description": "E-wallet dan Buy Now Pay Later (BNPL) makin popular di Malaysia. Faham cara ia berfungsi, risiko sebenar dan cara guna dengan bijak tanpa terjebak hutang.",
@@ -328,7 +489,12 @@
     "slug": "ria-rangka-kesediaan-persaraan-kwsp",
     "path": "articles/financial-literacy/ria-rangka-kesediaan-persaraan-kwsp.md",
     "category": "Persaraan & Pelaburan",
-    "tags": ["KWSP", "RIA", "Persaraan", "EPF"],
+    "tags": [
+      "KWSP",
+      "RIA",
+      "Persaraan",
+      "EPF"
+    ],
     "published": "2026-09-26",
     "updated": "2026-09-26",
     "description": "Kenali Rangka Kerja Kesediaan Pendapatan Persaraan (RIA) KWSP yang berkuat kuasa 2026 — tiga sasaran simpanan baharu menggantikan sasaran Simpanan Asas tunggal yang lama.",
@@ -340,7 +506,12 @@
     "slug": "debt-service-ratio-malaysia",
     "path": "articles/dsr/debt-service-ratio-malaysia.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["DSR", "Hutang", "Pinjaman", "Pinjaman Rumah"],
+    "tags": [
+      "DSR",
+      "Hutang",
+      "Pinjaman",
+      "Pinjaman Rumah"
+    ],
     "published": "2026-09-22",
     "updated": "2026-09-22",
     "description": "Panduan memahami Debt Service Ratio (DSR), formula pengiraan dan batasannya dalam menilai kemampuan membayar hutang.",
@@ -352,7 +523,12 @@
     "slug": "emergency-fund-malaysia",
     "path": "articles/budgeting/emergency-fund-malaysia.md",
     "category": "Bajet & Simpanan",
-    "tags": ["Emergency Fund", "Simpanan", "Bajet", "Financial Safety Net"],
+    "tags": [
+      "Emergency Fund",
+      "Simpanan",
+      "Bajet",
+      "Financial Safety Net"
+    ],
     "published": "2026-09-22",
     "updated": "2026-09-22",
     "description": "Panduan membina emergency fund berdasarkan perbelanjaan, komitmen dan keadaan kewangan anda.",
@@ -364,7 +540,12 @@
     "slug": "bagaimana-bank-negara-menentukan-opr",
     "path": "articles/economy/bagaimana-bank-negara-menentukan-opr.md",
     "category": "Ekonomi & OPR",
-    "tags": ["OPR", "Bank Negara Malaysia", "Inflasi", "Ekonomi"],
+    "tags": [
+      "OPR",
+      "Bank Negara Malaysia",
+      "Inflasi",
+      "Ekonomi"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Panduan ringkas tentang bagaimana Bank Negara Malaysia melalui Monetary Policy Committee (MPC) menentukan OPR.",
@@ -376,7 +557,13 @@
     "slug": "kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank",
     "path": "articles/savings/kwsp-asnb-tabung-haji-vs-akaun-simpanan-bank.md",
     "category": "Simpanan & Pelaburan",
-    "tags": ["KWSP", "ASNB", "Tabung Haji", "Simpanan Bank", "Simpanan"],
+    "tags": [
+      "KWSP",
+      "ASNB",
+      "Tabung Haji",
+      "Simpanan Bank",
+      "Simpanan"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Perbandingan ringkas KWSP, ASNB, Tabung Haji dan akaun simpanan bank dari segi tujuan, akses, risiko dan perlindungan.",
@@ -388,7 +575,13 @@
     "slug": "pinjam-ah-long-dan-alternatif-selamat",
     "path": "articles/debt/pinjaman-ah-long-dan-alternatif-selamat.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["Ah Long", "Pinjaman", "Hutang", "Kredit Komuniti", "AKPK"],
+    "tags": [
+      "Ah Long",
+      "Pinjaman",
+      "Hutang",
+      "Kredit Komuniti",
+      "AKPK"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Kenapa pinjaman Ah Long sangat berisiko, tanda amaran yang perlu diperhatikan dan pilihan pembiayaan yang lebih terkawal jika anda benar-benar memerlukan wang.",
@@ -400,7 +593,12 @@
     "slug": "urus-duit-dan-simpanan-kecemasan",
     "path": "articles/financial-literacy/urus-duit-dan-simpanan-kecemasan.md",
     "category": "Bajet & Simpanan",
-    "tags": ["Bajet", "Simpanan", "Emergency Fund", "Financial Literacy"],
+    "tags": [
+      "Bajet",
+      "Simpanan",
+      "Emergency Fund",
+      "Financial Literacy"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Asas pengurusan wang yang membantu rakyat Malaysia membina simpanan dan menghadapi kejutan kewangan.",
@@ -412,7 +610,12 @@
     "slug": "faham-hutang-sebelum-meminjam",
     "path": "articles/financial-literacy/faham-hutang-sebelum-meminjam.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["Hutang", "Pinjaman", "DSR", "Financial Literacy"],
+    "tags": [
+      "Hutang",
+      "Pinjaman",
+      "DSR",
+      "Financial Literacy"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Perkara asas yang perlu difahami sebelum mengambil pinjaman supaya kos dan kemampuan bayaran balik lebih jelas.",
@@ -424,7 +627,12 @@
     "slug": "elak-scam-dan-semak-entiti",
     "path": "articles/financial-literacy/elak-scam-dan-semak-entiti.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["Scam", "Keselamatan", "Pelaburan", "Financial Literacy"],
+    "tags": [
+      "Scam",
+      "Keselamatan",
+      "Pelaburan",
+      "Financial Literacy"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Panduan ringkas untuk menyemak tawaran kewangan dan mengenal pasti tanda amaran sebelum menyerahkan wang atau maklumat peribadi.",
@@ -436,7 +644,12 @@
     "slug": "tahu-perlindungan-duit-anda",
     "path": "articles/financial-literacy/tahu-perlindungan-duit-anda.md",
     "category": "Keselamatan Kewangan",
-    "tags": ["PIDM", "Deposit", "Perlindungan", "Financial Literacy"],
+    "tags": [
+      "PIDM",
+      "Deposit",
+      "Perlindungan",
+      "Financial Literacy"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Fahami beza antara deposit bank, pelaburan dan produk kewangan lain serta jenis perlindungan yang berkaitan.",
@@ -448,7 +661,12 @@
     "slug": "rancang-persaraan-dan-pelaburan",
     "path": "articles/financial-literacy/rancang-persaraan-dan-pelaburan.md",
     "category": "Persaraan & Pelaburan",
-    "tags": ["Persaraan", "KWSP", "Pelaburan", "Financial Literacy"],
+    "tags": [
+      "Persaraan",
+      "KWSP",
+      "Pelaburan",
+      "Financial Literacy"
+    ],
     "published": "2026-09-23",
     "updated": "2026-09-23",
     "description": "Asas merancang persaraan dan memahami beza antara simpanan dengan pelaburan supaya matlamat kewangan lebih jelas.",
@@ -460,7 +678,15 @@
     "slug": "panduan-beli-rumah-due-diligence",
     "path": "articles/property/panduan-beli-rumah-due-diligence.md",
     "category": "Rumah & Hartanah",
-    "tags": ["Rumah", "Hartanah", "Pemaju", "Due Diligence", "Pinjaman Rumah", "KPKT", "TEDUH"],
+    "tags": [
+      "Rumah",
+      "Hartanah",
+      "Pemaju",
+      "Due Diligence",
+      "Pinjaman Rumah",
+      "KPKT",
+      "TEDUH"
+    ],
     "published": "2026-09-24",
     "updated": "2026-09-24",
     "description": "Panduan ringkas untuk menilai rumah dan projek perumahan, termasuk semakan lesen, status projek, tanah dan rekod pemaju sebelum membuat komitmen kewangan.",
@@ -472,7 +698,13 @@
     "slug": "skor-kredit-ctos-ccris",
     "path": "articles/debt/skor-kredit-ctos-ccris.md",
     "category": "Hutang & Pinjaman",
-    "tags": ["CTOS", "CCRIS", "Skor Kredit", "Pinjaman", "DSR"],
+    "tags": [
+      "CTOS",
+      "CCRIS",
+      "Skor Kredit",
+      "Pinjaman",
+      "DSR"
+    ],
     "published": "2026-09-25",
     "updated": "2026-09-25",
     "description": "Faham beza CTOS dan CCRIS, apa yang mempengaruhi skor kredit anda, dan cara ia menjejaskan kelulusan pinjaman rumah, kereta atau peribadi.",
@@ -484,7 +716,12 @@
     "slug": "akaun-kwsp-persaraan-sejahtera-fleksibel",
     "path": "articles/financial-literacy/akaun-kwsp-persaraan-sejahtera-fleksibel.md",
     "category": "Persaraan & Pelaburan",
-    "tags": ["KWSP", "EPF", "Akaun Fleksibel", "Persaraan"],
+    "tags": [
+      "KWSP",
+      "EPF",
+      "Akaun Fleksibel",
+      "Persaraan"
+    ],
     "published": "2026-09-25",
     "updated": "2026-09-25",
     "description": "Faham struktur tiga akaun KWSP — Persaraan, Sejahtera dan Fleksibel — termasuk peratusan caruman dan syarat pengeluaran setiap akaun.",
@@ -496,7 +733,12 @@
     "slug": "asb-asnb-panduan-pelaburan",
     "path": "articles/savings/asb-asnb-panduan-pelaburan.md",
     "category": "Simpanan & Pelaburan",
-    "tags": ["ASB", "ASNB", "Pelaburan", "Dividen"],
+    "tags": [
+      "ASB",
+      "ASNB",
+      "Pelaburan",
+      "Dividen"
+    ],
     "published": "2026-09-25",
     "updated": "2026-09-25",
     "description": "Panduan asas melabur dalam ASB — cara ia berfungsi, dividen, pembiayaan ASB (ASB loan) dan risiko yang perlu difahami.",
@@ -508,7 +750,12 @@
     "slug": "peraturan-50-30-20-bajet",
     "path": "articles/budgeting/peraturan-50-30-20-bajet.md",
     "category": "Bajet & Simpanan",
-    "tags": ["Bajet", "50/30/20", "Simpanan", "Perbelanjaan"],
+    "tags": [
+      "Bajet",
+      "50/30/20",
+      "Simpanan",
+      "Perbelanjaan"
+    ],
     "published": "2026-09-25",
     "updated": "2026-09-25",
     "description": "Kaedah bajet 50/30/20 — cara mudah membahagikan pendapatan bulanan kepada keperluan, kehendak dan simpanan.",
