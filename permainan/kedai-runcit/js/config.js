@@ -97,7 +97,5 @@ KR.config = {
       check: function (s) { return s.stats.customers >= 500; } },
     { id: 'takhabis', name: 'Stok Cukup',       desc: 'Sehari tanpa barang habis (sekurang-kurangnya 40 pelanggan).', reward: 40,
       check: function (s, r) { return r.served >= 40 && Object.keys(r.perProduct).every(function (k) { return !r.perProduct[k].out; }); } }
-  ],
-
-  customers: ['🧑', '👩', '👨', '👵', '👴', '🧒', '👧', '🧕', '👳']
+  ]
 };
