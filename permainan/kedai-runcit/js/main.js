@@ -108,7 +108,7 @@
     var mins = 8 * 60 + Math.min(1, day.elapsed / dur) * 14 * 60;
     var h = Math.floor(mins / 60), m = Math.floor(mins % 60 / 15) * 15;
     $('clock').textContent = ((h - 1) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' pagi' : h < 19 ? ' petang' : ' malam');
-    if (day.elapsed >= dur + 2500) return finishDay();
+    if (day.elapsed >= dur + (day.use3d ? 5000 : 2500)) return finishDay();   // let the last customers come out
     requestAnimationFrame(tick);
   }
 
@@ -132,7 +132,7 @@
   }
 
   function spawn3d(entry) {
-    var sp = day.speed, walk = 2600 / sp, fromLeft = Math.random() < 0.5; // longer streets than the 2D scene
+    var sp = day.speed, walk = 3600 / sp, fromLeft = Math.random() < 0.5; // longer streets than the 2D scene
     var h = S3.spawn(Math.floor(Math.random() * 1000), fromLeft, walk, state.rep);
     later(function () {
       var o = outcome(entry);
@@ -140,7 +140,7 @@
       later(function () {
         S3.leave(h, walk);
         later(function () { S3.remove(h); }, walk + 50);
-      }, 900 / sp);
+      }, 1100 / sp);
     }, walk);
   }
 
@@ -170,7 +170,7 @@
         el.classList.add('leaving');
         el.style.left = (fromLeft ? w + 10 : -40) + 'px';
         later(function () { el.remove(); }, walk);
-      }, 900 / sp);
+      }, 1100 / sp);
     }, walk);
   }
 

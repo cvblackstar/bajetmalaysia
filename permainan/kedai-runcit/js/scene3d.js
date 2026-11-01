@@ -120,7 +120,7 @@ KR.scene3d = (function () {
     var glass = box(2.5, 1.35, 0.05, 0xcfe9f3, -1.3, 1.25, 1.28);
     glass.material.emissive = new THREE.Color(0x203038);
     shelfGroup = new THREE.Group(); root.add(shelfGroup);
-    box(1.2, 2.2, 0.1, 0x9c7445, 1.6, 1.1, 1.22);           // door
+    box(1.2, 2.2, 0.1, 0x2b2119, 1.6, 1.1, 1.22);           // open doorway
     box(2.4, 0.9, 0.8, 0x8a6a3f, -1.3, 0.45, 1.8);          // display crates outside
     [0xd6332b, 0xf2b705, 0x2f9e6e].forEach(function (c, j) { box(0.6, 0.3, 0.5, c, -2.1 + j * 0.8, 1.05, 1.8); });
 
@@ -209,15 +209,17 @@ KR.scene3d = (function () {
   }
 
   var EDGE = 26;
-  // Same contract as the 2D walker: walk to the shop front, say something, walk off.
+  var DOOR = [1.6, 2.0], INSIDE = [1.6, 0.2];
+  // Same contract as the 2D walker: walk into the shop, say something, walk out and off.
   function spawn(seed, fromLeft, ms, rep) {
     var g = KR.models.isReady() ? KR.models.make(seed, rep) : KR.chars.make(seed);
-    var lane = 1.8 + Math.random() * 1.2, door = [-0.4 + Math.random() * 2.4, 2.0 + Math.random() * 0.6];
-    var p = { g: g, bubble: null, lane: lane, exitLeft: Math.random() < 0.5 };
+    var lane = 1.8 + Math.random() * 1.2;
+    var p = { g: g, bubble: null, lane: lane, exitLeft: Math.random() < 0.5, enter: true, bx: (Math.random() - 0.5) * 1.6 };
     var viaSide = fromLeft && Math.random() < 0.35;          // some come up the side road
     g.position.set(viaSide ? -9 : (fromLeft ? -EDGE : EDGE), 0.1, viaSide ? -EDGE : lane);
     root.add(g); people.push(p);
-    walkPath(p, viaSide ? [[-9, lane], door] : [[door[0] + (fromLeft ? -1.5 : 1.5), lane], door], ms);
+    var front = [DOOR[0] + (fromLeft ? -1.2 : 1.2), lane];
+    walkPath(p, viaSide ? [[-9, lane], front, DOOR, INSIDE] : [front, DOOR, INSIDE], ms);
     return p;
   }
 
@@ -232,7 +234,8 @@ KR.scene3d = (function () {
   function leave(p, ms) {
     if (p.bubble) { p.bubble.remove(); p.bubble = null; }
     var x = p.exitLeft ? -EDGE : EDGE;
-    walkPath(p, [[p.g.position.x + (p.exitLeft ? -1 : 1), p.lane], [x, p.lane]], ms);
+    p.g.visible = true; p.enter = false;
+    walkPath(p, [DOOR, [DOOR[0] + (p.exitLeft ? -1 : 1), p.lane], [x, p.lane]], ms);
   }
 
   function remove(p) {
@@ -255,14 +258,12 @@ KR.scene3d = (function () {
         g.position.x = seg.a[0] + (seg.b[0] - seg.a[0]) * f;
         g.position.z = seg.a[1] + (seg.b[1] - seg.a[1]) * f;
         g.rotation.y = Math.atan2(seg.b[0] - seg.a[0], seg.b[1] - seg.a[1]);
-        if (now - p.t0 >= p.dur) p.walking = false;
-      } else {
-        g.rotation.y += (Math.PI - g.rotation.y) * 0.15;     // turn to face the shop
+        if (now - p.t0 >= p.dur) { p.walking = false; if (p.enter) g.visible = false; }   // inside the shop
       }
       if (g.userData.mixer) KR.models.animate(g, p.walking, dt); else KR.chars.animate(g, p.walking, now);
       if (p.bubble) {
         v = v || new THREE.Vector3();
-        v.set(g.position.x, g.userData.top + 0.25, g.position.z).project(camera);
+        v.set(DOOR[0] + p.bx, 3.9, DOOR[1] - 0.6).project(camera);   // bubbles pop up above the door
         p.bubble.style.left = ((v.x + 1) / 2 * host.clientWidth) + 'px';
         p.bubble.style.top = ((1 - v.y) / 2 * host.clientHeight) + 'px';
       }
