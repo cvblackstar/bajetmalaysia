@@ -1,2 +1,3 @@
 Characters: "Ultimate Animated Character Pack" by Quaternius (quaternius.com), CC0 1.0 public domain.
+Files: casual, casual2, casual3, worker, suit, doctor (young/old), kimono, each male and female.
 Converted to .glb with glTF-Transform: kept Idle, Walk, Walk_Carry and Victory animations, welded, resampled and quantized.

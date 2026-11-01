@@ -210,8 +210,8 @@ KR.scene3d = (function () {
 
   var EDGE = 26;
   // Same contract as the 2D walker: walk to the shop front, say something, walk off.
-  function spawn(seed, fromLeft, ms) {
-    var g = KR.models.isReady() ? KR.models.make(seed) : KR.chars.make(seed);
+  function spawn(seed, fromLeft, ms, rep) {
+    var g = KR.models.isReady() ? KR.models.make(seed, rep) : KR.chars.make(seed);
     var lane = 1.8 + Math.random() * 1.2, door = [-0.4 + Math.random() * 2.4, 2.0 + Math.random() * 0.6];
     var p = { g: g, bubble: null, lane: lane, exitLeft: Math.random() < 0.5 };
     var viaSide = fromLeft && Math.random() < 0.35;          // some come up the side road
