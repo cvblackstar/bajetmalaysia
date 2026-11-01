@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://bajetmy.my/permainan-kewangan.html">
+<title>Kedai Runcit Tycoon</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="game" id="game">
+
+  <header class="topbar">
+    <div class="shop-title">
+      <span class="eyebrow" id="dayLabel">Hari 1 · Isnin</span>
+      <strong id="shopName">Kedai Runcit Bajet</strong>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Duit</span><strong id="cash">RM0</strong></div>
+      <div class="stat"><span>Reputasi</span><strong id="rep">50</strong><div class="bar"><i id="repBar"></i></div></div>
+      <div class="stat"><span>Stok</span><strong id="cap">0/150</strong></div>
+    </div>
+  </header>
+
+  <!-- PLANNING PHASE -->
+  <section id="plan" class="phase">
+    <div class="forecast card" id="forecast"></div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="stok">Stok &amp; Harga</button>
+      <button class="tab" data-tab="upgrade">Naik Taraf</button>
+      <button class="tab" data-tab="info">Rekod</button>
+    </div>
+
+    <div class="tab-panel" id="tab-stok">
+      <p class="hint">Tambah stok untuk hari ini dan tetapkan harga jual. Bayaran borong dibuat bila kedai dibuka.</p>
+      <div id="products" class="products"></div>
+    </div>
+    <div class="tab-panel hidden" id="tab-upgrade">
+      <div id="upgrades" class="upgrades"></div>
+    </div>
+    <div class="tab-panel hidden" id="tab-info">
+      <div id="records" class="card"></div>
+      <div class="settings">
+        <label>Nama kedai <input id="nameInput" maxlength="28"></label>
+        <button class="btn ghost" id="resetBtn">Mula semula</button>
+      </div>
+    </div>
+
+    <div class="open-bar">
+      <div><span>Kos borong</span><strong id="orderCost">RM0.00</strong></div>
+      <button class="btn primary" id="openBtn">Buka Kedai</button>
+    </div>
+  </section>
+
+  <!-- DAY PHASE -->
+  <section id="dayView" class="phase hidden">
+    <div class="scene" id="scene">
+      <div class="sky"></div>
+      <div class="rain"></div>
+      <div class="clock" id="clock">8:00 pagi</div>
+      <div class="shopfront">
+        <div class="sign" id="sceneSign">KEDAI RUNCIT</div>
+        <div class="awning"></div>
+        <div class="window"><div class="shelf" id="shelf"></div></div>
+        <div class="door"></div>
+      </div>
+      <div class="road"></div>
+      <div id="walkers"></div>
+    </div>
+    <div class="live">
+      <div class="stat"><span>Pelanggan</span><strong id="liveCust">0</strong></div>
+      <div class="stat"><span>Jualan</span><strong id="liveSales">RM0.00</strong></div>
+      <div class="speed">
+        <button class="btn small" data-speed="1">x1</button>
+        <button class="btn small" data-speed="3">x3</button>
+        <button class="btn small" id="skipBtn">Langkau</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODALS -->
+  <div class="modal hidden" id="reportModal"><div class="modal-box" id="reportBox"></div></div>
+  <div class="modal hidden" id="introModal"><div class="modal-box">
+    <h2>Selamat datang, tauke!</h2>
+    <p>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Setiap pagi:</p>
+    <ol>
+      <li>Tengok ramalan cuaca dan acara hari ini.</li>
+      <li>Beli stok dari pemborong. Ruang kedai terhad.</li>
+      <li>Tetapkan harga. Terlalu mahal, pelanggan lari. Terlalu murah, untung nipis.</li>
+      <li>Buka kedai, kemudian semak laporan dan naik taraf kedai.</li>
+    </ol>
+    <p class="hint">Roti cepat basi, jadi jangan beli berlebihan. Kemajuan disimpan dalam pelayar ini.</p>
+    <button class="btn primary" id="introBtn">Jom mula</button>
+  </div></div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/platform.js"></script>
+<script src="js/state.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
