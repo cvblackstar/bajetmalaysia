@@ -82,7 +82,7 @@
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
     UI.header(state);
-    day0Cash = result.report.cash - result.report.revenue + result.report.bills;
+    day0Cash = result.report.cash - result.report.revenue + result.report.bills - (result.report.rewards || 0);
     $('cash').textContent = UI.rm(day0Cash);
 
     day = { result: result, next: 0, elapsed: 0, last: performance.now(), speed: day ? day.speed : 1,
@@ -158,19 +158,33 @@
     day.done = true;
     day.timers.forEach(clearTimeout);
     P.sdk.gameplayStop();
-    P.leaderboard.submit({ shopName: state.shopName, day: state.day, cash: state.cash, totalProfit: state.stats.totalProfit });
-    UI.header(state);
+        UI.header(state);
     UI.report(day.result.report, state);
   }
 
   $('reportBox').addEventListener('click', function (e) {
-    if (e.target.id === 'restartBtn') return restart();
+    if (e.target.id === 'restartBtn' || e.target.id === 'newSeasonBtn') return restart();
+    if (e.target.id === 'continueBtn') {
+      state.seasonDone = true; save();
+      $('reportModal').classList.add('hidden');
+      return showPlan();
+    }
     if (e.target.id !== 'nextBtn') return;
     $('reportModal').classList.add('hidden');
     S.nextDay(state); save();
+    if (S.seasonOver(state)) return endSeason();
     if (S.isBankrupt(state)) return UI.bankrupt(state);
     showPlan();
   });
+
+  function endSeason() {
+    var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
+    if (isNew) { best = { value: value, stars: S.starsFor(value), day: state.day - 1 }; KR.state.saveBest(best); }
+    P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    P.sdk.happytime();
+    showPlan();
+    UI.seasonEnd(state, best, isNew);
+  }
 
   $('introBtn').addEventListener('click', function () {
     state.seenIntro = true; save();
@@ -184,8 +198,8 @@
     UI.report(state.lastReport, state);
   } else {
     S.startDay(state); save();
-    if (S.isBankrupt(state)) UI.bankrupt(state);
-    showPlan();
+    if (S.seasonOver(state)) endSeason();
+    else { showPlan(); if (S.isBankrupt(state)) UI.bankrupt(state); }
   }
   if (!state.seenIntro) $('introModal').classList.remove('hidden');
 })();

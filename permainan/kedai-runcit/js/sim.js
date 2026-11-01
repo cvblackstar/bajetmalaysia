@@ -156,6 +156,7 @@ KR.sim = (function () {
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
     s.stats.bestDay = Math.max(s.stats.bestDay, profit);
     s.stats.customers += served;
+    s.stats.streak = profit > 0 ? s.stats.streak + 1 : 0;
     s.history.push(profit);
     if (s.history.length > 14) s.history.shift();
 
@@ -167,9 +168,44 @@ KR.sim = (function () {
       spoiled: spoiled, spoiledValue: round2(spoiledValue),
       perProduct: perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
     };
+    report.milestones = checkMilestones(s, report);
+    report.cash = s.cash;
+    report.value = shopValue(s);
     s.lastReport = report;
     return { report: report, timeline: timeline };
   }
+
+  // Shop value = cash + unsold stock at wholesale cost + upgrades at what they cost.
+  function shopValue(s) {
+    var stock = C.products.reduce(function (t, p) { return t + s.stock[p.id] * p.cost; }, 0);
+    var ups = owned(s).reduce(function (t, u) { return t + u.price; }, 0);
+    return round2(s.cash + stock + ups);
+  }
+
+  function starsFor(value) {
+    return C.starTargets.filter(function (t) { return value >= t; }).length;
+  }
+
+  function nextTarget(value) {
+    return C.starTargets.find(function (t) { return value < t; }) || null;
+  }
+
+  // Award any milestones reached today; rewards are paid straight into cash.
+  function checkMilestones(s, r) {
+    var earned = [];
+    C.milestones.forEach(function (m) {
+      if (s.milestones[m.id] || !m.check(s, r)) return;
+      s.milestones[m.id] = s.day;
+      s.cash = round2(s.cash + m.reward);
+      earned.push(m.id);
+    });
+    r.rewards = earned.reduce(function (t, id) {
+      return t + C.milestones.find(function (m) { return m.id === id; }).reward;
+    }, 0);
+    return earned;
+  }
+
+  function seasonOver(s) { return !s.seasonDone && s.day > C.seasonDays; }
 
   function nextDay(s) {
     s.day++;
@@ -189,6 +225,7 @@ KR.sim = (function () {
     dayName: dayName, capacity: capacity, serveCap: serveCap, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, startDay: startDay, runDay: runDay, nextDay: nextDay,
-    isBankrupt: isBankrupt, round2: round2
+    isBankrupt: isBankrupt, round2: round2, shopValue: shopValue, starsFor: starsFor,
+    nextTarget: nextTarget, seasonOver: seasonOver
   };
 })();

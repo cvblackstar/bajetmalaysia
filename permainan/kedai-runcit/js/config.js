@@ -15,6 +15,11 @@ KR.config = {
   paydayEvery: 30,
   paydayOn: 25,
   dayLengthMs: 24000,    // playback length of one day at x1 speed
+  bestKey: 'kedaiRuncit.best.v1',
+
+  // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
+  seasonDays: 30,
+  starTargets: [700, 1500, 3000],
 
   dayNames: ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
   dayTraffic: [1, 0.95, 1, 1.05, 1.15, 1.3, 1.25],
@@ -71,6 +76,28 @@ KR.config = {
     promosi:    { name: 'Promosi Pemborong', desc: 'Harga borong 20% lebih murah hari ini.', costMult: 0.8 }
   },
   randomEvents: ['pasarmalam', 'sukan', 'promosi'],
+
+  // Milestones pay a one-off cash reward. check(s, r) gets the state and today's report.
+  milestones: [
+    { id: 'untung1',  name: 'Untung Pertama',   desc: 'Untung dalam sehari.', reward: 20,
+      check: function (s, r) { return r.profit > 0; } },
+    { id: 'rm100',    name: 'Hari RM100',       desc: 'Untung RM100 dalam sehari.', reward: 50,
+      check: function (s, r) { return r.profit >= 100; } },
+    { id: 'rm200',    name: 'Hari Raya Kedai',  desc: 'Untung RM200 dalam sehari.', reward: 100,
+      check: function (s, r) { return r.profit >= 200; } },
+    { id: 'streak5',  name: 'Konsisten',        desc: 'Untung 5 hari berturut-turut.', reward: 60,
+      check: function (s) { return s.stats.streak >= 5; } },
+    { id: 'naiktaraf', name: 'Pelaburan Pertama', desc: 'Beli naik taraf pertama.', reward: 30,
+      check: function (s) { return Object.keys(s.upgrades).length >= 1; } },
+    { id: 'semua',    name: 'Kedai Lengkap',    desc: 'Beli semua naik taraf.', reward: 150,
+      check: function (s) { return Object.keys(s.upgrades).length >= KR.config.upgrades.length; } },
+    { id: 'rep80',    name: 'Kedai Kegemaran',  desc: 'Capai reputasi 80.', reward: 50,
+      check: function (s) { return s.rep >= 80; } },
+    { id: 'pelanggan500', name: 'Kenal Satu Taman', desc: 'Layan 500 pelanggan.', reward: 80,
+      check: function (s) { return s.stats.customers >= 500; } },
+    { id: 'takhabis', name: 'Stok Cukup',       desc: 'Sehari tanpa barang habis (sekurang-kurangnya 40 pelanggan).', reward: 40,
+      check: function (s, r) { return r.served >= 40 && Object.keys(r.perProduct).every(function (k) { return !r.perProduct[k].out; }); } }
+  ],
 
   customers: ['🧑', '👩', '👨', '👵', '👴', '🧒', '👧', '🧕', '👳']
 };
