@@ -8,10 +8,6 @@ KR.scene3d = (function () {
   var people = [], running = false, raf = 0;
   var PREF = 'kedaiRuncit.graphics';
 
-  var SKIN = [0xf3c9a4, 0xe0a87e, 0xc68856, 0x9a6440, 0xf6d5b8];
-  var SHIRT = [0xd6332b, 0x2f7fd1, 0x2f9e6e, 0xf2b705, 0x8e5bd1, 0xe86f9a, 0x2a9d8f, 0xf08a24];
-  var PANTS = [0x2d3a4a, 0x5a4632, 0x3c4f63, 0x4a4a4a];
-  var HEAD = ['hair', 'tudung', 'songkok', 'cap', 'hair', 'tudung', 'bun'];
   var SKY = { panas: 0xffd98a, cerah: 0x9fd6f2, mendung: 0xbcc6cf, hujan: 0x8596a5, ribut: 0x56636f };
   var LIGHT = { panas: 1.5, cerah: 1.3, mendung: 0.8, hujan: 0.6, ribut: 0.4 };
 
@@ -27,7 +23,7 @@ KR.scene3d = (function () {
     if (ready || failed || !wanted()) return Promise.resolve(ready);
     if (!hasWebGL()) { failed = true; return Promise.resolve(false); }
     return import('../vendor/three.module.min.js').then(function (mod) {
-      THREE = mod; build(); ready = true; return true;
+      THREE = mod; KR.chars.init(THREE); build(); ready = true; return true;
     }).catch(function () { failed = true; return false; });
   }
 
@@ -162,46 +158,6 @@ KR.scene3d = (function () {
     scene.add(rain);
   }
 
-  function seeded(seed) { return function (n, k) { return Math.abs(Math.floor(Math.sin(seed * 9.13 + k * 3.7) * 10000)) % n; }; }
-
-  // Low-poly customer built from primitives; mirrors the 2D look in art.js.
-  function makePerson(seed) {
-    var r = seeded(seed), g = new THREE.Group();
-    var skin = mat(SKIN[r(SKIN.length, 1)]), shirt = mat(SHIRT[r(SHIRT.length, 2)]);
-    var pants = mat(PANTS[r(PANTS.length, 3)]), head = HEAD[r(HEAD.length, 4)], veil = mat(SHIRT[r(SHIRT.length, 5)]);
-    var dark = mat(0x2b1d14), black = mat(0x1d1d1d);
-    var legs = [];
-    [-0.12, 0.12].forEach(function (x) {
-      var hip = new THREE.Group(); hip.position.set(x, 0.72, 0);
-      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.72, 6), pants); leg.position.y = -0.36;
-      hip.add(leg); g.add(hip); legs.push(hip);
-    });
-    var body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 0.72, 7), shirt); body.position.y = 1.08; g.add(body);
-    [-0.33, 0.33].forEach(function (x) {
-      var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.6, 5), shirt);
-      arm.position.set(x, 1.1, 0); arm.rotation.z = x > 0 ? 0.15 : -0.15; g.add(arm);
-    });
-    var face = new THREE.Mesh(new THREE.IcosahedronGeometry(0.21, 1), skin); face.position.set(0, 1.62, 0.02); g.add(face);
-    var eyeGeo = new THREE.SphereGeometry(0.025, 5, 4);
-    [-0.07, 0.07].forEach(function (x) { var e = new THREE.Mesh(eyeGeo, black); e.position.set(x, 1.65, 0.21); g.add(e); });
-    if (head === 'hair' || head === 'bun') {
-      var hair = new THREE.Mesh(new THREE.SphereGeometry(0.225, 7, 5, 0, Math.PI * 2, 0, Math.PI / 2), dark);
-      hair.position.set(0, 1.64, -0.02); hair.rotation.x = -0.35; g.add(hair);
-      if (head === 'bun') { var b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 0), dark); b.position.set(0, 1.86, -0.12); g.add(b); }
-    } else if (head === 'tudung') {
-      var t = new THREE.Mesh(new THREE.IcosahedronGeometry(0.25, 1), veil); t.position.set(0, 1.64, -0.06); g.add(t);
-      var drape = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.36, 0.38, 8), veil); drape.position.y = 1.36; g.add(drape);
-      face.position.z = 0.07; face.scale.set(0.85, 0.9, 0.85);
-    } else if (head === 'songkok') {
-      var s = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.2, 0.16, 8), black); s.position.y = 1.8; g.add(s);
-    } else if (head === 'cap') {
-      var cap = new THREE.Mesh(new THREE.SphereGeometry(0.225, 7, 4, 0, Math.PI * 2, 0, Math.PI / 2), veil); cap.position.y = 1.66; g.add(cap);
-      var visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.2), veil); visor.position.set(0, 1.68, 0.26); g.add(visor);
-    }
-    g.userData.legs = legs;
-    return g;
-  }
-
   function resize(host) {
     var w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
@@ -236,10 +192,7 @@ KR.scene3d = (function () {
 
   function stop() { running = false; cancelAnimationFrame(raf); clear(); }
 
-  function dispose(g) {
-    root.remove(g);
-    g.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
-  }
+  function dispose(g) { root.remove(g); KR.chars.dispose(g); }
 
   function clear() {
     people.forEach(function (p) { dispose(p.g); if (p.bubble) p.bubble.remove(); });
@@ -256,8 +209,7 @@ KR.scene3d = (function () {
   var EDGE = 26;
   // Same contract as the 2D walker: walk to the shop front, say something, walk off.
   function spawn(seed, fromLeft, ms) {
-    var g = makePerson(seed);
-    g.traverse(function (o) { if (o.isMesh) o.castShadow = true; });
+    var g = KR.chars.make(seed);
     var lane = 1.8 + Math.random() * 1.2, door = [-0.4 + Math.random() * 2.4, 2.0 + Math.random() * 0.6];
     var p = { g: g, bubble: null, lane: lane, exitLeft: Math.random() < 0.5 };
     var viaSide = fromLeft && Math.random() < 0.35;          // some come up the side road
@@ -272,6 +224,7 @@ KR.scene3d = (function () {
     b.className = 'bubble' + (bad ? ' bad' : '');
     b.innerHTML = html;
     overlay.appendChild(b); p.bubble = b;
+    if (!bad) p.g.userData.bag.visible = true;              // walks off carrying a plastic bag
   }
 
   function leave(p, ms) {
@@ -290,7 +243,7 @@ KR.scene3d = (function () {
     if (!running) return;
     resizeIfNeeded();
     people.forEach(function (p) {
-      var g = p.g, legs = g.userData.legs;
+      var g = p.g;
       if (p.walking) {
         var dist = Math.min(1, (now - p.t0) / p.dur) * p.total, seg = null;
         for (var i = 0; i < p.segs.length; i++) { seg = p.segs[i]; if (dist <= seg.d || i === p.segs.length - 1) break; dist -= seg.d; }
@@ -298,17 +251,14 @@ KR.scene3d = (function () {
         g.position.x = seg.a[0] + (seg.b[0] - seg.a[0]) * f;
         g.position.z = seg.a[1] + (seg.b[1] - seg.a[1]) * f;
         g.rotation.y = Math.atan2(seg.b[0] - seg.a[0], seg.b[1] - seg.a[1]);
-        var s = Math.sin(now / 90 + g.id);
-        legs[0].rotation.x = s * 0.6; legs[1].rotation.x = -s * 0.6;
-        g.position.y = 0.1 + Math.abs(s) * 0.05;
         if (now - p.t0 >= p.dur) p.walking = false;
       } else {
         g.rotation.y += (Math.PI - g.rotation.y) * 0.15;     // turn to face the shop
-        legs[0].rotation.x = legs[1].rotation.x = 0; g.position.y = 0.1;
       }
+      KR.chars.animate(g, p.walking, now);
       if (p.bubble) {
         v = v || new THREE.Vector3();
-        v.set(g.position.x, 2.1, g.position.z).project(camera);
+        v.set(g.position.x, g.userData.top + 0.25, g.position.z).project(camera);
         p.bubble.style.left = ((v.x + 1) / 2 * host.clientWidth) + 'px';
         p.bubble.style.top = ((1 - v.y) / 2 * host.clientHeight) + 'px';
       }
