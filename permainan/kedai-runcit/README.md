@@ -10,6 +10,8 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `js/sim.js` | Pure game rules, no DOM. `runDay()` simulates a day and returns a report + timeline. |
 | `js/art.js` | Inline SVG sprites (products, people, weather, upgrades, stars). |
 | `js/audio.js` | Web Audio sound effects (ka-ching, coin, sad) and the mute setting. |
+| `js/scene3d.js` | Optional three.js street scene with low-poly customers. Falls back to the SVG scene without WebGL, when opened from `file://`, or when the player picks 2D. |
+| `vendor/three.module.min.js` | three.js r158 (MIT, see `vendor/three.LICENSE`), loaded in the background with `import()`. |
 | `js/ui.js` | Renders the state into the page. |
 | `js/main.js` | Wires buttons, plays the day animation, saves. |
 
