@@ -132,7 +132,7 @@
   }
 
   function spawn3d(entry) {
-    var sp = day.speed, walk = 1400 / sp, fromLeft = Math.random() < 0.5;
+    var sp = day.speed, walk = 2600 / sp, fromLeft = Math.random() < 0.5; // longer streets than the 2D scene
     var h = S3.spawn(Math.floor(Math.random() * 1000), fromLeft, walk);
     later(function () {
       var o = outcome(entry);

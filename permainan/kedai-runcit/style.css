@@ -196,3 +196,5 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .scene.is3d .scene3d { display: block; }
 .scene.is3d .sky, .scene.is3d .rain, .scene.is3d .shopfront, .scene.is3d .road { display: none; }
 .scene.is3d .bubble { bottom: auto; transform: translate(-50%, -100%); z-index: 2; }
+.scene.is3d { height: 440px; }
+@media (max-width: 520px) { .scene.is3d { height: 400px; } }
