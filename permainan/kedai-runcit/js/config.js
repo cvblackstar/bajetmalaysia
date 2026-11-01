@@ -14,7 +14,9 @@ KR.config = {
   eventChance: 0.2,
   paydayEvery: 30,
   paydayOn: 25,
-  dayLengthMs: 24000,    // playback length of one day at x1 speed
+  hourMs: 4000,          // playback length of one opening hour at x1 speed
+  openHour: 8,           // 8 pagi
+  closeHour: 20,         // 8 malam (the 'lewat' upgrade adds hours)
   bestKey: 'kedaiRuncit.best.v1',
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
@@ -66,7 +68,9 @@ KR.config = {
     { id: 'papan',    name: 'Papan Tanda LED', icon: '💡', price: 450, upkeep: 2,
       desc: 'Lebih ramai nampak kedai korang, +20% pelanggan.', traffic: 0.2 },
     { id: 'pembantu', name: 'Pembantu Kedai', icon: '🧑‍🍳', price: 300, upkeep: 35,
-      desc: 'Layan +60 pelanggan sehari.', serve: 60 }
+      desc: 'Layan +60 pelanggan sehari.', serve: 60 },
+    { id: 'lewat',    name: 'Buka Sampai 12 Malam', icon: '🌙', price: 350, upkeep: 8,
+      desc: 'Buka 8 pagi hingga 12 malam. +25% pelanggan, layan +20 lagi.', traffic: 0.25, serve: 20, hours: 4 }
   ],
 
   events: {
