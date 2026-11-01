@@ -100,7 +100,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .settings { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; justify-content: space-between; margin-top: 10px; }
 .settings label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
 .settings input { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
-.records table { width: 100%; border-collapse: collapse; }
+#records table { width: 100%; border-collapse: collapse; }
 #records td { padding: 4px 0; border-bottom: 1px dashed var(--line); }
 #records td:last-child { text-align: right; font-weight: 700; }
 .spark { display: flex; align-items: end; gap: 3px; height: 50px; margin-top: 10px; }
