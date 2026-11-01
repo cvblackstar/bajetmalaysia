@@ -21,6 +21,7 @@ KR.sim = (function () {
 
   function capacity(s) { return C.baseCapacity + sumUp(s, 'capacity'); }
   function serveCap(s) { return C.baseServe + sumUp(s, 'serve'); }
+  function closeHour(s) { return C.closeHour + sumUp(s, 'hours'); }
   function dailyCosts(s) { return C.rent + sumUp(s, 'upkeep'); }
 
   function totalUnits(obj) {
@@ -222,7 +223,7 @@ KR.sim = (function () {
 
   return {
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, unlockedProducts: unlockedProducts,
-    dayName: dayName, capacity: capacity, serveCap: serveCap, dailyCosts: dailyCosts,
+    dayName: dayName, capacity: capacity, serveCap: serveCap, closeHour: closeHour, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, startDay: startDay, runDay: runDay, nextDay: nextDay,
     isBankrupt: isBankrupt, round2: round2, shopValue: shopValue, starsFor: starsFor,

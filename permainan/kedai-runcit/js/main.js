@@ -85,7 +85,9 @@
     if (use3d) S3.start({
       host: scene, overlay: $('walkers'), weather: result.report.weather, shopName: state.shopName,
       products: C.products.filter(function (p) { return state.stock[p.id] || result.report.perProduct[p.id].sold; })
-        .map(function (p) { return A.product(p.id); })
+        .map(function (p) { return A.product(p.id); }),
+      capacity: state.upgrades.pembantu ? 4 : 3,               // customers inside the shop at once
+      timeScale: function () { return day ? day.speed : 1; }
     });
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
@@ -93,8 +95,12 @@
     day0Cash = result.report.cash - result.report.revenue + result.report.bills - (result.report.rewards || 0);
     $('cash').textContent = UI.rm(day0Cash);
 
+    var hours = S.closeHour(state) - C.openHour, visitors = result.timeline.length;
     day = { use3d: use3d, result: result, next: 0, elapsed: 0, last: performance.now(), speed: day ? day.speed : 1,
-            timers: [], customers: 0, sales: 0, done: false };
+            timers: [], customers: 0, sales: 0, done: false, hours: hours, dur: hours * C.hourMs };
+    // Time a customer spends inside (on top of ~1s walking in and out of the door): short enough
+    // that the shop keeps up on average, so a line only builds up when several arrive together.
+    day.dwell = Math.max(300, Math.min(1800, 0.75 * (state.upgrades.pembantu ? 4 : 3) * day.dur / Math.max(1, visitors) - 1000));
     setSpeed(day.speed);
     requestAnimationFrame(tick);
   }
@@ -103,12 +109,13 @@
     if (!day || day.done) return;
     var dt = Math.min(100, now - day.last); day.last = now;
     day.elapsed += dt * day.speed;
-    var tl = day.result.timeline, dur = C.dayLengthMs;
+    var tl = day.result.timeline, dur = day.dur;
     while (day.next < tl.length && tl[day.next].t * dur <= day.elapsed) spawn(tl[day.next++]);
-    var mins = 8 * 60 + Math.min(1, day.elapsed / dur) * 14 * 60;
+    var mins = C.openHour * 60 + Math.min(1, day.elapsed / dur) * day.hours * 60;
     var h = Math.floor(mins / 60), m = Math.floor(mins % 60 / 15) * 15;
+    if (day.use3d) S3.setHour(mins / 60);
     $('clock').textContent = ((h - 1) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' pagi' : h < 19 ? ' petang' : ' malam');
-    if (day.elapsed >= dur + 2500) return finishDay();
+    if (day.elapsed >= dur + (day.use3d ? 9000 : 2500)) return finishDay();   // let the last customers come out
     requestAnimationFrame(tick);
   }
 
@@ -132,16 +139,12 @@
   }
 
   function spawn3d(entry) {
-    var sp = day.speed, walk = 2600 / sp, fromLeft = Math.random() < 0.5; // longer streets than the 2D scene
-    var h = S3.spawn(Math.floor(Math.random() * 1000), fromLeft, walk, state.rep);
-    later(function () {
-      var o = outcome(entry);
-      S3.say(h, o.html, o.bad);
-      later(function () {
-        S3.leave(h, walk);
-        later(function () { S3.remove(h); }, walk + 50);
-      }, 900 / sp);
-    }, walk);
+    S3.spawn({
+      seed: Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep,
+      dwell: day.dwell, patience: 2500, bx: (Math.random() - 0.5) * 1.6,
+      giveUp: !!(entry.complaint && entry.complaint.type === 'queue'),
+      outcome: function () { return outcome(entry); }
+    });
   }
 
   function spawn(entry) {
@@ -170,7 +173,7 @@
         el.classList.add('leaving');
         el.style.left = (fromLeft ? w + 10 : -40) + 'px';
         later(function () { el.remove(); }, walk);
-      }, 900 / sp);
+      }, 1100 / sp);
     }, walk);
   }
 

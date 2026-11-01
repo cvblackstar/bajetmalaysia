@@ -67,6 +67,8 @@ KR.art = (function () {
   }
 
   var upgrades = {
+    lewat: '<path d="M30 6a17 17 0 1 0 12 26A14 14 0 0 1 30 6z" fill="#ffd23f" ' + OL + '/>' +
+      '<circle cx="17" cy="31" r="10" fill="#fff" ' + OL + '/><path d="M17 25v6l4 3" fill="none" ' + OL + ' stroke-width="2.2"/>',
     peti: '<rect x="12" y="4" width="24" height="40" rx="3" fill="#e8f4fb" ' + OL + '/>' +
       '<path d="M12 18h24" ' + OL + '/><path d="M31 9v5M31 22v8" stroke="#3a2a1f" stroke-width="2.4" stroke-linecap="round"/>' +
       '<path d="M17 30l3-3 3 3-3 3z" fill="#7cc6ee"/>',

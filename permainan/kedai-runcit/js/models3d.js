@@ -15,7 +15,7 @@ KR.models = (function () {
     unique: ['kimono_male', 'kimono_female']
   };
   var RARE = { rep: 80, chance: 0.08 }, UNIQUE = { rep: 95, chance: 0.03 };
-  var SCALE = 0.85, uniqueOut = 0;
+  var SCALE = 0.85, HEIGHT = 0.855, uniqueOut = 0;          // HEIGHT squashes only the vertical
 
   function load(THREE) {
     T = THREE;
@@ -63,24 +63,24 @@ KR.models = (function () {
 
     var g = new T.Group();
     g.add(model);
-    g.scale.setScalar(SCALE);
+    g.scale.set(SCALE, SCALE * HEIGHT, SCALE);
     if (tier === 'unique') uniqueOut++;
 
     var head = model.getObjectByName('Head').getWorldPosition(new T.Vector3());
     var mixer = new T.AnimationMixer(model), actions = {};
-    ['Idle', 'Walk', 'Walk_Carry'].forEach(function (n) {
+    ['Idle', 'Walk'].forEach(function (n) {
       var clip = src.animations.find(function (a) { return a.name === n; });
       if (clip) actions[n] = mixer.clipAction(clip);
     });
     actions.Idle.play();
     mixer.update(Math.random());                                // so neighbours aren't in lockstep
-    g.userData = { mixer: mixer, actions: actions, current: 'Idle', bag: bag, skin: skin, tier: tier, top: (head.y + 1.3) * SCALE };
+    g.userData = { mixer: mixer, actions: actions, current: 'Idle', bag: bag, skin: skin, tier: tier, top: (head.y + 1.3) * SCALE * HEIGHT };
     return g;
   }
 
   function animate(g, walking, dt) {
     var u = g.userData;
-    var want = walking ? (u.bag.visible && u.actions.Walk_Carry ? 'Walk_Carry' : 'Walk') : 'Idle';
+    var want = walking ? 'Walk' : 'Idle';      // plain walk even with a bag, so the arms swing normally
     if (want !== u.current) {
       var next = u.actions[want], prev = u.actions[u.current];
       next.reset().play();
