@@ -21,7 +21,7 @@ KR.platform = {
     }
   },
 
-  // TODO(leaderboard): post { shopName, day, cash, totalProfit } to Supabase.
+  // TODO(leaderboard): post { shopName, value, stars } to Supabase at season end.
   leaderboard: {
     enabled: false,
     submit: function (entry) { return Promise.resolve({ ok: false, reason: 'disabled' }); },

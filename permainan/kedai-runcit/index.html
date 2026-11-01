@@ -15,6 +15,7 @@
     <div class="shop-title">
       <span class="eyebrow" id="dayLabel">Hari 1 · Isnin</span>
       <strong id="shopName">Kedai Runcit Bajet</strong>
+      <button class="mute" id="muteBtn" type="button">Bunyi: buka</button>
     </div>
     <div class="stats">
       <div class="stat"><span>Duit</span><strong id="cash">RM0</strong></div>
@@ -22,6 +23,8 @@
       <div class="stat"><span>Stok</span><strong id="cap">0/150</strong></div>
     </div>
   </header>
+
+  <div class="goal card" id="goal"></div>
 
   <!-- PLANNING PHASE -->
   <section id="plan" class="phase">
@@ -42,6 +45,8 @@
     </div>
     <div class="tab-panel hidden" id="tab-info">
       <div id="records" class="card"></div>
+      <h3 class="sub-title">Pencapaian</h3>
+      <div id="milestones" class="milestones"></div>
       <div class="settings">
         <label>Nama kedai <input id="nameInput" maxlength="28"></label>
         <button class="btn ghost" id="resetBtn">Mula semula</button>
@@ -84,7 +89,7 @@
   <div class="modal hidden" id="reportModal"><div class="modal-box" id="reportBox"></div></div>
   <div class="modal hidden" id="introModal"><div class="modal-box">
     <h2>Selamat datang, tauke!</h2>
-    <p>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Setiap pagi:</p>
+    <p>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 30 hari untuk dapat sampai 3 bintang. Setiap pagi:</p>
     <ol>
       <li>Tengok ramalan cuaca dan acara hari ini.</li>
       <li>Beli stok dari pemborong. Ruang kedai terhad.</li>
@@ -99,6 +104,8 @@
 
 <script src="js/config.js"></script>
 <script src="js/platform.js"></script>
+<script src="js/art.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/state.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/ui.js"></script>

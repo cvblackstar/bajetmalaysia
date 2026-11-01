@@ -1,6 +1,6 @@
 // Controller: wires buttons to the rules, plays the day animation, saves progress.
 (function () {
-  var C = KR.config, S = KR.sim, UI = KR.ui, P = KR.platform, $ = UI.$;
+  var C = KR.config, S = KR.sim, UI = KR.ui, P = KR.platform, A = KR.art, SFX = KR.audio, $ = UI.$;
   var state = KR.state.load();
   var day = null; // current playback
   var day0Cash = 0;
@@ -18,6 +18,7 @@
     var b = e.target.closest('button[data-act]');
     if (!b) return;
     var id = b.closest('.product').dataset.id, n = parseFloat(b.dataset.n);
+    SFX.click();
     if (b.dataset.act === 'order') {
       if (n < 0) state.order[id] = Math.max(0, state.order[id] + n);
       else for (var i = 0; i < n && S.canOrder(state, id, 1); i++) state.order[id]++;
@@ -30,7 +31,7 @@
 
   $('upgrades').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-up]');
-    if (b && S.buyUpgrade(state, b.dataset.up)) { P.sdk.happytime(); save(); UI.plan(state); }
+    if (b && S.buyUpgrade(state, b.dataset.up)) { SFX.kaching(); P.sdk.happytime(); save(); UI.plan(state); }
   });
 
   document.querySelectorAll('.tab').forEach(function (t) {
@@ -77,12 +78,12 @@
     scene.className = 'scene w-' + result.report.weather;
     $('sceneSign').textContent = state.shopName.toUpperCase();
     $('shelf').innerHTML = C.products.filter(function (p) { return state.stock[p.id] || result.report.perProduct[p.id].sold; })
-      .map(function (p) { return '<span>' + p.icon + '</span>'; }).join('');
+      .map(function (p) { return A.product(p.id); }).join('');
     $('walkers').innerHTML = '';
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
     UI.header(state);
-    day0Cash = result.report.cash - result.report.revenue + result.report.bills;
+    day0Cash = result.report.cash - result.report.revenue + result.report.bills - (result.report.rewards || 0);
     $('cash').textContent = UI.rm(day0Cash);
 
     day = { result: result, next: 0, elapsed: 0, last: performance.now(), speed: day ? day.speed : 1,
@@ -111,8 +112,9 @@
     var door = scene.querySelector('.door').getBoundingClientRect().left - scene.getBoundingClientRect().left + 20;
     var el = document.createElement('div');
     el.className = 'walker';
-    el.textContent = C.customers[Math.floor(Math.random() * C.customers.length)];
+    el.innerHTML = A.person(Math.floor(Math.random() * 1000));
     var fromLeft = Math.random() < 0.5;
+    if (!fromLeft) el.classList.add('flip');
     el.style.left = (fromLeft ? -40 : w + 10) + 'px';
     $('walkers').appendChild(el);
     var walk = 1400 / sp;
@@ -124,7 +126,8 @@
       var bubble = document.createElement('div');
       if (entry.bought.length) {
         bubble.className = 'bubble';
-        bubble.textContent = entry.bought.map(function (id) { return S.product(id).icon; }).join('');
+        bubble.innerHTML = entry.bought.map(function (id) { return A.product(id); }).join('');
+        SFX.coin();
         day.customers++;
         entry.bought.forEach(function (id) { day.sales += state.prices[id]; });
         $('liveCust').textContent = day.customers;
@@ -133,11 +136,13 @@
       } else {
         bubble.className = 'bubble bad';
         var c = entry.complaint || {};
-        bubble.textContent = c.type === 'pricey' ? 'Mahalnya ' + S.product(c.id).icon
-          : c.type === 'out' ? S.product(c.id).icon + ' habis?' : 'Lama sangat!';
+        bubble.innerHTML = c.type === 'pricey' ? 'Mahalnya ' + A.product(c.id)
+          : c.type === 'out' ? A.product(c.id) + ' habis?' : 'Lama sangat!';
+        if (day.speed === 1) SFX.sad();
       }
       el.appendChild(bubble);
       later(function () {
+        el.classList.add('leaving');
         el.style.left = (fromLeft ? w + 10 : -40) + 'px';
         later(function () { el.remove(); }, walk);
       }, 900 / sp);
@@ -158,24 +163,48 @@
     day.done = true;
     day.timers.forEach(clearTimeout);
     P.sdk.gameplayStop();
-    P.leaderboard.submit({ shopName: state.shopName, day: state.day, cash: state.cash, totalProfit: state.stats.totalProfit });
-    UI.header(state);
+        UI.header(state);
+    if (day.result.report.profit > 0 || day.result.report.milestones.length) SFX.kaching();
     UI.report(day.result.report, state);
   }
 
   $('reportBox').addEventListener('click', function (e) {
-    if (e.target.id === 'restartBtn') return restart();
+    if (e.target.id === 'restartBtn' || e.target.id === 'newSeasonBtn') return restart();
+    if (e.target.id === 'continueBtn') {
+      state.seasonDone = true; save();
+      $('reportModal').classList.add('hidden');
+      return showPlan();
+    }
     if (e.target.id !== 'nextBtn') return;
     $('reportModal').classList.add('hidden');
     S.nextDay(state); save();
+    if (S.seasonOver(state)) return endSeason();
     if (S.isBankrupt(state)) return UI.bankrupt(state);
     showPlan();
   });
+
+  function endSeason() {
+    var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
+    if (isNew) { best = { value: value, stars: S.starsFor(value), day: state.day - 1 }; KR.state.saveBest(best); }
+    P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    P.sdk.happytime();
+    SFX.kaching();
+    showPlan();
+    UI.seasonEnd(state, best, isNew);
+  }
 
   $('introBtn').addEventListener('click', function () {
     state.seenIntro = true; save();
     $('introModal').classList.add('hidden');
   });
+
+  function renderMute() {
+    var m = SFX.isMuted();
+    $('muteBtn').textContent = m ? 'Bunyi: tutup' : 'Bunyi: buka';
+    $('muteBtn').setAttribute('aria-pressed', String(!m));
+  }
+  $('muteBtn').addEventListener('click', function () { SFX.setMuted(!SFX.isMuted()); renderMute(); SFX.click(); });
+  renderMute();
 
   // ---------- Boot ----------
   // A day that was simulated but whose report wasn't closed: show the report again.
@@ -184,8 +213,8 @@
     UI.report(state.lastReport, state);
   } else {
     S.startDay(state); save();
-    if (S.isBankrupt(state)) UI.bankrupt(state);
-    showPlan();
+    if (S.seasonOver(state)) endSeason();
+    else { showPlan(); if (S.isBankrupt(state)) UI.bankrupt(state); }
   }
   if (!state.seenIntro) $('introModal').classList.remove('hidden');
 })();

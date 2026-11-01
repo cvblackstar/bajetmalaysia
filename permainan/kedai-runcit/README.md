@@ -8,6 +8,8 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `js/platform.js` | Storage, leaderboard, donation and portal SDK hooks (stubs for now). |
 | `js/state.js` | New game, load, migrate and save (localStorage via `platform.js`). |
 | `js/sim.js` | Pure game rules, no DOM. `runDay()` simulates a day and returns a report + timeline. |
+| `js/art.js` | Inline SVG sprites (products, people, weather, upgrades, stars). |
+| `js/audio.js` | Web Audio sound effects (ka-ching, coin, sad) and the mute setting. |
 | `js/ui.js` | Renders the state into the page. |
 | `js/main.js` | Wires buttons, plays the day animation, saves. |
 

@@ -2,7 +2,7 @@
 window.KR = window.KR || {};
 
 KR.ui = (function () {
-  var C = KR.config, S = KR.sim;
+  var C = KR.config, S = KR.sim, A = KR.art;
   var $ = function (id) { return document.getElementById(id); };
 
   function rm(n) {
@@ -21,12 +21,31 @@ KR.ui = (function () {
     $('repBar').style.width = s.rep + '%';
     var used = S.totalUnits(s.stock) + S.totalUnits(s.order);
     $('cap').textContent = used + '/' + S.capacity(s);
+    goal(s);
+  }
+
+  function starsHtml(n) {
+    var out = '';
+    for (var i = 0; i < C.starTargets.length; i++) out += A.star(i < n);
+    return out;
+  }
+
+  function goal(s) {
+    var value = S.shopValue(s), stars = S.starsFor(value), target = S.nextTarget(value);
+    var inSeason = !s.seasonDone && s.day <= C.seasonDays;
+    var prev = stars ? C.starTargets[stars - 1] : 0;
+    var pct = target ? Math.max(0, Math.min(100, (value - prev) / (target - prev) * 100)) : 100;
+    $('goal').innerHTML =
+      '<strong>' + (inSeason ? 'Musim: Hari ' + s.day + '/' + C.seasonDays : 'Mod bebas') + '</strong>' +
+      '<span>Nilai kedai ' + rm0(value) + (target ? ' · bintang seterusnya ' + rm0(target) : ' · semua bintang!') + '</span>' +
+      '<span class="stars">' + starsHtml(stars) + '</span>' +
+      '<div class="gbar"><i style="width:' + pct + '%"></i></div>';
   }
 
   function forecast(s) {
     var f = s.forecast, w = C.weathers[f.weather], ev = f.event ? C.events[f.event] : null;
     $('forecast').innerHTML =
-      '<div class="wicon">' + w.icon + '</div><div>' +
+      '<div class="wicon">' + A.weather(f.weather) + '</div><div>' +
       '<h3>Ramalan: ' + w.name + '</h3>' +
       '<p>Kos harian RM' + S.dailyCosts(s) + ' (sewa dan bil). Ramalan cuaca tak selalu tepat.</p>' +
       (ev ? '<span class="event-tag">' + esc(ev.name) + '</span> <p>' + esc(ev.desc) + '</p>' : '') +
@@ -37,13 +56,13 @@ KR.ui = (function () {
     $('products').innerHTML = C.products.map(function (p) {
       if (!S.isUnlocked(s, p)) {
         var u = S.upgrade(p.requires);
-        return '<div class="product locked"><div class="picon">' + p.icon + '</div>' +
+        return '<div class="product locked"><div class="picon">' + A.product(p.id) + '</div>' +
           '<div><div class="pname">' + p.name + '</div><div class="pmeta">Perlu ' + u.name + '</div></div><div></div></div>';
       }
       var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
       var order = s.order[p.id] || 0;
       return '<div class="product" data-id="' + p.id + '">' +
-        '<div class="picon">' + p.icon + '</div>' +
+        '<div class="picon">' + A.product(p.id) + '</div>' +
         '<div><div class="pname">' + p.name + '</div>' +
         '<div class="pmeta">Borong ' + rm(cost) + ' · Harga biasa ' + rm(p.ref) + (p.perish >= 0.2 ? ' · cepat rosak' : '') + '</div></div>' +
         '<div class="margin ' + (unit > 0 ? 'good' : 'bad') + '">' + (unit >= 0 ? '+' : '') + rm(unit) + '/unit</div>' +
@@ -67,7 +86,7 @@ KR.ui = (function () {
     $('upgrades').innerHTML = C.upgrades.map(function (u) {
       var have = !!s.upgrades[u.id];
       return '<div class="upgrade' + (have ? ' owned' : '') + '">' +
-        '<div class="uicon">' + u.icon + '</div><h4>' + u.name + '</h4><p>' + u.desc +
+        '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + u.name + '</h4><p>' + u.desc +
         (u.upkeep ? ' Kos RM' + u.upkeep + '/hari.' : '') + '</p>' +
         (have ? '<strong class="pos">Sudah ada</strong>'
               : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < u.price ? ' disabled' : '') + '>Beli ' + rm0(u.price) + '</button>') +
@@ -85,6 +104,12 @@ KR.ui = (function () {
       (h.length ? '<p class="hint">Untung 14 hari terakhir</p><div class="spark">' + h.map(function (v) {
         return '<i class="' + (v < 0 ? 'loss' : '') + '" style="height:' + Math.max(4, Math.abs(v) / max * 100) + '%" title="' + rm(v) + '"></i>';
       }).join('') + '</div>' : '');
+    var best = KR.state.loadBest();
+    if (best.value) $('records').innerHTML += '<p class="hint">Rekod musim terbaik: ' + rm0(best.value) + ' ' + starsHtml(best.stars) + '</p>';
+    $('milestones').innerHTML = C.milestones.map(function (m) {
+      return '<div class="milestone' + (s.milestones[m.id] ? ' done' : '') + '"><strong>' + m.name + '</strong>' +
+        '<span>' + m.desc + ' Ganjaran ' + rm0(m.reward) + '.</span></div>';
+    }).join('');
     $('nameInput').value = s.shopName;
   }
 
@@ -112,11 +137,11 @@ KR.ui = (function () {
     var repDiff = r.repAfter - r.repBefore;
     var sold = C.products.filter(function (p) { return r.perProduct[p.id].sold; }).map(function (p) {
       var st = r.perProduct[p.id];
-      return '<div class="report-row"><span>' + p.icon + ' ' + p.name + ' × ' + st.sold + '</span><span>' + rm(st.revenue) + '</span></div>';
+      return '<div class="report-row"><span><i class="ic">' + A.product(p.id) + '</i>' + p.name + ' × ' + st.sold + '</span><span>' + rm(st.revenue) + '</span></div>';
     }).join('');
     $('reportBox').innerHTML =
       '<h2>Laporan Hari ' + r.day + ' (' + r.dayName + ')</h2>' +
-      '<p class="hint">' + C.weathers[r.weather].icon + ' ' + C.weathers[r.weather].name + ' · ' +
+      '<p class="hint"><i class="ic">' + A.weather(r.weather) + '</i>' + C.weathers[r.weather].name + ' · ' +
         r.served + ' pelanggan dilayan daripada ' + r.visitors + ' yang datang</p>' +
       sold +
       '<div class="report-row"><span>Hasil jualan</span><span class="pos">' + rm(r.revenue) + '</span></div>' +
@@ -124,6 +149,10 @@ KR.ui = (function () {
       '<div class="report-row"><span>Sewa dan bil</span><span class="loss">' + rm(-r.bills) + '</span></div>' +
       '<div class="report-row total"><span>Untung hari ini</span><span class="' + (r.profit >= 0 ? 'pos' : 'loss') + '">' + rm(r.profit) + '</span></div>' +
       '<div class="report-row"><span>Reputasi</span><span>' + r.repBefore + ' → ' + r.repAfter + ' (' + (repDiff >= 0 ? '+' : '') + repDiff + ')</span></div>' +
+      (r.milestones && r.milestones.length ? '<div class="earned">' + r.milestones.map(function (id) {
+        var m = C.milestones.find(function (x) { return x.id === id; });
+        return '<p>Pencapaian baru: ' + m.name + ' (+' + rm0(m.reward) + ')</p>';
+      }).join('') + '</div>' : '') +
       '<div class="tips">' + tips(r, s).map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
       '<p class="hint">Untung hari ini termasuk stok yang korang beli. Stok yang belum terjual masih ada untuk esok.</p>' +
       '<button class="btn primary" id="nextBtn">Hari seterusnya</button>';
@@ -139,6 +168,26 @@ KR.ui = (function () {
     $('reportModal').classList.remove('hidden');
   }
 
-  return { $: $, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
+  function seasonEnd(s, best, isNewBest) {
+    var value = S.shopValue(s), stars = S.starsFor(value);
+    var msg = ['Kedai masih kecil, tapi korang dah belajar selok-belok berniaga.',
+               'Bagus! Kedai korang dah mula dikenali.',
+               'Hebat! Kedai korang jadi pilihan orang taman.',
+               'Tauke sebenar! Kedai korang paling laku.'][stars];
+    $('reportBox').innerHTML =
+      '<h2>Tamat Musim ' + C.seasonDays + ' Hari</h2>' +
+      '<div class="big-stars">' + starsHtml(stars) + '</div>' +
+      '<p>' + msg + '</p>' +
+      '<div class="report-row total"><span>Nilai kedai</span><span>' + rm0(value) + '</span></div>' +
+      '<div class="report-row"><span>Untung keseluruhan</span><span>' + rm(s.stats.totalProfit) + '</span></div>' +
+      '<div class="report-row"><span>Pencapaian</span><span>' + Object.keys(s.milestones).length + '/' + C.milestones.length + '</span></div>' +
+      '<div class="report-row"><span>Rekod terbaik</span><span>' + rm0(best.value) + (isNewBest ? ' (baru!)' : '') + '</span></div>' +
+      '<p class="hint">Sasaran bintang: ' + C.starTargets.map(rm0).join(' / ') + '. Nilai kedai = duit + stok + naik taraf.</p>' +
+      '<button class="btn primary wide" id="newSeasonBtn">Mula musim baru</button>' +
+      '<button class="btn wide" id="continueBtn">Teruskan main (mod bebas)</button>';
+    $('reportModal').classList.remove('hidden');
+  }
+
+  return { $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
            records: records, report: report, bankrupt: bankrupt };
 })();

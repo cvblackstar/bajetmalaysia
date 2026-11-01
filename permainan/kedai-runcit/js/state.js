@@ -18,7 +18,9 @@ KR.state = (function () {
       order: order,
       upgrades: {},
       forecast: null,
-      stats: { totalProfit: 0, bestDay: 0, customers: 0 },
+      stats: { totalProfit: 0, bestDay: 0, customers: 0, streak: 0 },
+      milestones: {},
+      seasonDone: false,
       history: [],
       lastReport: null,
       seenIntro: false
@@ -34,6 +36,7 @@ KR.state = (function () {
       s[k] = Object.assign(fresh()[k], saved[k] || {});
     });
     s.stats = Object.assign(fresh().stats, saved.stats || {});
+    s.milestones = Object.assign({}, saved.milestones || {});
     s.version = C.version;
     return s;
   }
@@ -42,5 +45,9 @@ KR.state = (function () {
   function save(s) { return KR.platform.storage.save(C.saveKey, s); }
   function reset() { KR.platform.storage.remove(C.saveKey); return fresh(); }
 
-  return { fresh: fresh, load: load, save: save, reset: reset };
+  // Best season result survives "Mula semula" so players can try to beat it.
+  function loadBest() { return KR.platform.storage.load(C.bestKey) || { value: 0, stars: 0 }; }
+  function saveBest(b) { return KR.platform.storage.save(C.bestKey, b); }
+
+  return { fresh: fresh, load: load, save: save, reset: reset, loadBest: loadBest, saveBest: saveBest };
 })();
