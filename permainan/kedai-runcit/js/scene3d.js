@@ -23,7 +23,9 @@ KR.scene3d = (function () {
     if (ready || failed || !wanted()) return Promise.resolve(ready);
     if (!hasWebGL()) { failed = true; return Promise.resolve(false); }
     return import('../vendor/three.module.min.js').then(function (mod) {
-      THREE = mod; KR.chars.init(THREE); build(); ready = true; return true;
+      THREE = mod; KR.chars.init(THREE); build(); ready = true;
+      KR.models.load(THREE);                              // rigged models arrive a bit later; chibi ones fill in until then
+      return true;
     }).catch(function () { failed = true; return false; });
   }
 
@@ -192,7 +194,7 @@ KR.scene3d = (function () {
 
   function stop() { running = false; cancelAnimationFrame(raf); clear(); }
 
-  function dispose(g) { root.remove(g); KR.chars.dispose(g); }
+  function dispose(g) { root.remove(g); (g.userData.mixer ? KR.models : KR.chars).dispose(g); }
 
   function clear() {
     people.forEach(function (p) { dispose(p.g); if (p.bubble) p.bubble.remove(); });
@@ -209,7 +211,7 @@ KR.scene3d = (function () {
   var EDGE = 26;
   // Same contract as the 2D walker: walk to the shop front, say something, walk off.
   function spawn(seed, fromLeft, ms) {
-    var g = KR.chars.make(seed);
+    var g = KR.models.isReady() ? KR.models.make(seed) : KR.chars.make(seed);
     var lane = 1.8 + Math.random() * 1.2, door = [-0.4 + Math.random() * 2.4, 2.0 + Math.random() * 0.6];
     var p = { g: g, bubble: null, lane: lane, exitLeft: Math.random() < 0.5 };
     var viaSide = fromLeft && Math.random() < 0.35;          // some come up the side road
@@ -239,8 +241,10 @@ KR.scene3d = (function () {
   }
 
   var v = null;
+  var lastNow = 0;
   function loop(now) {
     if (!running) return;
+    var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0; lastNow = now;
     resizeIfNeeded();
     people.forEach(function (p) {
       var g = p.g;
@@ -255,7 +259,7 @@ KR.scene3d = (function () {
       } else {
         g.rotation.y += (Math.PI - g.rotation.y) * 0.15;     // turn to face the shop
       }
-      KR.chars.animate(g, p.walking, now);
+      if (g.userData.mixer) KR.models.animate(g, p.walking, dt); else KR.chars.animate(g, p.walking, now);
       if (p.bubble) {
         v = v || new THREE.Vector3();
         v.set(g.position.x, g.userData.top + 0.25, g.position.z).project(camera);
