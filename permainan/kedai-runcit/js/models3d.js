@@ -15,7 +15,7 @@ KR.models = (function () {
     unique: ['kimono_male', 'kimono_female']
   };
   var RARE = { rep: 80, chance: 0.08 }, UNIQUE = { rep: 95, chance: 0.03 };
-  var SCALE = 0.85, HEIGHT = 0.855, uniqueOut = 0;          // HEIGHT squashes only the vertical
+  var SCALE = 0.85, HEIGHT = 0.77,  uniqueOut = 0;          // HEIGHT squashes only the vertical
 
   function load(THREE) {
     T = THREE;

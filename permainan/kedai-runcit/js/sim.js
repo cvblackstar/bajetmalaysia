@@ -86,19 +86,20 @@ KR.sim = (function () {
     C.products.forEach(function (p) { s.order[p.id] = 0; });
   }
 
-  // Simulates the whole day at once and applies it to the state.
-  // Returns a report plus a timeline of customer visits for the UI to animate.
-  function runDay(s) {
+  // A day runs in three steps so the player can restock while the shop is open:
+  //   openDay   pays for the order, decides who will come and what they want (s.today)
+  //   serveNext each customer buys (or not) when they arrive, from the stock at that moment
+  //   closeDay  serves anyone left, then overnight spoilage, bills and the report
+  // Everything lives in s.today, so a half-played day survives a reload.
+  function openDay(s) {
     var weather = actualWeather(s.forecast.weather);
     var ev = event(s) || {};
     var W = C.weathers[weather];
 
-    // 1. Pay for today's order and move it into stock.
     var stockSpend = orderCost(s);
     s.cash = round2(s.cash - stockSpend);
     C.products.forEach(function (p) { s.stock[p.id] += s.order[p.id] || 0; s.order[p.id] = 0; });
 
-    // 2. How many people come by today.
     var traffic = C.baseTraffic * C.dayTraffic[weekday(s.day)] * W.traffic *
       (0.5 + s.rep / 100) * (1 + sumUp(s, 'traffic')) * (ev.traffic || 1);
     var visitors = Math.max(0, Math.round(traffic * (0.9 + rnd() * 0.2)));
@@ -108,39 +109,74 @@ KR.sim = (function () {
 
     var perProduct = {};
     C.products.forEach(function (p) { perProduct[p.id] = { sold: 0, revenue: 0, pricey: 0, out: 0 }; });
-    var timeline = [], revenue = 0, served = 0, queueLost = 0, repDelta = 0;
-
+    var timeline = [];
     for (var i = 0; i < visitors; i++) {
       var t = clamp((i + rnd()) / Math.max(visitors, 1), 0, 0.999);
-      if (served >= cap) {
-        queueLost++; repDelta -= 0.4;
-        timeline.push({ t: t, bought: [], complaint: { type: 'queue' } });
-        continue;
-      }
-      served++;
-      var wants = rnd() < 0.35 ? 2 : 1, bought = [], complaint = null;
-      for (var k = 0; k < wants; k++) {
+      if (i >= cap) { timeline.push({ t: t, queue: true }); continue; }
+      var wants = [], n = rnd() < 0.35 ? 2 : 1;
+      for (var k = 0; k < n; k++) {
         var p = pickWeighted(available, function (x) {
           return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1);
         });
-        var price = s.prices[p.id];
-        var willing = p.ref * (0.8 + rnd() * 0.6) * willingMult;
-        var st = perProduct[p.id];
-        if (s.stock[p.id] <= 0) {
-          st.out++; repDelta -= 0.5; complaint = complaint || { type: 'out', id: p.id };
-        } else if (price > willing) {
-          st.pricey++; repDelta -= 0.25; complaint = complaint || { type: 'pricey', id: p.id };
-        } else {
-          s.stock[p.id]--; st.sold++; st.revenue = round2(st.revenue + price);
-          revenue += price; bought.push(p.id);
-          repDelta += price <= p.ref ? 0.25 : 0.08;
-        }
+        wants.push({ id: p.id, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
       }
-      timeline.push({ t: t, bought: bought, complaint: bought.length ? null : complaint });
+      timeline.push({ t: t, wants: wants });
     }
-    revenue = round2(revenue);
+    // The ones turned away by the queue are spread over the day too.
+    timeline.sort(function (x, y) { return x.t - y.t; });
 
-    // 3. Overnight: perishables spoil, bills are paid.
+    s.today = {
+      weather: weather, visitors: visitors, timeline: timeline, next: 0,
+      served: 0, queueLost: 0, revenue: 0, repDelta: 0, stockSpend: stockSpend, midSpend: 0,
+      perProduct: perProduct
+    };
+    return s.today;
+  }
+
+  // Serve the next customer in the timeline; returns their entry with bought/complaint filled in.
+  function serveNext(s) {
+    var d = s.today, e = d.timeline[d.next++];
+    if (!e) return null;
+    e.bought = [];
+    if (e.queue) {
+      d.queueLost++; d.repDelta -= 0.4; e.complaint = { type: 'queue' };
+      return e;
+    }
+    d.served++;
+    var complaint = null;
+    e.wants.forEach(function (w) {
+      var price = s.prices[w.id], st = d.perProduct[w.id];
+      if (s.stock[w.id] <= 0) {
+        st.out++; d.repDelta -= 0.5; complaint = complaint || { type: 'out', id: w.id };
+      } else if (price > w.willing) {
+        st.pricey++; d.repDelta -= 0.25; complaint = complaint || { type: 'pricey', id: w.id };
+      } else {
+        s.stock[w.id]--; st.sold++; st.revenue = round2(st.revenue + price);
+        d.revenue = round2(d.revenue + price); s.cash = round2(s.cash + price); e.bought.push(w.id);
+        d.repDelta += price <= product(w.id).ref ? 0.25 : 0.08;
+      }
+    });
+    e.complaint = e.bought.length ? null : complaint;
+    return e;
+  }
+
+  // Mid-day restock: wholesale price plus a markup, paid now, on the shelf straight away.
+  function restockCost(id, qty) { return round2(product(id).cost * (1 + C.midRestockMarkup) * qty); }
+  function canRestock(s, id, qty) {
+    return s.cash >= restockCost(id, qty) && totalUnits(s.stock) + qty <= capacity(s) && isUnlocked(s, product(id));
+  }
+  function restock(s, id, qty) {
+    if (!s.today || !canRestock(s, id, qty)) return false;
+    var cost = restockCost(id, qty);
+    s.cash = round2(s.cash - cost); s.stock[id] += qty;
+    s.today.midSpend = round2(s.today.midSpend + cost);
+    return true;
+  }
+
+  function closeDay(s) {
+    var d = s.today;
+    while (d.next < d.timeline.length) serveNext(s);
+
     var perishMult = owned(s).reduce(function (m, u) { return m * (u.perishMult || 1); }, 1);
     var spoiled = {}, spoiledValue = 0;
     C.products.forEach(function (p) {
@@ -148,33 +184,37 @@ KR.sim = (function () {
       if (lost > 0) { spoiled[p.id] = lost; s.stock[p.id] -= lost; spoiledValue += lost * p.cost; }
     });
     var bills = dailyCosts(s);
-    s.cash = round2(s.cash + revenue - bills);
+    s.cash = round2(s.cash - bills);
 
     var repBefore = s.rep;
-    s.rep = Math.round(clamp(s.rep + clamp(repDelta, -8, 8), 0, 100));
-    var profit = round2(revenue - stockSpend - bills);
+    s.rep = Math.round(clamp(s.rep + clamp(d.repDelta, -8, 8), 0, 100));
+    var profit = round2(d.revenue - d.stockSpend - d.midSpend - bills);
 
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
     s.stats.bestDay = Math.max(s.stats.bestDay, profit);
-    s.stats.customers += served;
+    s.stats.customers += d.served;
     s.stats.streak = profit > 0 ? s.stats.streak + 1 : 0;
     s.history.push(profit);
     if (s.history.length > 14) s.history.shift();
 
     var report = {
       day: s.day, dayName: dayName(s.day),
-      forecast: s.forecast.weather, weather: weather, event: s.forecast.event,
-      visitors: visitors, served: served, queueLost: queueLost,
-      revenue: revenue, stockSpend: stockSpend, bills: bills, profit: profit,
+      forecast: s.forecast.weather, weather: d.weather, event: s.forecast.event,
+      visitors: d.visitors, served: d.served, queueLost: d.queueLost,
+      revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
       spoiled: spoiled, spoiledValue: round2(spoiledValue),
-      perProduct: perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
+      perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
     };
     report.milestones = checkMilestones(s, report);
     report.cash = s.cash;
     report.value = shopValue(s);
+    s.today = null;
     s.lastReport = report;
-    return { report: report, timeline: timeline };
+    return report;
   }
+
+  // Whole day in one go (used by tests and balance scripts).
+  function runDay(s) { openDay(s); return closeDay(s); }
 
   // Shop value = cash + unsold stock at wholesale cost + upgrades at what they cost.
   function shopValue(s) {
@@ -223,7 +263,8 @@ KR.sim = (function () {
 
   return {
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, unlockedProducts: unlockedProducts,
-    dayName: dayName, capacity: capacity, serveCap: serveCap, closeHour: closeHour, dailyCosts: dailyCosts,
+    dayName: dayName, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
+    restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, startDay: startDay, runDay: runDay, nextDay: nextDay,
     isBankrupt: isBankrupt, round2: round2, shopValue: shopValue, starsFor: starsFor,

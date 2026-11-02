@@ -14,6 +14,7 @@ KR.config = {
   eventChance: 0.2,
   paydayEvery: 30,
   paydayOn: 25,
+  midRestockMarkup: 0.1, // restocking while the shop is open costs 10% more than the morning order
   hourMs: 4000,          // playback length of one opening hour at x1 speed
   openHour: 8,           // 8 pagi
   closeHour: 20,         // 8 malam (the 'lewat' upgrade adds hours)

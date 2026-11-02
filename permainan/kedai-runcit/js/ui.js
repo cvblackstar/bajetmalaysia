@@ -146,6 +146,7 @@ KR.ui = (function () {
       sold +
       '<div class="report-row"><span>Hasil jualan</span><span class="pos">' + rm(r.revenue) + '</span></div>' +
       '<div class="report-row"><span>Beli stok</span><span class="loss">' + rm(-r.stockSpend) + '</span></div>' +
+      (r.midSpend ? '<div class="report-row"><span>Tambah stok (siang)</span><span class="loss">' + rm(-r.midSpend) + '</span></div>' : '') +
       '<div class="report-row"><span>Sewa dan bil</span><span class="loss">' + rm(-r.bills) + '</span></div>' +
       '<div class="report-row total"><span>Untung hari ini</span><span class="' + (r.profit >= 0 ? 'pos' : 'loss') + '">' + rm(r.profit) + '</span></div>' +
       '<div class="report-row"><span>Reputasi</span><span>' + r.repBefore + ' → ' + r.repAfter + ' (' + (repDiff >= 0 ? '+' : '') + repDiff + ')</span></div>' +

@@ -4,7 +4,7 @@ window.KR = window.KR || {};
 
 KR.scene3d = (function () {
   var THREE = null, ready = false, failed = false;
-  var renderer, scene, camera, hemi, sun, rain, root, shopSign, shelfGroup, car, lights = [];
+  var renderer, scene, camera, hemi, sun, rain, root, shopSign, shopLamp, shelfGroup, car, lights = [];
   var people = [], running = false, raf = 0;
   var PREF = 'kedaiRuncit.graphics';
 
@@ -69,7 +69,9 @@ KR.scene3d = (function () {
     m.rotation.y = Math.PI / 2; m.position.set(x, y, z); (parent || root).add(m); return m;
   }
   var prim = {};
-  var TREES = [[-4.5, -3.5], [-6.5, 0.2], [4, -4.5], [14.5, -3], [-12, 0.5], [3.5, 9.5], [-3, 9.5], [10, 9.8], [-21, -3], [-6, 9.8], [16, 9.6]];
+  // The shop: 10% taller than before and wider and deeper so there's room inside.
+  var SHOP = { w: 7.9, h: 3.7, cut: 2.3, front: 1.2, back: -3.6 };
+  var TREES = [[-5.2, -3.8], [-6.8, 0.2], [4.6, -5.2], [15.5, -3.4], [-12.5, 0.5], [3.5, 9.5], [-3, 9.5], [10, 9.8], [-21, -3], [-6, 9.8], [16, 9.6]];
   function tree(x, z, s) {
     s = s || 1;
     box(0.25 * s, 1.2 * s, 0.25 * s, 0x7a5233, x, 0.6 * s, z, prim.trees);
@@ -88,6 +90,7 @@ KR.scene3d = (function () {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true;
+    renderer.localClippingEnabled = true;                // used to cut the front wall off the shop model
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.className = 'scene3d';
     scene = new THREE.Scene();
@@ -109,45 +112,55 @@ KR.scene3d = (function () {
     box(60, 0.14, 0.25, 0x9a9384, 0, 0.02, 3.5);           // kerb
     box(60, 0.1, 0.5, 0x6d6a60, 0, 0.0, 7.1);              // longkang across the road
 
-    // The kedai runcit (simple boxes until the shop model loads, see loadEnv)
+    // The kedai runcit, drawn as a cutaway: no front wall and no roof, so you can see inside.
+    // Simple walls until the shop model loads (see loadEnv); the rest stays.
+    var SW = SHOP.w / 2, front = SHOP.front, back = SHOP.back, H = SHOP.cut;
     prim.shop = new THREE.Group(); root.add(prim.shop);
-    box(6, 3.4, 4, 0xf6e7c8, 0, 1.7, -0.8, prim.shop);
-    box(6.4, 0.3, 4.4, 0xb5653b, 0, 3.55, -0.8, prim.shop);  // flat roof edge
-    for (var k = 0; k < 8; k++) {                          // striped awning
-      var a = box(0.78, 0.08, 1.0, k % 2 ? 0xffffff : 0xc0453a, -2.73 + k * 0.78, 2.35, 1.6, prim.shop);
-      a.rotation.x = 0.3;
-    }
-    box(1.8, 1.4, 0.1, 0xcfe9f3, -1.9, 1.4, 1.22, prim.shop); box(1.8, 1.4, 0.1, 0xcfe9f3, 1.9, 1.4, 1.22, prim.shop);
-    box(1.3, 2.15, 0.1, 0x2b2119, 0, 1.08, 1.23);           // open doorway (stays, the model's door is closed)
-    var sign = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.75, 0.2),
+    box(SHOP.w, H, 0.2, 0xf6e7c8, 0, H / 2, back, prim.shop);
+    box(0.2, H, front - back, 0xf6e7c8, -SW, H / 2, (front + back) / 2, prim.shop);
+    box(0.2, H, front - back, 0xf6e7c8, SW, H / 2, (front + back) / 2, prim.shop);
+    box(SHOP.w - 0.4, 0.06, front - back - 0.3, 0xe9e2d4, 0, 0.13, (front + back) / 2 - 0.1);   // floor tiles
+    for (var fx = -SW + 0.6; fx < SW - 0.3; fx += 0.8) box(0.03, 0.062, front - back - 0.3, 0xcfc6b4, fx, 0.13, (front + back) / 2 - 0.1);
+    // Signboard on two posts at the corner of the kaki lima
+    [-SW - 2.85, -SW - 0.85].forEach(function (x) { box(0.12, 2.6, 0.12, 0x3b3f44, x, 1.3, 1.75); });
+    var sign = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.75, 0.12),
       [mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), new THREE.MeshBasicMaterial({ map: signTexture('KEDAI RUNCIT') }), mat(0x1f7a55)]);
-    sign.position.set(0, 3.75, 1.45); root.add(sign); shopSign = sign;
+    sign.position.set(-SW - 1.85, 2.45, 1.8); root.add(sign); shopSign = sign;
+    shopLamp = new THREE.PointLight(0xffd9a0, 0, 12); shopLamp.position.set(0, 3.2, -1.2); scene.add(shopLamp);
 
-    // Shop front: tiled kaki lima, a product rack, an ice-cream freezer, plant pots
-    box(6.4, 0.14, 2.2, 0xd8b98f, 0, 0, 2.35);
-    for (var tx = -3; tx < 3.2; tx += 0.8) box(0.04, 0.142, 2.2, 0xc7a67a, tx, 0, 2.35);
-    box(2.0, 1.4, 0.5, 0x8a6a3f, 2.15, 0.7, 1.6);           // rack outside the door
-    [-0.95, 0.95].forEach(function (x) { box(0.45, 0.4, 0.45, 0xb5653b, x, 0.27, 1.55); });   // plant pots
+    // Inside: shelves along the back and left wall, an island, the counter, a drinks fridge
+    var WOOD = 0x9c7445;
+    box(6.1, 2.2, 0.5, WOOD, -0.5, 1.1, back + 0.4);
+    box(0.5, 1.9, 2.6, WOOD, -SW + 0.45, 0.95, back + 2.2);
+    box(2.4, 1.2, 0.7, WOOD, -0.9, 0.6, back + 2.6);
+    box(0.8, 1.05, 2.0, 0x8a6a3f, SW - 1.7, 0.53, front - 2.2);           // counter
+    box(0.5, 0.3, 0.4, 0x3b3f44, SW - 1.7, 1.2, front - 2.6);             // till
+    var fridge = box(1.0, 2.2, 0.7, 0xe8f4fb, SW - 0.7, 1.1, back + 0.55);
+    box(0.8, 1.8, 0.05, 0x9fd3ea, SW - 0.7, 1.2, back + 0.92);
+    box(1.3, 0.85, 0.7, 0xf4f7fb, -SW + 1.3, 0.43, front - 0.6);            // peti ais krim
+    box(1.32, 0.1, 0.72, 0x2f7fd1, -SW + 1.3, 0.9, front - 0.6);
     shelfGroup = new THREE.Group(); root.add(shelfGroup);
-    box(1.4, 0.9, 0.7, 0xf4f7fb, -2.0, 0.45, 1.65);         // peti ais krim
-    box(1.42, 0.1, 0.72, 0x2f7fd1, -2.0, 0.93, 1.65);
-    var shopLight = box(5.6, 0.08, 0.25, 0xfff3c4, 0, 2.62, 1.45); lights.push(shopLight);
+
+    // Kaki lima in front: tiles and plant pots by the pillars
+    box(SHOP.w + 1, 0.14, 2.2, 0xd8b98f, 0, 0, 2.35);
+    for (var tx = -SW - 0.5; tx < SW + 0.6; tx += 0.8) box(0.04, 0.142, 2.2, 0xc7a67a, tx, 0, 2.35);
+    [-SW - 0.35, SW + 0.35].forEach(function (x) { box(0.45, 0.4, 0.45, 0xb5653b, x, 0.27, 1.65); });
 
     // Neighbours, a bus stop and a padang (simple versions until the models load)
     prim.houses = new THREE.Group(); root.add(prim.houses);
-    house(6, -0.8, 0xbfe3d6, 0xc0453a); house(9.2, -0.8, 0xf3d9a4, 0x8e5bd1); house(12.4, -0.8, 0xcfd8f2, 0x2f7fd1);
-    house(-15, -0.8, 0xf6c9c9, 0x2f9e6e);
-    box(2.6, 0.08, 1.1, 0x2f7fd1, 16.5, 2.2, 3.0);            // bus stop roof
-    box(0.1, 2.2, 0.1, 0x3b3f44, 15.3, 1.1, 3.4); box(0.1, 2.2, 0.1, 0x3b3f44, 17.7, 1.1, 3.4);
-    box(2.2, 0.12, 0.45, 0xf2b705, 16.5, 0.5, 2.8);          // bench
+    house(6.2, -0.8, 0xbfe3d6, 0xc0453a); house(9.6, -0.8, 0xf3d9a4, 0x8e5bd1); house(13.4, -0.8, 0xcfd8f2, 0x2f7fd1);
+    house(-16, -0.8, 0xf6c9c9, 0x2f9e6e);
+    box(2.6, 0.08, 1.1, 0x2f7fd1, 18.5, 2.2, 3.0);            // bus stop roof
+    box(0.1, 2.2, 0.1, 0x3b3f44, 17.3, 1.1, 3.4); box(0.1, 2.2, 0.1, 0x3b3f44, 19.7, 1.1, 3.4);
+    box(2.2, 0.12, 0.45, 0xf2b705, 18.5, 0.5, 2.8);          // bench
     var field = box(10, 0.04, 8, 0x6eb24f, -18, 0, -9); field.receiveShadow = true;
     box(0.12, 1.2, 0.12, 0xffffff, -18, 0.6, -12.5); box(0.12, 1.2, 0.12, 0xffffff, -18, 0.6, -5.5);
     prim.trees = new THREE.Group(); root.add(prim.trees);
     TREES.forEach(function (p, j) { tree(p[0], p[1], 0.9 + (j % 3) * 0.15); });
-    box(0.12, 3.2, 0.12, 0x3b3f44, 3.3, 1.6, 3.4);           // street lamp
-    var lamp = box(0.35, 0.15, 0.35, 0xfff3c4, 3.3, 3.2, 3.4); lights.push(lamp);
+    box(0.12, 3.2, 0.12, 0x3b3f44, 4.8, 1.6, 3.4);           // street lamp
+    var lamp = box(0.35, 0.15, 0.35, 0xfff3c4, 4.8, 3.2, 3.4); lights.push(lamp);
     // Parked kapcai
-    box(0.25, 0.4, 1.1, 0xd6332b, 4.6, 0.45, 2.7); box(0.1, 0.5, 0.5, 0x222222, 4.6, 0.25, 2.2); box(0.1, 0.5, 0.5, 0x222222, 4.6, 0.25, 3.2);
+    box(0.25, 0.4, 1.1, 0xd6332b, 5.8, 0.45, 2.7); box(0.1, 0.5, 0.5, 0x222222, 5.8, 0.25, 2.2); box(0.1, 0.5, 0.5, 0x222222, 5.8, 0.25, 3.2);
 
     // A car that drives along the main road now and then
     car = new THREE.Group();
@@ -190,7 +203,8 @@ KR.scene3d = (function () {
   // Place a copy of a model with its own origin at x, z (models sit on y = 0 and face +z).
   function put(src, x, z, scale, rotY) {
     var o = src.clone(true);
-    o.scale.setScalar(scale); o.rotation.y = rotY || 0; o.position.set(x, 0, z);
+    if (Array.isArray(scale)) o.scale.set(scale[0], scale[1], scale[2]); else o.scale.setScalar(scale);
+    o.rotation.y = rotY || 0; o.position.set(x, 0, z);
     o.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
     root.add(o); return o;
   }
@@ -219,11 +233,18 @@ KR.scene3d = (function () {
     ['tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b', 'bush', 'bush_berry', 'flowers', 'plant'].forEach(function (n) {
       M[n].traverse(function (m) { if (m.isMesh) m.material.color.multiplyScalar(1.9); });   // the pack's greens are very dark
     });
-    put(M.shop, 0, -0.54, 2.42);                           // front wall lines up with the doorway at z = 1.2
+    // Shop model stretched to the new footprint, with its front wall cut away (clipping plane)
+    // so the inside shows. The model's front wall sits at z = 0.72 in its own units.
+    var sx = SHOP.w / 2.48, sy = SHOP.h / 1.397, sz = (SHOP.front - SHOP.back) / 1.62, oz = SHOP.front - 0.72 * sz;
+    var cut = [new THREE.Plane(new THREE.Vector3(0, 0, -1), oz + 0.64 * sz), new THREE.Plane(new THREE.Vector3(0, -1, 0), SHOP.cut)];
+    put(M.shop, 0, oz, [sx, sy, sz]).traverse(function (m) {
+      if (m.isMesh) { m.material = m.material.clone(); m.material.clippingPlanes = cut; m.material.side = THREE.DoubleSide; }
+    });
     prim.shop.visible = false;
 
-    put(M.house_a, 5.6, -0.56, 2.4); put(M.house_d, 8.8, -0.56, 2.4); put(M.house_b, 13.3, -0.56, 2.4);
-    put(M.house_c, -15.5, -1.42, 2.4);
+    // Houses 10% bigger than before
+    put(M.house_a, 6.2, -0.72, 2.64); put(M.house_d, 9.6, -0.72, 2.64); put(M.house_b, 14.4, -0.72, 2.64);
+    put(M.house_c, -16, -1.67, 2.64);
     var colours = [[0xbfe3d6, 0xc0453a], [0xf3d9a4, 0x8e5bd1], [0xcfd8f2, 0x2f7fd1], [0xf6c9c9, 0x2f9e6e]];
     root.children.slice(-4).forEach(function (o, i) { repaint(o, colours[i][0], colours[i][1]); });
     prim.houses.visible = false;
@@ -236,10 +257,9 @@ KR.scene3d = (function () {
     prim.trees.visible = false;
 
     // Greenery around the shop front and the houses
-    put(M.plant, -0.95, 1.55, 0.6); put(M.plant, 0.95, 1.55, 0.6, 1.2);
-    put(M.flowers, -3.4, 1.5, 1.1); put(M.flowers, 3.5, 1.4, 1.1, 0.8);
-    put(M.bush, -3.6, 0.4, 0.9); put(M.bush_berry, 3.6, 0.3, 0.9);
-    [[4.6, 1.5], [7.0, 1.6], [8.0, 1.5], [11.2, 1.6], [15.4, 1.5], [-13.2, 1.4], [-17.6, 1.4]].forEach(function (p, j) {
+    put(M.plant, -SHOP.w / 2 - 0.35, 1.65, 0.6); put(M.plant, SHOP.w / 2 + 0.35, 1.65, 0.6, 1.2);
+    put(M.flowers, -7.3, 1.5, 1.1); put(M.bush, -4.9, 0.0, 0.9);
+    [[5.0, 1.6], [7.4, 1.6], [8.6, 1.5], [12.0, 1.6], [16.6, 1.5], [-13.8, 1.4], [-18.2, 1.4]].forEach(function (p, j) {
       put(j % 2 ? M.bush : M.bush_berry, p[0], p[1], 0.75, j);
     });
     [[-5.5, -1.5], [-6.8, -2.6], [5.2, 9.2], [-1.2, 9.4], [12.5, 9.5]].forEach(function (p, j) { put(M.bush, p[0], p[1], 1, j); });
@@ -249,10 +269,10 @@ KR.scene3d = (function () {
     var w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
-    var aspect = w / h, viewH = 19.5, viewW = viewH * aspect;
-    if (viewW < 20.5) { viewW = 20.5; viewH = viewW / aspect; }      // phones: keep the shop and its neighbours in view
+    var aspect = w / h, viewH = 22, viewW = viewH * aspect;
+    if (viewW < 24) { viewW = 24; viewH = viewW / aspect; }      // phones: keep the shop and its neighbours in view
     Object.assign(camera, { left: -viewW / 2, right: viewW / 2, top: viewH / 2, bottom: -viewH / 2 });
-    camera.position.set(14, 16, 22); camera.lookAt(1, 0.5, 1.2);
+    camera.position.set(14, 20, 22); camera.lookAt(1, 0.5, 0.2);
     camera.updateProjectionMatrix();
   }
 
@@ -269,7 +289,14 @@ KR.scene3d = (function () {
     while (shelfGroup.children.length) shelfGroup.remove(shelfGroup.children[0]);
     opts.products.forEach(function (svg, i) {
       var p = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: svgTexture(svg), transparent: true }));
-      p.position.set(1.4 + (i % 4) * 0.5, 1.15 - Math.floor(i / 4) * 0.5, 1.87); shelfGroup.add(p);
+      for (var r = 0; r < 3; r++) for (var c = i; c < 11; c += opts.products.length) {   // fill the back shelf
+        var q = p.clone(); q.position.set(-SHOP.w / 2 + 1.1 + c * 0.55, 0.55 + r * 0.6, SHOP.back + 0.67); shelfGroup.add(q);
+      }
+      for (var c2 = i; c2 < 4; c2 += opts.products.length) {                          // and the island
+        var q2 = p.clone(); q2.position.set(-1.8 + c2 * 0.6, 0.85, SHOP.back + 2.97); shelfGroup.add(q2);
+        var q3 = p.clone(); q3.position.set(-SHOP.w / 2 + 0.71, 0.7 + (c2 % 2) * 0.7, SHOP.back + 1.5 + Math.floor(c2 / 2) * 1.2);
+        q3.rotation.y = Math.PI / 2; shelfGroup.add(q3);                                 // and the side shelf
+      }
     });
     resize(host);
     running = true;
@@ -286,6 +313,7 @@ KR.scene3d = (function () {
     scene.background.copy(daySky).lerp(NIGHT, t);
     sun.intensity = dayLight * (1 - 0.85 * t);
     hemi.intensity = 1.1 * (1 - 0.6 * t);
+    shopLamp.intensity = t * 18;
     lights.forEach(function (m) { m.material.emissive.setHex(0xffd27a); m.material.emissiveIntensity = t * 1.2; });
   }
 
@@ -295,14 +323,21 @@ KR.scene3d = (function () {
 
   function clear() {
     people.forEach(function (p) { dispose(p.g); if (p.bubble) p.bubble.remove(); });
-    people = []; queue = []; inside = 0; loiter = 0;
+    people = []; queue = []; inside = 0; loiter = 0; spotUsed = SPOTS.map(function () { return false; });
   }
 
   // ---------- Customers ----------
   // Each customer walks up, joins the line in front of the door, goes inside when there is
   // room, says what happened (bubble above the door), then walks out and off the street.
   // Times are in game milliseconds, so the x2/x4/x8 buttons speed everything up together.
-  var DOOR = [0, 2.1], INSIDE = [0, 0.1], WALK_SPEED = 3.6, EDGE = 26;
+  var DOOR = [0.6, 2.0], INSIDE = [0.6, 0.8], COUNTER = [1.3, -1.0], WALK_SPEED = 3.0, EDGE = 26;
+  // Where a customer stands to browse, and which way they face.
+  var SPOTS = [
+    { at: [-1.0, -2.45], rot: Math.PI }, { at: [-0.9, 0.05], rot: Math.PI }, { at: [-2.55, -1.0], rot: -Math.PI / 2 },
+    { at: [0.4, -2.45], rot: Math.PI }, { at: [-2.4, -2.45], rot: Math.PI }, { at: [0.1, 0.05], rot: Math.PI },
+    { at: [-2.55, -2.0], rot: -Math.PI / 2 }
+  ];
+  var spotUsed = SPOTS.map(function () { return false; }), staff = [];
   var queue = [], inside = 0, loiter = 0, cfg = {};
 
   function slot(i) { return [DOOR[0] - 1.2 - (i % 9) * 1.0, 2.75 + Math.floor(i / 9) * 0.5]; }   // a long line doubles back
@@ -347,7 +382,7 @@ KR.scene3d = (function () {
   function leave(p, from) {
     if (p.bubble) { p.bubble.remove(); p.bubble = null; }
     var x = p.exitLeft ? -EDGE : EDGE;
-    p.state = 'exit'; p.g.visible = true;
+    p.state = 'exit';
     go(p, from.concat([[from.length ? from[from.length - 1][0] + (p.exitLeft ? -1 : 1) : p.g.position.x, p.lane], [x, p.lane]]),
       function () { remove(p); });
   }
@@ -369,24 +404,50 @@ KR.scene3d = (function () {
   }
 
   function updatePeople(dt) {                               // dt in game seconds
-    if (queue.length && queue[0].state === 'queue' && inside < (cfg.capacity || 2)) {
+    var free = spotUsed.indexOf(false);
+    if (queue.length && queue[0].state === 'queue' && free >= 0 && inside < (cfg.capacity || 2)) {
       var p = queue.shift(); inside++;
-      p.state = 'enter';
-      go(p, [[DOOR[0], DOOR[1] + 0.3], DOOR, INSIDE], function () {
-        p.state = 'inside'; p.g.visible = false; p.timer = p.o.dwell;
-        bubble(p, p.o.outcome());
-      });
+      p.state = 'enter'; p.spot = free; spotUsed[free] = true;
+      var sp = SPOTS[free];
+      go(p, [DOOR, INSIDE, sp.at], function () { p.state = 'browse'; p.face = sp.rot; p.timer = p.o.dwell * 0.6; });
       shuffleQueue();
     }
     people.slice().forEach(function (p) {
       if (p.walking) step(p, WALK_SPEED * dt);
       else if (p.state === 'queue') p.g.rotation.y += (Math.PI / 2 - p.g.rotation.y) * 0.2;   // face the door
-      if (p.state === 'inside' && (p.timer -= dt * 1000) <= 0) { inside--; leave(p, [DOOR]); }
+      else if (p.face != null) p.g.rotation.y += (p.face - p.g.rotation.y) * 0.2;
+      if (p.state === 'browse' && (p.timer -= dt * 1000) <= 0) {
+        spotUsed[p.spot] = false; p.face = null;
+        var o = p.o.outcome();
+        if (o.bad) { bubble(p, o); p.state = 'done'; p.timer = 700; }            // nothing to buy: says why, leaves
+        else {
+          p.state = 'pay';
+          go(p, [[COUNTER[0] - 0.45 * (p.spot % 2), COUNTER[1] + 0.35 * (p.spot - 3)]], function () {
+            p.face = Math.PI / 2; bubble(p, o); p.state = 'done'; p.timer = p.o.dwell * 0.4 + 400;
+          });
+        }
+      }
+      if (p.state === 'done' && (p.timer -= dt * 1000) <= 0) { inside--; p.face = null; leave(p, [[0.9, 0.6], [0.9, 1.9]]); }
       if (p.state === 'loiter' && (p.timer -= dt * 1000) <= 0) {
         if (!p.bubble) { bubble(p, p.o.outcome()); p.timer = 1200; }
         else { loiter--; leave(p, []); }
       }
     });
+  }
+
+  // The tauke (and the pembantu once hired) stand behind the counter.
+  function updateStaff(dt) {
+    var want = cfg.staff || 1;
+    if (staff.length !== want && KR.models.isReady()) {
+      staff.forEach(function (g) { dispose(g); });
+      staff = [];
+      for (var i = 0; i < want; i++) {
+        var g = KR.models.make(i ? 11 : 4, 0);                  // fixed looks, always a common character
+        g.position.set(SHOP.w / 2 - 0.9, 0.1, -1.0 + (i ? -1.2 : 0.3)); g.rotation.y = -Math.PI / 2;
+        root.add(g); staff.push(g);
+      }
+    }
+    staff.forEach(function (g) { KR.models.animate(g, false, dt); });
   }
 
   var v = null;
@@ -397,14 +458,13 @@ KR.scene3d = (function () {
     var ts = cfg.timeScale ? cfg.timeScale() : 1;
     resizeIfNeeded();
     updatePeople(dt * ts);
+    updateStaff(dt * ts);
     people.forEach(function (p) {
       var g = p.g;
       if (g.userData.mixer) KR.models.animate(g, p.walking, dt * Math.min(ts, 3)); else KR.chars.animate(g, p.walking, now);
       if (p.bubble) {
         v = v || new THREE.Vector3();
-        if (p.state === 'loiter') v.set(g.position.x, g.userData.top + 0.25, g.position.z);
-        else v.set(DOOR[0] + p.o.bx, 3.9, DOOR[1] - 0.8);  // bubbles from inside pop up above the door
-        v.project(camera);
+        v.set(g.position.x, g.userData.top + 0.25, g.position.z).project(camera);
         p.bubble.style.left = ((v.x + 1) / 2 * host.clientWidth) + 'px';
         p.bubble.style.top = ((1 - v.y) / 2 * host.clientHeight) + 'px';
       }

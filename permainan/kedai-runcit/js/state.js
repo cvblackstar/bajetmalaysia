@@ -23,6 +23,7 @@ KR.state = (function () {
       seasonDone: false,
       history: [],
       lastReport: null,
+      today: null,         // a day in progress (see sim.openDay)
       seenIntro: false
     };
   }

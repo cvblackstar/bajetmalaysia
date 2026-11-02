@@ -64,43 +64,44 @@
     if (S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
       if (!window.confirm('Tiada stok langsung. Buka kedai juga?')) return;
     }
-    var result = S.runDay(state);
-    save(); // result is saved before the animation, so a reload can't replay the day
-    playDay(result);
+    S.openDay(state);
+    save(); // the day in progress is saved, so a reload finishes it instead of replaying it
+    playDay();
   });
 
   // ---------- Day playback ----------
-  function playDay(result) {
+  function playDay() {
+    var today = state.today;
+    var shown = S.unlockedProducts(state).filter(function (p) { return state.stock[p.id] || today.perProduct[p.id].sold; });
     P.sdk.gameplayStart();
     $('plan').classList.add('hidden');
     $('dayView').classList.remove('hidden');
     var scene = $('scene');
-    scene.className = 'scene w-' + result.report.weather;
+    scene.className = 'scene w-' + today.weather;
     $('sceneSign').textContent = state.shopName.toUpperCase();
-    $('shelf').innerHTML = C.products.filter(function (p) { return state.stock[p.id] || result.report.perProduct[p.id].sold; })
-      .map(function (p) { return A.product(p.id); }).join('');
+    $('shelf').innerHTML = shown.map(function (p) { return A.product(p.id); }).join('');
     $('walkers').innerHTML = '';
     var use3d = S3.isReady();
     scene.classList.toggle('is3d', use3d);
     if (use3d) S3.start({
-      host: scene, overlay: $('walkers'), weather: result.report.weather, shopName: state.shopName,
-      products: C.products.filter(function (p) { return state.stock[p.id] || result.report.perProduct[p.id].sold; })
-        .map(function (p) { return A.product(p.id); }),
-      capacity: state.upgrades.pembantu ? 4 : 3,               // customers inside the shop at once
-      timeScale: function () { return day ? day.speed : 1; }
+      host: scene, overlay: $('walkers'), weather: today.weather, shopName: state.shopName,
+      products: S.unlockedProducts(state).map(function (p) { return A.product(p.id); }),
+      staff: state.upgrades.pembantu ? 2 : 1,
+      capacity: state.upgrades.pembantu ? 7 : 5,               // customers inside the shop at once
+      timeScale: function () { return day && !day.paused ? day.speed : 0; }
     });
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
     UI.header(state);
-    day0Cash = result.report.cash - result.report.revenue + result.report.bills - (result.report.rewards || 0);
+    day0Cash = state.cash;
     $('cash').textContent = UI.rm(day0Cash);
 
-    var hours = S.closeHour(state) - C.openHour, visitors = result.timeline.length;
-    day = { use3d: use3d, result: result, next: 0, elapsed: 0, last: performance.now(), speed: day ? day.speed : 1,
+    var hours = S.closeHour(state) - C.openHour, visitors = today.timeline.length;
+    day = { use3d: use3d, elapsed: 0, paused: false, last: performance.now(), speed: day ? day.speed : 1,
             timers: [], customers: 0, sales: 0, done: false, hours: hours, dur: hours * C.hourMs };
-    // Time a customer spends inside (on top of ~1s walking in and out of the door): short enough
-    // that the shop keeps up on average, so a line only builds up when several arrive together.
-    day.dwell = Math.max(300, Math.min(1800, 0.75 * (state.upgrades.pembantu ? 4 : 3) * day.dur / Math.max(1, visitors) - 1000));
+    // Time a customer spends browsing and paying (on top of ~3.5s walking around inside): short
+    // enough that the shop keeps up on average, so a line only builds up in a rush.
+    day.dwell = Math.max(250, Math.min(1800, 0.75 * (state.upgrades.pembantu ? 7 : 5) * day.dur / Math.max(1, visitors) - 3500));
     setSpeed(day.speed);
     requestAnimationFrame(tick);
   }
@@ -108,9 +109,12 @@
   function tick(now) {
     if (!day || day.done) return;
     var dt = Math.min(100, now - day.last); day.last = now;
-    day.elapsed += dt * day.speed;
-    var tl = day.result.timeline, dur = day.dur;
-    while (day.next < tl.length && tl[day.next].t * dur <= day.elapsed) spawn(tl[day.next++]);
+    if (!day.paused) day.elapsed += dt * day.speed;
+    var tl = state.today.timeline, dur = day.dur;
+    while (state.today.next < tl.length && tl[state.today.next].t * dur <= day.elapsed) {
+      spawn(S.serveNext(state));                           // buys from the stock on the shelf right now
+      if (state.today.next % 10 === 0) save();
+    }
     var mins = C.openHour * 60 + Math.min(1, day.elapsed / dur) * day.hours * 60;
     var h = Math.floor(mins / 60), m = Math.floor(mins % 60 / 15) * 15;
     if (day.use3d) S3.setHour(mins / 60);
@@ -129,7 +133,7 @@
       entry.bought.forEach(function (id) { day.sales += state.prices[id]; });
       $('liveCust').textContent = day.customers;
       $('liveSales').textContent = UI.rm(day.sales);
-      $('cash').textContent = UI.rm(day0Cash + day.sales);
+      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
       return { bad: false, html: entry.bought.map(function (id) { return A.product(id); }).join('') };
     }
     if (day.speed === 1) SFX.sad();
@@ -186,15 +190,51 @@
   });
   $('skipBtn').addEventListener('click', function () { if (day) finishDay(); });
 
+  // ---------- Mid-day restock ----------
+  // Pauses the day; stock bought here costs C.midRestockMarkup more and is on the shelf at once.
+  function renderRestock() {
+    $('restockList').innerHTML = S.unlockedProducts(state).map(function (p) {
+      return '<div class="restock-row" data-id="' + p.id + '"><span class="ricon">' + A.product(p.id) + '</span>' +
+        '<span class="rname">' + p.name + '<small>Stok: ' + state.stock[p.id] + ' | ' + UI.rm(S.restockCost(p.id, 1)) + ' seunit</small></span>' +
+        [5, 10].map(function (n) {
+          return '<button class="btn small" data-n="' + n + '"' + (S.canRestock(state, p.id, n) ? '' : ' disabled') + '>+' + n +
+            ' (' + UI.rm(S.restockCost(p.id, n)) + ')</button>';
+        }).join('') + '</div>';
+    }).join('');
+    $('restockCash').textContent = UI.rm(state.cash);
+  }
+  $('restockBtn').addEventListener('click', function () {
+    if (!day || day.done) return;
+    day.paused = true; SFX.click();
+    renderRestock();
+    $('restockModal').classList.remove('hidden');
+  });
+  $('restockList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-n]');
+    if (!b || !day) return;
+    var id = b.closest('.restock-row').dataset.id;
+    if (S.restock(state, id, +b.dataset.n)) {
+      SFX.coin(); save(); renderRestock();
+      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
+    }
+  });
+  $('restockClose').addEventListener('click', function () {
+    $('restockModal').classList.add('hidden');
+    if (day) { day.paused = false; day.last = performance.now(); }
+  });
+
   function finishDay() {
     if (!day || day.done) return;
     day.done = true;
     day.timers.forEach(clearTimeout);
     if (day.use3d) S3.stop();
     P.sdk.gameplayStop();
-        UI.header(state);
-    if (day.result.report.profit > 0 || day.result.report.milestones.length) SFX.kaching();
-    UI.report(day.result.report, state);
+    $('restockModal').classList.add('hidden');
+    var report = S.closeDay(state);
+    save();
+    UI.header(state);
+    if (report.profit > 0 || report.milestones.length) SFX.kaching();
+    UI.report(report, state);
   }
 
   $('reportBox').addEventListener('click', function (e) {
@@ -247,6 +287,8 @@
   S3.load().then(renderGfx); // three.js loads in the background; 2D is used until it's ready
 
   // ---------- Boot ----------
+  // A day left half-played (page closed mid-day): serve the rest of it and show the report.
+  if (state.today) { S.closeDay(state); save(); }
   // A day that was simulated but whose report wasn't closed: show the report again.
   if (state.lastReport) {
     UI.plan(state);

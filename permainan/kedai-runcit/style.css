@@ -198,3 +198,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .scene.is3d .bubble { bottom: auto; transform: translate(-50%, -100%); z-index: 2; }
 .scene.is3d { height: 440px; }
 @media (max-width: 520px) { .scene.is3d { height: 400px; } }
+
+/* Mid-day restock */
+.speed { flex-wrap: wrap; }
+.btn.accent { background: var(--gold); }
+.restock-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,.12); }
+.restock-row .ricon { width: 32px; height: 32px; flex: none; }
+.restock-row .rname { flex: 1; font-weight: 600; font-size: 14px; }
+.restock-row .rname small { display: block; font-weight: 400; opacity: .75; }
+.restock-row .btn + .btn { margin-top: 0; }
+.modal-box .restock-row .btn { white-space: nowrap; }
+#restockList { max-height: 50vh; overflow-y: auto; }
