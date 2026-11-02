@@ -209,3 +209,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .restock-row .btn + .btn { margin-top: 0; }
 .modal-box .restock-row .btn { white-space: nowrap; }
 #restockList { max-height: 50vh; overflow-y: auto; }
+
+/* Zoom buttons over the 3D scene */
+.zoombar { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 3; }
+.zoombar button { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.92); font-size: 22px; font-weight: 700; color: var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.scene:not(.is3d) .zoombar { display: none; }

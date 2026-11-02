@@ -9,6 +9,16 @@ KR.art = (function () {
   var OL = 'stroke="#3a2a1f" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
 
   var products = {
+    cokelat:
+      '<path d="M9 14h30v22H9z" fill="#6b3a1f" ' + OL + '/>' +
+      '<path d="M19 14v22M29 14v22M9 25h30" stroke="#4a2612" stroke-width="1.6"/>' +
+      '<path d="M7 28l34-8v20H7z" fill="#c0453a" ' + OL + '/>' +
+      '<path d="M7 33l34-8" stroke="#ffd23f" stroke-width="2.2"/>',
+    airtin:
+      '<path d="M15 8h18l2 4v26l-2 4H15l-2-4V12z" fill="#2f7fd1" ' + OL + '/>' +
+      '<path d="M13 18h22v12H13z" fill="#e8f4fb"/>' +
+      '<path d="M18 24c2-3 4 3 6 0s4 3 6 0" fill="none" stroke="#d6332b" stroke-width="2" stroke-linecap="round"/>' +
+      '<path d="M17 8l1-3h12l1 3" fill="#c9d3dc" ' + OL + '/><circle cx="24" cy="6" r="1" fill="#3a2a1f"/>',
     air:
       '<rect x="19" y="4" width="10" height="5" rx="1.5" fill="#2f7fd1" ' + OL + '/>' +
       '<path d="M18 9h12l2 6v25a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4V15z" fill="#bfe6ff" ' + OL + '/>' +
@@ -67,15 +77,15 @@ KR.art = (function () {
   }
 
   var upgrades = {
+    rak: '<path d="M4 18h40v24H4z" fill="#f6e7c8" ' + OL + '/><path d="M4 12h40l-2 6H6z" fill="#c0453a" ' + OL + '/>' +
+      '<path d="M17 18v24M31 18v24" ' + OL + '/>' +
+      '<path d="M7 24h7v18H7zM34 24h7v18h-7z" fill="#9c7445"/><path d="M20 24h8v18h-8z" fill="#3a2a1f"/>' +
+      '<path d="M38 2v8M34 6h8" stroke="#2f9e6e" stroke-width="3" stroke-linecap="round"/>',
     lewat: '<path d="M30 6a17 17 0 1 0 12 26A14 14 0 0 1 30 6z" fill="#ffd23f" ' + OL + '/>' +
       '<circle cx="17" cy="31" r="10" fill="#fff" ' + OL + '/><path d="M17 25v6l4 3" fill="none" ' + OL + ' stroke-width="2.2"/>',
     peti: '<rect x="12" y="4" width="24" height="40" rx="3" fill="#e8f4fb" ' + OL + '/>' +
       '<path d="M12 18h24" ' + OL + '/><path d="M31 9v5M31 22v8" stroke="#3a2a1f" stroke-width="2.4" stroke-linecap="round"/>' +
       '<path d="M17 30l3-3 3 3-3 3z" fill="#7cc6ee"/>',
-    rak: '<path d="M8 6v38M40 6v38" ' + OL + ' stroke-width="2.4"/>' +
-      '<path d="M8 17h32M8 30h32M8 43h32" ' + OL + ' stroke-width="2.4"/>' +
-      '<rect x="11" y="9" width="6" height="8" fill="#d6332b"/><rect x="19" y="11" width="8" height="6" fill="#ffd23f"/><rect x="29" y="9" width="8" height="8" fill="#2f7fd1"/>' +
-      '<rect x="11" y="23" width="9" height="7" fill="#2f9e6e"/><rect x="22" y="21" width="6" height="9" fill="#e3a35a"/><rect x="30" y="24" width="7" height="6" fill="#ff9fc0"/>',
     kipas: '<path d="M24 2v12" ' + OL + ' stroke-width="2.4"/>' +
       '<ellipse cx="11" cy="20" rx="12" ry="3.5" fill="#9c7445" ' + OL + '/><ellipse cx="37" cy="20" rx="12" ry="3.5" fill="#9c7445" ' + OL + '/>' +
       '<circle cx="24" cy="19" r="5" fill="#e8e2d0" ' + OL + '/>' +

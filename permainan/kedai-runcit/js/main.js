@@ -87,7 +87,8 @@
       host: scene, overlay: $('walkers'), weather: today.weather, shopName: state.shopName,
       products: S.unlockedProducts(state).map(function (p) { return A.product(p.id); }),
       staff: state.upgrades.pembantu ? 2 : 1,
-      capacity: state.upgrades.pembantu ? 7 : 5,               // customers inside the shop at once
+      lots: S.level(state, 'rak'),                               // shop lots rented next door
+      capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
       timeScale: function () { return day && !day.paused ? day.speed : 0; }
     });
     $('liveCust').textContent = '0';
@@ -101,7 +102,7 @@
             timers: [], customers: 0, sales: 0, done: false, hours: hours, dur: hours * C.hourMs };
     // Time a customer spends browsing and paying (on top of ~3.5s walking around inside): short
     // enough that the shop keeps up on average, so a line only builds up in a rush.
-    day.dwell = Math.max(250, Math.min(1800, 0.75 * (state.upgrades.pembantu ? 7 : 5) * day.dur / Math.max(1, visitors) - 3500));
+    day.dwell = Math.max(250, Math.min(1800, 0.75 * (5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0)) * day.dur / Math.max(1, visitors) - 3500));
     setSpeed(day.speed);
     requestAnimationFrame(tick);
   }

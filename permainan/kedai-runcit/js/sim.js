@@ -10,8 +10,38 @@ KR.sim = (function () {
 
   function product(id) { return C.products.find(function (p) { return p.id === id; }); }
   function upgrade(id) { return C.upgrades.find(function (u) { return u.id === id; }); }
-  function owned(s) { return C.upgrades.filter(function (u) { return s.upgrades[u.id]; }); }
-  function sumUp(s, key) { return owned(s).reduce(function (t, u) { return t + (u[key] || 0); }, 0); }
+  // Upgrade level owned (old saves stored true for a one-level upgrade).
+  function level(s, id) { var v = s.upgrades[id]; return v === true ? 1 : (v || 0); }
+  function ownedLevels(s) {
+    var out = [];
+    C.upgrades.forEach(function (u) { for (var i = 0; i < level(s, u.id); i++) out.push(u.levels[i]); });
+    return out;
+  }
+  function sumUp(s, key) { return ownedLevels(s).reduce(function (t, l) { return t + (l[key] || 0); }, 0); }
+  function nextLevel(s, id) { var u = upgrade(id); return u.levels[level(s, id)] || null; }
+
+  // Products with an expiry are tracked in batches (oldest first) so they can go out of date.
+  function batches(s, id) {
+    s.batches = s.batches || {};
+    var b = s.batches[id] = s.batches[id] || [], held = b.reduce(function (t, x) { return t + x.qty; }, 0);
+    if (held < s.stock[id]) b.push({ qty: s.stock[id] - held, day: s.day });     // older saves: treat as new
+    while (held > s.stock[id] && b.length) { var cut = Math.min(b[0].qty, held - s.stock[id]); b[0].qty -= cut; held -= cut; if (!b[0].qty) b.shift(); }
+    return b;
+  }
+  function addStock(s, id, qty) {
+    if (product(id).expiry) { batches(s, id); s.batches[id].push({ qty: qty, day: s.day }); }
+    s.stock[id] += qty;
+  }
+  function takeStock(s, id) {
+    if (product(id).expiry) { var b = batches(s, id); if (--b[0].qty <= 0) b.shift(); }
+    s.stock[id]--;
+  }
+  // Days left before the oldest batch expires (null when none in stock or no expiry).
+  function daysLeft(s, id) {
+    var p = product(id);
+    if (!p.expiry || !s.stock[id]) return null;
+    return p.expiry - (s.day - batches(s, id)[0].day);
+  }
 
   function isUnlocked(s, p) { return !p.requires || !!s.upgrades[p.requires]; }
   function unlockedProducts(s) { return C.products.filter(function (p) { return isUnlocked(s, p); }); }
@@ -73,10 +103,10 @@ KR.sim = (function () {
   }
 
   function buyUpgrade(s, id) {
-    var u = upgrade(id);
-    if (!u || s.upgrades[id] || s.cash < u.price) return false;
-    s.cash = round2(s.cash - u.price);
-    s.upgrades[id] = true;
+    var u = upgrade(id), next = u && nextLevel(s, id);
+    if (!next || s.cash < next.price) return false;
+    s.cash = round2(s.cash - next.price);
+    s.upgrades[id] = level(s, id) + 1;
     return true;
   }
 
@@ -98,10 +128,11 @@ KR.sim = (function () {
 
     var stockSpend = orderCost(s);
     s.cash = round2(s.cash - stockSpend);
-    C.products.forEach(function (p) { s.stock[p.id] += s.order[p.id] || 0; s.order[p.id] = 0; });
+    C.products.forEach(function (p) { if (s.order[p.id]) addStock(s, p.id, s.order[p.id]); s.order[p.id] = 0; });
 
+    var R = C.trafficRep;
     var traffic = C.baseTraffic * C.dayTraffic[weekday(s.day)] * W.traffic *
-      (0.5 + s.rep / 100) * (1 + sumUp(s, 'traffic')) * (ev.traffic || 1);
+      (R.min + R.scale * Math.pow(s.rep / 100, R.power)) * (1 + sumUp(s, 'traffic')) * (ev.traffic || 1);
     var visitors = Math.max(0, Math.round(traffic * (0.9 + rnd() * 0.2)));
     var willingMult = (1 + sumUp(s, 'willing')) * (ev.willing || 1);
     var cap = serveCap(s);
@@ -151,7 +182,7 @@ KR.sim = (function () {
       } else if (price > w.willing) {
         st.pricey++; d.repDelta -= 0.25; complaint = complaint || { type: 'pricey', id: w.id };
       } else {
-        s.stock[w.id]--; st.sold++; st.revenue = round2(st.revenue + price);
+        takeStock(s, w.id); st.sold++; st.revenue = round2(st.revenue + price);
         d.revenue = round2(d.revenue + price); s.cash = round2(s.cash + price); e.bought.push(w.id);
         d.repDelta += price <= product(w.id).ref ? 0.25 : 0.08;
       }
@@ -168,7 +199,7 @@ KR.sim = (function () {
   function restock(s, id, qty) {
     if (!s.today || !canRestock(s, id, qty)) return false;
     var cost = restockCost(id, qty);
-    s.cash = round2(s.cash - cost); s.stock[id] += qty;
+    s.cash = round2(s.cash - cost); addStock(s, id, qty);
     s.today.midSpend = round2(s.today.midSpend + cost);
     return true;
   }
@@ -177,10 +208,14 @@ KR.sim = (function () {
     var d = s.today;
     while (d.next < d.timeline.length) serveNext(s);
 
-    var perishMult = owned(s).reduce(function (m, u) { return m * (u.perishMult || 1); }, 1);
+    var perishMult = ownedLevels(s).reduce(function (m, l) { return m * (l.perishMult || 1); }, 1);
     var spoiled = {}, spoiledValue = 0;
     C.products.forEach(function (p) {
       var lost = Math.floor(s.stock[p.id] * p.perish * perishMult);
+      if (p.expiry && s.stock[p.id]) {                     // out-of-date batches are thrown away
+        batches(s, p.id).filter(function (b) { return s.day - b.day >= p.expiry - 1; }).forEach(function (b) { lost += b.qty; });
+        s.batches[p.id] = s.batches[p.id].filter(function (b) { return s.day - b.day < p.expiry - 1; });
+      }
       if (lost > 0) { spoiled[p.id] = lost; s.stock[p.id] -= lost; spoiledValue += lost * p.cost; }
     });
     var bills = dailyCosts(s);
@@ -219,7 +254,7 @@ KR.sim = (function () {
   // Shop value = cash + unsold stock at wholesale cost + upgrades at what they cost.
   function shopValue(s) {
     var stock = C.products.reduce(function (t, p) { return t + s.stock[p.id] * p.cost; }, 0);
-    var ups = owned(s).reduce(function (t, u) { return t + u.price; }, 0);
+    var ups = ownedLevels(s).reduce(function (t, l) { return t + l.price; }, 0);
     return round2(s.cash + stock + ups);
   }
 
@@ -266,7 +301,7 @@ KR.sim = (function () {
     dayName: dayName, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
-    buyUpgrade: buyUpgrade, startDay: startDay, runDay: runDay, nextDay: nextDay,
+    buyUpgrade: buyUpgrade, level: level, nextLevel: nextLevel, daysLeft: daysLeft, startDay: startDay, runDay: runDay, nextDay: nextDay,
     isBankrupt: isBankrupt, round2: round2, shopValue: shopValue, starsFor: starsFor,
     nextTarget: nextTarget, seasonOver: seasonOver
   };

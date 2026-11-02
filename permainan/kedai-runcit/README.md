@@ -12,9 +12,9 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `js/audio.js` | Web Audio sound effects (ka-ching, coin, sad) and the mute setting. |
 | `js/characters3d.js` | Chibi-style 3D people built from primitives: swappable headwear, tops, bottoms, extras and colours (base for the Reka Tauke creator). |
 | `js/models3d.js` | Rigged, animated customers from Quaternius' CC0 character pack (`models/*.glb`), used as provided. Common: casual, worker, suit. Rare (reputation 80+): doctors. Unique (95+): kimono. Falls back to `characters3d.js` if they fail to load. |
-| `models/env/*.glb` | Shop, houses, trees, palms, bushes and flowers from Quaternius' CC0 Buildings and Nature packs, placed by `scene3d.js` (box versions show until they load). |
+| `models/env/*.glb` | Shop lots, houses, flats, bank, klinik, trees, palms, bushes and flowers from Quaternius' CC0 Buildings and Nature packs, placed by `scene3d.js` (box versions show until they load). |
 | `vendor/GLTFLoader.js`, `SkeletonUtils.js`, `BufferGeometryUtils.js` | three.js r158 add-ons (MIT) used to load and clone the models. |
-| `js/scene3d.js` | Optional three.js street scene with low-poly customers. Falls back to the SVG scene without WebGL, when opened from `file://`, or when the player picks 2D. |
+| `js/scene3d.js` | Optional three.js town scene: a row of 3 shop lots (the "Besarkan Kedai" upgrade rents lots 2 and 3), zoom (wheel, pinch, +/-) and drag to pan; zoomed in shows a cutaway of the inside, zoomed out shows the roof. Falls back to the SVG scene without WebGL, when opened from `file://`, or when the player picks 2D. |
 | `vendor/three.module.min.js` | three.js r158 (MIT, see `vendor/three.LICENSE`), loaded in the background with `import()`. |
 | `js/ui.js` | Renders the state into the page. |
 | `js/main.js` | Wires buttons, plays the day animation, saves. |

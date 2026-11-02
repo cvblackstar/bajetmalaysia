@@ -64,7 +64,8 @@ KR.ui = (function () {
       return '<div class="product" data-id="' + p.id + '">' +
         '<div class="picon">' + A.product(p.id) + '</div>' +
         '<div><div class="pname">' + p.name + '</div>' +
-        '<div class="pmeta">Borong ' + rm(cost) + ' · Harga biasa ' + rm(p.ref) + (p.perish >= 0.2 ? ' · cepat rosak' : '') + '</div></div>' +
+        '<div class="pmeta">Borong ' + rm(cost) + ' · Harga biasa ' + rm(p.ref) + (p.perish >= 0.2 ? ' · cepat rosak' : '') +
+          (p.expiry ? ' · tahan ' + p.expiry + ' hari' + (S.daysLeft(s, p.id) != null ? ' (stok lama luput dalam ' + S.daysLeft(s, p.id) + ' hari)' : '') : '') + '</div></div>' +
         '<div class="margin ' + (unit > 0 ? 'good' : 'bad') + '">' + (unit >= 0 ? '+' : '') + rm(unit) + '/unit</div>' +
         '<div class="controls">' +
           '<div class="group"><label>Stok</label>' +
@@ -84,12 +85,14 @@ KR.ui = (function () {
 
   function upgrades(s) {
     $('upgrades').innerHTML = C.upgrades.map(function (u) {
-      var have = !!s.upgrades[u.id];
-      return '<div class="upgrade' + (have ? ' owned' : '') + '">' +
-        '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + u.name + '</h4><p>' + u.desc +
-        (u.upkeep ? ' Kos RM' + u.upkeep + '/hari.' : '') + '</p>' +
-        (have ? '<strong class="pos">Sudah ada</strong>'
-              : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < u.price ? ' disabled' : '') + '>Beli ' + rm0(u.price) + '</button>') +
+      var lvl = S.level(s, u.id), next = S.nextLevel(s, u.id), info = next || u.levels[u.levels.length - 1];
+      var steps = u.levels.length > 1 ? ' <small>(Tahap ' + lvl + '/' + u.levels.length + ')</small>' : '';
+      return '<div class="upgrade' + (next ? '' : ' owned') + '">' +
+        '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + u.name + steps + '</h4><p>' + info.desc +
+        (info.upkeep ? ' Kos RM' + info.upkeep + '/hari.' : '') + '</p>' +
+        (!next ? '<strong class="pos">Sudah ada</strong>'
+              : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < next.price ? ' disabled' : '') + '>' +
+                (lvl ? 'Naik tahap ' : 'Beli ') + rm0(next.price) + '</button>') +
         '</div>';
     }).join('');
   }
