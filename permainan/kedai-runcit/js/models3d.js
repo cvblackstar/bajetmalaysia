@@ -1,6 +1,6 @@
 // Rigged, animated customers from Quaternius' "Ultimate Animated Character Pack" (CC0).
 // Each customer is a clone of one of the models exactly as provided. Common customers
-// (casual, worker, suit) always come; rare ones (doctors) need reputation 80+, and the
+// (casual, worker, suit, and a tauke in songkok and apron) always come; rare ones (doctors) need reputation 80+, and the
 // unique kimono pair need 95+ (only one of them on the street at a time).
 // If the models can't load, scene3d.js keeps using the code-built chibi characters.
 window.KR = window.KR || {};
@@ -10,7 +10,7 @@ KR.models = (function () {
   // Customer tiers. Rare ones only turn up when reputation is 80+, unique ones at 95+.
   var TIERS = {
     common: ['casual_male', 'casual_female', 'casual2_male', 'casual2_female', 'casual3_male', 'casual3_female',
-             'worker_male', 'worker_female', 'suit_male', 'suit_female'],
+             'worker_male', 'worker_female', 'suit_male', 'suit_female', 'tauke_male'],
     rare: ['doctor_male_young', 'doctor_male_old', 'doctor_female_young', 'doctor_female_old'],
     unique: ['kimono_male', 'kimono_female']
   };
