@@ -239,3 +239,20 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .rent-note { color: var(--green-d); font-weight: 600; }
 .hint.special { color: #1d6fa5; font-weight: 600; }
 @media (max-width: 480px) { .tab { padding: 8px 4px; font-size: 13px; } }
+
+/* Yesterday's demand, repeat order, regulars */
+.demand { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.demand b { color: var(--green-d); font-weight: 700; }
+.demand b.out { color: var(--red); }
+.demand b.pricey { color: #b7791f; }
+#repeatBtn { margin: 0 0 8px; }
+.regular { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px dashed var(--line); }
+.regular:first-of-type { border-top: 0; }
+.regular .ic { width: 26px; height: 26px; }
+.regular strong { display: block; }
+.regular span { font-size: 12px; color: var(--muted); }
+.regular.locked { opacity: .5; }
+.regular.away strong { color: var(--muted); }
+.hearts i { font-style: normal; color: #ddd3c2; font-size: 15px; margin-left: 1px; }
+.hearts i.on { color: #d6455d; }
+.bubble .who { font-size: 11px; color: var(--green-d); margin-right: 3px; }

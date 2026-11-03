@@ -100,6 +100,20 @@ KR.i18n = (function () {
     'Tiada stok langsung. Buka kedai juga?': 'No stock at all. Open the shop anyway?',
     'UNTUK DISEWA': 'FOR RENT', 'Zum masuk': 'Zoom in', 'Zum keluar': 'Zoom out',
 
+    // Demand, repeat order, regulars, factory
+    'laku {n}': 'sold {n}', 'habis {n}': 'ran out {n}', 'kata mahal {n}': 'too pricey {n}',
+    'Ulang order semalam ({n} unit)': 'Repeat yesterday\'s order ({n} units)',
+    'Pelanggan tetap': 'Regulars', 'Muncul bila reputasi {r}+': 'Shows up at reputation {r}+',
+    'Merajuk, datang balik dalam {n} hari': 'Sulking, back in {n} days',
+    'Suka {p}, datang hampir setiap hari': 'Loves {p}, comes almost every day',
+    'Kalau barang kegemaran mereka habis atau terlalu mahal, mereka kecewa. Hati habis, mereka merajuk seminggu.':
+      'If their favourite item is sold out or too pricey, they get upset. When their hearts run out, they sulk for a week.',
+    '{n} merajuk sebab tak dapat {p}. Dia takkan datang seminggu.': '{n} is sulking after missing out on {p} and won\'t come for a week.',
+    '{n} kecewa, {p} habis.': '{n} was upset: {p} was sold out.', '{n} kecewa, {p} mahal sangat.': '{n} was upset: {p} was too pricey.',
+    'Pelanggan tetap yang gembira: {list}': 'Happy regulars: {list}',
+    'Pekerja kilang singgah waktu rehat tengah hari dan lepas habis syif.': 'Factory workers dropped by at lunch and after their shift.',
+    'KILANG': 'FACTORY',
+
     // Config data
     'Isnin': 'Monday', 'Selasa': 'Tuesday', 'Rabu': 'Wednesday', 'Khamis': 'Thursday', 'Jumaat': 'Friday', 'Sabtu': 'Saturday', 'Ahad': 'Sunday',
     'Panas terik': 'Scorching hot', 'Cerah': 'Sunny', 'Mendung': 'Cloudy', 'Hujan': 'Rain', 'Ribut petir': 'Thunderstorm',
