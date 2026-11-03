@@ -41,9 +41,10 @@ KR.models = (function () {
 
   // tier: 'common' / 'rare' / 'unique' as decided by the game rules (sim.js), or a reputation
   // number to pick one here.
-  function make(seed, tier) {
+  // model: a specific model name (e.g. 'worker_male' for factory workers), else picked from the tier.
+  function make(seed, tier, model) {
     if (typeof tier !== 'string') tier = pickTier(tier || 0, Math.random());
-    var list = TIERS[tier], src = base[list[seed % list.length]];
+    var list = TIERS[tier], src = base[model || list[seed % list.length]];
     var model = SU.clone(src.scene);                            // the model as provided, no add-ons
     // The pack ships skin as a near-black placeholder meant to be tinted, so give it a real skin tone.
     var skin = new T.MeshStandardMaterial({ color: KR.chars.randomLook(seed).skin, roughness: 0.6, side: T.DoubleSide });

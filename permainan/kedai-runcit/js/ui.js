@@ -66,12 +66,15 @@ KR.ui = (function () {
           '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta">' + t('Perlu {u}', { u: t(u.name) }) + '</div></div><div></div></div>';
       }
       var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
-      var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id);
+      var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id), dem = s.lastDemand && s.lastDemand[p.id];
       return '<div class="product" data-id="' + p.id + '">' +
         '<div class="picon">' + A.product(p.id) + '</div>' +
         '<div><div class="pname">' + t(p.name) + '</div>' +
         '<div class="pmeta">' + t('Borong {c} · Harga biasa {r}', { c: rm(cost), r: rm(p.ref) }) + (p.perish >= 0.2 ? t(' · cepat rosak') : '') +
-          (p.expiry ? t(' · tahan {n} hari', { n: p.expiry }) + (left != null ? t(' (stok lama luput dalam {n} hari)', { n: left }) : '') : '') + '</div></div>' +
+          (p.expiry ? t(' · tahan {n} hari', { n: p.expiry }) + (left != null ? t(' (stok lama luput dalam {n} hari)', { n: left }) : '') : '') + '</div>' +
+          (dem ? '<div class="demand">' + t('Semalam') + ': <b>' + t('laku {n}', { n: dem.sold }) + '</b>' +
+            (dem.out ? ' · <b class="out">' + t('habis {n}', { n: dem.out }) + '</b>' : '') +
+            (dem.pricey ? ' · <b class="pricey">' + t('kata mahal {n}', { n: dem.pricey }) + '</b>' : '') + '</div>' : '') + '</div>' +
         '<div class="margin ' + (unit > 0 ? 'good' : 'bad') + '">' + (unit >= 0 ? '+' : '') + rm(unit) + t('/unit') + '</div>' +
         '<div class="controls">' +
           '<div class="group"><label>' + t('Stok') + '</label>' +
@@ -87,6 +90,9 @@ KR.ui = (function () {
         '</div></div>';
     }).join('');
     $('orderCost').textContent = rm(S.orderCost(s));
+    var last = s.lastOrder ? S.totalUnits(s.lastOrder) : 0;
+    $('repeatBtn').classList.toggle('hidden', !last);
+    $('repeatBtn').textContent = t('Ulang order semalam ({n} unit)', { n: last });
   }
 
   function upgrades(s) {
@@ -133,9 +139,25 @@ KR.ui = (function () {
         '<span class="tnum">' + n + ' <small>(' + (pct < 1 && n ? pct.toFixed(1) : Math.round(pct)) + '%)</small></span></div>';
     }).join('');
   }
+  function hearts(n) {
+    var out = '';
+    for (var i = 0; i < C.regularRules.maxHearts; i++) out += '<i class="' + (i < n ? 'on' : '') + '">♥</i>';
+    return '<span class="hearts">' + out + '</span>';
+  }
+  function regularsHtml(s) {
+    S.regulars(s);
+    return '<div class="card"><h3 class="sub-title">' + t('Pelanggan tetap') + '</h3>' + C.regulars.map(function (r) {
+      var st = s.regulars[r.id], p = S.product(r.item);
+      var status = !st ? t('Muncul bila reputasi {r}+', { r: r.rep })
+        : st.away ? t('Merajuk, datang balik dalam {n} hari', { n: st.away })
+        : t('Suka {p}, datang hampir setiap hari', { p: t(p.name) });
+      return '<div class="regular' + (st ? (st.away ? ' away' : '') : ' locked') + '"><i class="ic">' + A.product(r.item) + '</i>' +
+        '<div><strong>' + esc(r.name) + '</strong><span>' + status + '</span></div>' + (st ? hearts(st.hearts) : '') + '</div>';
+    }).join('') + '<p class="hint">' + t('Kalau barang kegemaran mereka habis atau terlalu mahal, mereka kecewa. Hati habis, mereka merajuk seminggu.') + '</p></div>';
+  }
   function customers(s) {
     var st = s.stats, last = st.lastDay, T = C.tiers;
-    $('custStats').innerHTML = !st.customers ? '<p class="hint">' + t('Belum ada pelanggan lagi. Buka kedai dulu!') + '</p>' :
+    $('custStats').innerHTML = !st.customers ? '<p class="hint">' + t('Belum ada pelanggan lagi. Buka kedai dulu!') + '</p>' + regularsHtml(s) :
       '<div class="card"><h3 class="sub-title">' + t('Semua pelanggan') + '</h3>' +
       '<div class="big-num">' + st.customers + ' <small>' + t('Pelanggan dilayan') + '</small></div>' +
       tierBars(st.tiers || {}, st.customers) +
@@ -146,6 +168,7 @@ KR.ui = (function () {
         tierBars(last.tiers, last.served) +
         '<table class="cust-table"><tr><td>' + t('Beli berganda') + '</td><td>' + last.multiBuys + '</td></tr>' +
         '<tr><td>' + t('Balik sebab beratur lama') + '</td><td>' + last.queueLost + '</td></tr></table></div>' : '') +
+      regularsHtml(s) +
       '<p class="hint">' + t('Pelanggan jarang (doktor) datang bila reputasi {r}+ dan selalunya beli 2 kali ganda. Pelanggan unik (kimono) datang bila reputasi {u}+ dan selalunya beli 3 kali ganda.',
         { r: T.rare.rep, u: T.unique.rep }) + '</p>';
   }
@@ -166,6 +189,11 @@ KR.ui = (function () {
     if (r.queueLost) out.push(t('{n} orang balik sebab lama beratur. Pembantu kedai boleh tolong.', { n: r.queueLost }));
     var spoiledText = Object.keys(r.spoiled).map(function (id) { return r.spoiled[id] + ' ' + t(S.product(id).name); });
     if (spoiledText.length) out.push(t('Rosak semalaman: {list} ({v}).', { list: spoiledText.join(', '), v: rm(r.spoiledValue) }));
+    (r.regulars || []).forEach(function (v) {
+      var reg = S.regular(v.id), p = t(S.product(reg.item).name);
+      if (v.gone) out.push(t('{n} merajuk sebab tak dapat {p}. Dia takkan datang seminggu.', { n: reg.name, p: p }));
+      else if (!v.ok) out.push(t(v.why === 'out' ? '{n} kecewa, {p} habis.' : '{n} kecewa, {p} mahal sangat.', { n: reg.name, p: p }));
+    });
     if (!out.length) out.push(t('Hari yang lancar. Pelanggan puas hati.'));
     return out;
   }
@@ -185,6 +213,9 @@ KR.ui = (function () {
       '<p class="hint"><i class="ic">' + A.weather(r.weather) + '</i>' + t(C.weathers[r.weather].name) + ' · ' +
         t('{s} pelanggan dilayan daripada {v} yang datang', { s: r.served, v: r.visitors }) + '</p>' +
       ((tiers.rare || tiers.unique) ? '<p class="hint special">' + t('Pelanggan istimewa: {r} jarang, {u} unik', { r: tiers.rare || 0, u: tiers.unique || 0 }) + '</p>' : '') +
+      (r.regulars && r.regulars.some(function (v) { return v.ok; }) ? '<p class="hint special">' + t('Pelanggan tetap yang gembira: {list}',
+        { list: r.regulars.filter(function (v) { return v.ok; }).map(function (v) { return esc(S.regular(v.id).name); }).join(', ') }) + '</p>' : '') +
+      (r.factoryDay ? '<p class="hint">' + t('Pekerja kilang singgah waktu rehat tengah hari dan lepas habis syif.') + '</p>' : '') +
       (r.multiBuys ? '<p class="hint special">' + t('{n} orang beli berganda hari ini.', { n: r.multiBuys }) + '</p>' : '') +
       sold +
       row(t('Hasil jualan'), '<span class="pos">' + rm(r.revenue) + '</span>') +

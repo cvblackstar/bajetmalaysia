@@ -30,6 +30,10 @@
     UI.header(state); UI.products(state); save();
   });
 
+  $('repeatBtn').addEventListener('click', function () {
+    SFX.click(); S.repeatOrder(state); UI.header(state); UI.products(state); save();
+  });
+
   $('upgrades').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-up]');
     if (b && S.buyUpgrade(state, b.dataset.up)) { SFX.kaching(); P.sdk.happytime(); save(); UI.plan(state); }
@@ -90,7 +94,8 @@
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
       capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
-      timeScale: function () { return day && !day.paused ? day.speed : 0; }
+      timeScale: function () { return day && !day.paused ? day.speed : 0; },
+      factoryDay: !!today.factoryDay, closeHour: S.closeHour(state)
     });
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
@@ -129,6 +134,11 @@
 
   // What the customer says and how the live counters change when they reach the door.
   function outcome(entry) {
+    var o = outcomeOf(entry), reg = entry.regular && S.regular(entry.regular);
+    if (reg) o.html = '<span class="who">' + reg.name + '</span>' + o.html;
+    return o;
+  }
+  function outcomeOf(entry) {
     if (entry.bought.length) {
       SFX.coin();
       day.customers++;
@@ -150,7 +160,8 @@
 
   function spawn3d(entry) {
     S3.spawn({
-      seed: Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
+      seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
+      from: entry.from, back: entry.back, regular: !!entry.regular,
       dwell: day.dwell, patience: 2500, bx: (Math.random() - 0.5) * 1.6,
       giveUp: !!(entry.complaint && entry.complaint.type === 'queue'),
       outcome: function () { return outcome(entry); }

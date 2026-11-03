@@ -138,6 +138,7 @@ KR.sim = (function () {
     var W = C.weathers[weather];
 
     var stockSpend = orderCost(s);
+    if (totalUnits(s.order)) s.lastOrder = Object.assign({}, s.order);   // for "repeat yesterday's order"
     s.cash = round2(s.cash - stockSpend);
     C.products.forEach(function (p) { if (s.order[p.id]) addStock(s, p.id, s.order[p.id]); s.order[p.id] = 0; });
 
@@ -151,26 +152,51 @@ KR.sim = (function () {
 
     var perProduct = {};
     C.products.forEach(function (p) { perProduct[p.id] = { sold: 0, revenue: 0, pricey: 0, out: 0 }; });
-    var timeline = [];
-    for (var i = 0; i < visitors; i++) {
-      var t = clamp((i + rnd()) / Math.max(visitors, 1), 0, 0.999);
-      var tier = pickTier(s.rep, rnd()), T = C.tiers[tier];
-      if (i >= cap) { timeline.push({ t: t, queue: true, tier: tier }); continue; }
-      var wants = [], n = rnd() < 0.35 ? 2 : 1, multi = rnd() < T.multiChance ? T.multi : 1;
+    // Who comes today: passers-by from the taman, factory workers on weekdays (lunch break and
+    // the end of the shift), and the regulars. Factory hours are turned into a 0..1 day time.
+    var hours = closeHour(s) - C.openHour;
+    function at(h) { return clamp((h - C.openHour) / hours, 0, 0.999); }
+    var people = [];
+    for (var i = 0; i < visitors; i++) people.push({ t: clamp((i + rnd()) / Math.max(visitors, 1), 0, 0.999) });
+    var F = C.factory, factoryDay = F.days.indexOf(weekday(s.day)) >= 0;
+    if (factoryDay) [F.lunch, F.shift].forEach(function (w) {
+      var n = w.min + Math.floor(rnd() * (w.max - w.min + 1));
+      for (var j = 0; j < n; j++) people.push({ t: at(w.from + rnd() * (w.to - w.from)), from: 'kilang', back: !!w.back });
+    });
+    people.sort(function (x, y) { return x.t - y.t; });
+
+    function wantsFor(multi, n) {
+      var out = [];
       for (var k = 0; k < n; k++) {
         var p = pickWeighted(available, function (x) {
           return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1);
         });
-        wants.push({ id: p.id, qty: multi, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
+        out.push({ id: p.id, qty: multi, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
       }
-      timeline.push({ t: t, wants: wants, tier: tier, multi: multi });
+      return out;
     }
-    // The ones turned away by the queue are spread over the day too.
+    var timeline = [];
+    people.forEach(function (e, idx) {
+      e.tier = e.from ? 'common' : pickTier(s.rep, rnd());   // factory workers are ordinary customers
+      if (idx >= cap) { e.queue = true; timeline.push(e); return; }   // the line was too long, they walk off
+      var T = C.tiers[e.tier];
+      e.multi = rnd() < T.multiChance ? T.multi : 1;
+      e.wants = wantsFor(e.multi, rnd() < 0.35 ? 2 : 1);
+      timeline.push(e);
+    });
+    // Regulars come most days for their favourite item, and are always let in.
+    regulars(s).forEach(function (r) {
+      var st = s.regulars[r.id];
+      if (st.away || !isUnlocked(s, product(r.item)) || rnd() > C.regularRules.visitChance) return;
+      timeline.push({ t: at(r.hour + rnd() * 1.5), tier: 'common', regular: r.id, multi: 1,
+        wants: [{ id: r.item, qty: rnd() < 0.3 ? 2 : 1, willing: product(r.item).ref * 1.3 * willingMult }] });
+    });
     timeline.sort(function (x, y) { return x.t - y.t; });
+    visitors = timeline.length;
 
     s.today = {
       weather: weather, visitors: visitors, timeline: timeline, next: 0,
-      served: 0, queueLost: 0, revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
+      served: 0, queueLost: 0, revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
       perProduct: perProduct
     };
     return s.today;
@@ -204,8 +230,49 @@ KR.sim = (function () {
       }
     });
     e.complaint = e.bought.length ? null : complaint;
+    if (e.regular) regularVisit(s, d, e);
     if (e.multi > 1 && e.bought.length > e.wants.length) d.multiBuys++;
     return e;
+  }
+
+  // ---------- Regulars ----------
+  // Named customers who come most days for one item. Each has hearts: a good visit adds one,
+  // a sold-out item takes two, a high price takes one. At zero they sulk (merajuk) and stay away
+  // for a week, then come back with two hearts. New regulars turn up as reputation grows.
+  function regulars(s) {
+    s.regulars = s.regulars || {};
+    return C.regulars.filter(function (r) {
+      if (!s.regulars[r.id] && s.rep >= r.rep) s.regulars[r.id] = { hearts: C.regularRules.startHearts, away: 0, visits: 0 };
+      return !!s.regulars[r.id];
+    });
+  }
+  function regular(id) { return C.regulars.find(function (r) { return r.id === id; }); }
+  function regularVisit(s, d, e) {
+    var R = C.regularRules, st = s.regulars[e.regular], before = st.hearts;
+    st.visits++;
+    if (e.bought.length) { st.hearts = Math.min(R.maxHearts, st.hearts + 1); d.repDelta += R.repBonus; }
+    else st.hearts -= e.complaint && e.complaint.type === 'out' ? 2 : 1;
+    var gone = st.hearts <= 0;
+    if (gone) { st.hearts = 0; st.away = R.awayDays; d.repDelta -= 1; }
+    d.regulars = d.regulars || [];
+    d.regulars.push({ id: e.regular, ok: !!e.bought.length, why: e.complaint && e.complaint.type, hearts: st.hearts, change: st.hearts - before, gone: gone });
+  }
+  // Overnight: regulars who are away count down, then come back.
+  function regularsNight(s) {
+    Object.keys(s.regulars || {}).forEach(function (id) {
+      var st = s.regulars[id];
+      if (st.away && --st.away === 0) st.hearts = 2;
+    });
+  }
+
+  // Fill today's order with yesterday's (as much as cash and shelf space allow).
+  function repeatOrder(s) {
+    var last = s.lastOrder || {}, any = false;
+    C.products.forEach(function (p) {
+      s.order[p.id] = 0;
+      for (var i = 0; i < (last[p.id] || 0) && canOrder(s, p.id, 1); i++) { s.order[p.id]++; any = true; }
+    });
+    return any;
   }
 
   // Mid-day restock: wholesale price plus a markup, paid now, on the shelf straight away.
@@ -250,6 +317,9 @@ KR.sim = (function () {
     s.stats.multiBuys = (s.stats.multiBuys || 0) + d.multiBuys;
     s.stats.turnedAway = (s.stats.turnedAway || 0) + d.queueLost;
     s.stats.revenue = round2((s.stats.revenue || 0) + d.revenue);
+    regularsNight(s);
+    s.lastDemand = {};
+    C.products.forEach(function (p) { var st = d.perProduct[p.id]; s.lastDemand[p.id] = { sold: st.sold, out: st.out, pricey: st.pricey }; });
     s.stats.lastDay = { served: d.served, tiers: d.tiers, multiBuys: d.multiBuys, queueLost: d.queueLost };
     s.stats.streak = profit > 0 ? s.stats.streak + 1 : 0;
     s.history.push(profit);
@@ -258,7 +328,7 @@ KR.sim = (function () {
     var report = {
       day: s.day, dayName: dayName(s.day),
       forecast: s.forecast.weather, weather: d.weather, event: s.forecast.event,
-      visitors: d.visitors, served: d.served, queueLost: d.queueLost, tiers: d.tiers, multiBuys: d.multiBuys,
+      visitors: d.visitors, served: d.served, regulars: d.regulars || [], factoryDay: d.factoryDay, queueLost: d.queueLost, tiers: d.tiers, multiBuys: d.multiBuys,
       revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
       spoiled: spoiled, spoiledValue: round2(spoiledValue),
       perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
@@ -321,7 +391,7 @@ KR.sim = (function () {
 
   return {
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, unlockedProducts: unlockedProducts,
-    dayName: dayName, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
+    dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, level: level, nextLevel: nextLevel, daysLeft: daysLeft, startDay: startDay, runDay: runDay, nextDay: nextDay,

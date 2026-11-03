@@ -24,7 +24,10 @@ KR.state = (function () {
       seasonDone: false,
       history: [],
       lastReport: null,
-      batches: {},         // dated stock for products that expire
+      batches: {},
+      regulars: {},        // regulars' hearts (see sim.regulars)
+      lastOrder: null,     // yesterday's morning order, for "repeat order"
+      lastDemand: null,    // yesterday's sold / ran out / too pricey per product         // dated stock for products that expire
       today: null,         // a day in progress (see sim.openDay)
       seenIntro: false
     };

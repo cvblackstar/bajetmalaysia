@@ -33,6 +33,24 @@ KR.config = {
   closeHour: 20,         // 8 malam (the 'lewat' upgrade adds hours)
   bestKey: 'kedaiRuncit.best.v1',
 
+  // Regulars: named customers who come most days for one item (see sim.js regulars()).
+  // rep = reputation needed before they start coming; hour = when they usually turn up; seed = their look.
+  regulars: [
+    { id: 'ali',  name: 'Pak Ali',  item: 'roti',    rep: 0,  hour: 8.5, seed: 12 },
+    { id: 'ros',  name: 'Kak Ros',  item: 'telur',   rep: 0,  hour: 11, seed: 7 },
+    { id: 'amin', name: 'Amin',     item: 'maggi',   rep: 60, hour: 17, seed: 21 },
+    { id: 'mei',  name: 'Mei Ling', item: 'airtin',  rep: 75, hour: 14, seed: 33 },
+    { id: 'raju', name: 'Raju',     item: 'cokelat', rep: 90, hour: 16, seed: 45 }
+  ],
+  regularRules: { visitChance: 0.85, startHearts: 3, maxHearts: 5, awayDays: 7, repBonus: 0.3 },
+  // The kilang across the road: on weekdays (Isnin-Jumaat) a few workers pop over at lunch and
+  // go back, and more come by when the shift ends from 6 petang. Hours are clock hours.
+  factory: {
+    days: [0, 1, 2, 3, 4],
+    lunch: { from: 12, to: 14, min: 2, max: 4, back: true },
+    shift: { from: 18, to: 19.5, min: 4, max: 8 }
+  },
+
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
   seasonDays: 90,
   starTargets: [3000, 7000, 12000],
