@@ -8,11 +8,13 @@ KR.config = {
   startCash: 200,
   startRep: 50,
   baseCapacity: 150,     // max units of stock in the shop
-  baseTraffic: 60,       // customers on a normal weekday, scaled by reputation (see trafficRep)
+  baseTraffic: 30,       // customers on a normal weekday, scaled by reputation (see trafficRep)
+  // Each customer buys this many of every item they want (fewer people, bigger baskets).
+  buyQty: 2,
   // Reputation -> share of baseTraffic: a new shop (rep 50) gets about 60%, a famous one (rep 100)
   // gets 1.5x, which is more than one person can serve, so long queues pull reputation back down.
   trafficRep: { min: 0.3, scale: 1.2, power: 2 },
-  baseServe: 70,         // customers the owner alone can serve per day
+  baseServe: 35,         // customers the owner alone can serve per day
   rent: 15,              // RM per day at full price
   // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
   // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
@@ -47,9 +49,26 @@ KR.config = {
   // go back, and more come by when the shift ends from 6 petang. Hours are clock hours.
   factory: {
     days: [0, 1, 2, 3, 4],
-    lunch: { from: 12, to: 14, min: 2, max: 4, back: true },
-    shift: { from: 18, to: 19.5, min: 4, max: 8 }
+    lunch: { from: 12, to: 14, min: 1, max: 2, back: true },
+    shift: { from: 18, to: 19.5, min: 2, max: 4 }
   },
+
+  // Bank: money saved here earns a return every night on the balance in the bank.
+  // rates[i] is the daily return at relationship level i; upgrades[i] is the price to reach level i+1.
+  bank: { rates: [0.05, 0.10, 0.20], upgrades: [500, 1200] },
+
+  // Kad TCG (needs the 'tcg' upgrade in lot 3): a new set comes out every `every` days. On release
+  // day collectors queue up for packs; the hype fades by `fade` a day. Weekends are card days too.
+  tcg: { every: 14, collectors: 6, fade: 0.65, weekend: 1.5, willing: 0.3 },
+  // Mesin capit (claw machine, lot 3): some of the people who visit play it for RM1 a go.
+  claw: { playRate: 0.4, price: 1, prizeCost: 0.35 },
+  // Lots: products and some upgrades belong to a lot. Lot 1 is the first shop, lot 2 and 3 are
+  // rented with "Besarkan Kedai".
+  lots: [
+    { name: 'Lot 1 · Barang harian' },
+    { name: 'Lot 2 · Barang dapur' },
+    { name: 'Lot 3 · Sudut hobi' }
+  ],
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
   seasonDays: 90,
@@ -72,6 +91,7 @@ KR.config = {
   // cost = wholesale per unit, ref = price most customers think is fair
   // demand = base pick weight, perish = share of leftover stock lost overnight
   // weather = demand multiplier per weather, requires = upgrade id to unlock
+  // lot = which shop lot sells it (2 and 3 need the lot rented first)
   products: [
     { id: 'air',     name: 'Air Mineral', icon: '💧', cost: 0.6, ref: 1.2,  demand: 1.0,  perish: 0,
       weather: { panas: 1.9, cerah: 1.3, mendung: 1.0, hujan: 0.7, ribut: 0.6 } },
@@ -83,13 +103,25 @@ KR.config = {
       weather: { panas: 1, cerah: 1, mendung: 1, hujan: 1, ribut: 1 } },
     { id: 'aiskrim', name: 'Ais Krim',    icon: '🍦', cost: 1.0, ref: 2.5,  demand: 0.8,  perish: 0.03, requires: 'peti',
       weather: { panas: 2.4, cerah: 1.5, mendung: 0.9, hujan: 0.4, ribut: 0.3 } },
-    { id: 'payung',  name: 'Payung',      icon: '☂️', cost: 6.0, ref: 12.0, demand: 0.12, perish: 0, requires: 'rak',
-      weather: { panas: 0.2, cerah: 0.3, mendung: 0.8, hujan: 6, ribut: 8 } },
     { id: 'cokelat', name: 'Cokelat',     icon: '🍫', cost: 1.5, ref: 3.0,  demand: 0.5,  perish: 0.02,
       weather: { panas: 0.6, cerah: 1.0, mendung: 1.1, hujan: 1.2, ribut: 1.2 } },
     // expiry = days a batch lasts on the shelf before it has to be thrown away
     { id: 'airtin',  name: 'Air Tin',     icon: '🥤', cost: 1.2, ref: 2.2,  demand: 0.7,  perish: 0, expiry: 15,
-      weather: { panas: 2.0, cerah: 1.4, mendung: 0.9, hujan: 0.6, ribut: 0.5 } }
+      weather: { panas: 2.0, cerah: 1.4, mendung: 0.9, hujan: 0.6, ribut: 0.5 } },
+    // Lot 2: kitchen basics
+    { id: 'beras',   name: 'Beras 5kg',   icon: '🍚', cost: 13.0, ref: 19.0, demand: 0.3, perish: 0, lot: 2,
+      weather: { panas: 1, cerah: 1, mendung: 1, hujan: 1.1, ribut: 1.2 } },
+    { id: 'minyak',  name: 'Minyak Masak', icon: '🫗', cost: 5.2, ref: 7.5,  demand: 0.35, perish: 0, lot: 2,
+      weather: { panas: 1, cerah: 1, mendung: 1, hujan: 1, ribut: 1.1 } },
+    { id: 'gula',    name: 'Gula 1kg',    icon: '🧂', cost: 2.6, ref: 3.8,  demand: 0.45, perish: 0, lot: 2,
+      weather: { panas: 1, cerah: 1, mendung: 1.05, hujan: 1.1, ribut: 1.1 } },
+    { id: 'payung',  name: 'Payung',      icon: '☂️', cost: 6.0, ref: 12.0, demand: 0.12, perish: 0, lot: 2,
+      weather: { panas: 0.2, cerah: 0.3, mendung: 0.8, hujan: 6, ribut: 8 } },
+    // Lot 3: hobby corner
+    { id: 'mainan',  name: 'Mainan Kecil', icon: '🧸', cost: 3.0, ref: 6.5, demand: 0.3, perish: 0, lot: 3,
+      weather: { panas: 0.9, cerah: 1, mendung: 1.1, hujan: 1.3, ribut: 1.3 } },
+    { id: 'tcg',     name: 'Pek Booster TCG', icon: '🃏', cost: 9.0, ref: 15.0, demand: 0.3, perish: 0, lot: 3, requires: 'tcg',
+      weather: { panas: 1, cerah: 1, mendung: 1, hujan: 1.1, ribut: 1.1 } }
   ],
 
   // upkeep = RM per day once bought
@@ -98,8 +130,8 @@ KR.config = {
       desc: 'Boleh jual ais krim. Roti dan telur kurang rosak.', perishMult: 0.5 },
     // An upgrade with levels can be bought once per level (each level's numbers add up).
     { id: 'rak',      name: 'Besarkan Kedai', icon: '🏬', levels: [
-      { price: 250, rent: 5, capacity: 150, desc: 'Sewa lot sebelah. +150 ruang stok, lebih ramai boleh masuk, boleh jual payung.' },
-      { price: 450, rent: 8, capacity: 150, desc: 'Sewa lot kedua. +150 lagi ruang stok, kedai jadi tiga pintu.' }
+      { price: 250, rent: 5, capacity: 150, desc: 'Sewa lot 2. +150 ruang stok, lebih ramai boleh masuk, jual barang dapur (beras, minyak, gula) dan payung.' },
+      { price: 450, rent: 8, capacity: 150, desc: 'Sewa lot 3: sudut hobi. +150 lagi ruang stok, jual mainan, dan boleh pasang mesin capit dan jual kad TCG.' }
     ] },
     { id: 'kipas',    name: 'Kipas Siling',   icon: '🌀', price: 120, upkeep: 1,
       desc: 'Kedai lebih selesa, +8% pelanggan.', traffic: 0.08 },
@@ -108,10 +140,20 @@ KR.config = {
     { id: 'papan',    name: 'Papan Tanda LED', icon: '💡', price: 450, upkeep: 2,
       desc: 'Lebih ramai nampak kedai korang, +20% pelanggan.', traffic: 0.2 },
     { id: 'pembantu', name: 'Pembantu Kedai', icon: '🧑‍🍳', price: 300, upkeep: 35,
-      desc: 'Layan +60 pelanggan sehari.', serve: 60 },
+      desc: 'Layan +30 pelanggan sehari.', serve: 30 },
     { id: 'lewat',    name: 'Buka Sampai 12 Malam', icon: '🌙', price: 350, upkeep: 8,
-      desc: 'Buka 8 pagi hingga 12 malam. +25% pelanggan, layan +20 lagi.', traffic: 0.25, serve: 20, hours: 4 }
+      desc: 'Buka 8 pagi hingga 12 malam. +25% pelanggan, layan +10 lagi.', traffic: 0.25, serve: 10, hours: 4 },
+    // Lot 3 only
+    { id: 'capit',    name: 'Mesin Capit',    icon: '🕹️', price: 400, upkeep: 2, lot: 3,
+      desc: 'Mesin capit di sudut hobi. Pengunjung main RM1 sekali, duit masuk tiap hari tanpa perlu stok.', claw: true },
+    { id: 'tcg',      name: 'Jual Kad TCG',   icon: '🃏', price: 300, upkeep: 0, lot: 3,
+      desc: 'Jual pek booster TCG. Set baru keluar setiap 14 hari dan peminat kad datang beratur.' },
+    // Hidden: only shows once every other upgrade is bought. Runs the shop for you (see main.js manager).
+    { id: 'pengurus', name: 'Pengurus Kedai', icon: '🧑‍💼', price: 2500, upkeep: 20, hidden: true,
+      desc: 'Pengurus pesan stok ikut jualan semalam dan buka kedai setiap hari untuk korang. Boleh tutup bila-bila masa.' }
   ],
+  // Cash + bank needed to celebrate and offer a second branch (RM5,000 + RM2,500 for the manager).
+  expandAt: 7500,
 
   events: {
     gaji:       { name: 'Hari Gaji', desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
@@ -134,18 +176,19 @@ KR.config = {
     { id: 'naiktaraf', name: 'Pelaburan Pertama', desc: 'Beli naik taraf pertama.', reward: 30,
       check: function (s) { return Object.keys(s.upgrades).length >= 1; } },
     { id: 'semua',    name: 'Kedai Lengkap',    desc: 'Beli semua naik taraf.', reward: 150,
-      check: function (s) { return Object.keys(s.upgrades).length >= KR.config.upgrades.length; } },
+      check: function (s) { return KR.sim.allUpgradesOwned(s); } },
     { id: 'rep80',    name: 'Kedai Kegemaran',  desc: 'Capai reputasi 80.', reward: 50,
       check: function (s) { return s.rep >= 80; } },
-    { id: 'pelanggan500', name: 'Kenal Satu Taman', desc: 'Layan 500 pelanggan.', reward: 80,
-      check: function (s) { return s.stats.customers >= 500; } },
-    { id: 'takhabis', name: 'Stok Cukup',       desc: 'Sehari tanpa barang habis (sekurang-kurangnya 40 pelanggan).', reward: 40,
-      check: function (s, r) { return r.served >= 40 && Object.keys(r.perProduct).every(function (k) { return !r.perProduct[k].out; }); } }
+    { id: 'pelanggan500', name: 'Kenal Satu Taman', desc: 'Layan 250 pelanggan.', reward: 80,
+      check: function (s) { return s.stats.customers >= 250; } },
+    { id: 'takhabis', name: 'Stok Cukup',       desc: 'Sehari tanpa barang habis (sekurang-kurangnya 20 pelanggan).', reward: 40,
+      check: function (s, r) { return r.served >= 20 && Object.keys(r.perProduct).every(function (k) { return !r.perProduct[k].out; }); } }
   ]
 };
 
 // Every upgrade gets a levels list, so the rules only deal with one shape.
 KR.config.upgrades.forEach(function (u) {
   if (!u.levels) u.levels = [Object.assign({}, u)];
+  u.levels.forEach(function (l) { l.id = u.id; });
   u.price = u.levels[0].price; u.upkeep = u.levels[0].upkeep; u.rent = u.levels[0].rent; u.desc = u.levels[0].desc;
 });

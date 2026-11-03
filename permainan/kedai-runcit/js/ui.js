@@ -55,15 +55,30 @@ KR.ui = (function () {
         { c: rm(S.dailyCosts(s)), r: rm(rent), b: rm(S.round2(S.dailyCosts(s) - rent)) }) + '</p>' +
       (mult < 1 ? '<p class="rent-note">' + t('Sewa diskaun: bayar {p}% sampai hari {d}.', { p: Math.round(mult * 100), d: until }) + '</p>' : '') +
       (ev ? '<span class="event-tag">' + esc(t(ev.name)) + '</span> <p>' + esc(t(ev.desc)) + '</p>' : '') +
+      (S.tcgOn(s) ? (S.tcgRelease(s) ? '<span class="event-tag tcg">' + t('Set TCG baru keluar hari ini!') + '</span> <p>' + t('Peminat kad akan datang beratur. Pastikan stok pek booster cukup.') + '</p>'
+        : '<p class="rent-note">' + t('Set TCG baru seterusnya dalam {n} hari.', { n: C.tcg.every - S.tcgDays(s) }) + '</p>') : '') +
       '</div>';
   }
 
+  // Products are grouped by the shop lot that sells them; lots not rented yet show what they'd add.
+  var LOT_NEED = ['', 'Sewa lot 2 (Besarkan Kedai) untuk jual barang ini.', 'Sewa lot 3 (Besarkan Kedai tahap 2) untuk jual barang ini.'];
   function products(s) {
-    $('products').innerHTML = C.products.map(function (p) {
+    var open = S.lotsOpen(s);
+    $('products').innerHTML = C.lots.map(function (lot, i) {
+      var list = C.products.filter(function (p) { return S.lotOf(p) === i + 1; });
+      return '<h3 class="lot-title' + (i + 1 > open ? ' locked' : '') + '">' + t(lot.name) +
+        (i + 1 > open ? ' <small>' + t(LOT_NEED[i]) + '</small>' : '') + '</h3>' + list.map(productRow.bind(null, s)).join('');
+    }).join('');
+    $('orderCost').textContent = rm(S.orderCost(s));
+    var last = s.lastOrder ? S.totalUnits(s.lastOrder) : 0;
+    $('repeatBtn').classList.toggle('hidden', !last);
+    $('repeatBtn').textContent = t('Ulang order semalam ({n} unit)', { n: last });
+  }
+  function productRow(s, p) {
       if (!S.isUnlocked(s, p)) {
-        var u = S.upgrade(p.requires);
+        var need = S.lotOf(p) > S.lotsOpen(s) ? t('Perlu lot {n}', { n: S.lotOf(p) }) : t('Perlu {u}', { u: t(S.upgrade(p.requires).name) });
         return '<div class="product locked"><div class="picon">' + A.product(p.id) + '</div>' +
-          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta">' + t('Perlu {u}', { u: t(u.name) }) + '</div></div><div></div></div>';
+          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta">' + need + '</div></div><div></div></div>';
       }
       var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
       var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id), dem = s.lastDemand && s.lastDemand[p.id];
@@ -88,22 +103,18 @@ KR.ui = (function () {
             '<button class="step" data-act="price" data-n="0.1">+</button>' +
           '</div>' +
         '</div></div>';
-    }).join('');
-    $('orderCost').textContent = rm(S.orderCost(s));
-    var last = s.lastOrder ? S.totalUnits(s.lastOrder) : 0;
-    $('repeatBtn').classList.toggle('hidden', !last);
-    $('repeatBtn').textContent = t('Ulang order semalam ({n} unit)', { n: last });
   }
 
   function upgrades(s) {
-    $('upgrades').innerHTML = C.upgrades.map(function (u) {
+    $('upgrades').innerHTML = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); }).map(function (u) {
       var lvl = S.level(s, u.id), next = S.nextLevel(s, u.id), info = next || u.levels[u.levels.length - 1];
       var steps = u.levels.length > 1 ? ' <small>' + t(' (Tahap {l}/{n})', { l: lvl, n: u.levels.length }) + '</small>' : '';
-      return '<div class="upgrade' + (next ? '' : ' owned') + '">' +
+      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (u.hidden ? ' secret' : '') + '">' +
         '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + t(u.name) + steps + '</h4><p>' + t(info.desc) +
         (info.upkeep ? t(' Kos {c}/hari.', { c: 'RM' + info.upkeep }) : '') +
         (info.rent ? t(' Sewa {c}/hari.', { c: 'RM' + info.rent }) : '') + '</p>' +
         (!next ? '<strong class="pos">' + t('Sudah ada') + '</strong>'
+              : !S.upgradeOpen(s, u) ? '<strong class="muted">' + t('Perlu lot {n}', { n: S.lotOf(u) }) + '</strong>'
               : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < next.price ? ' disabled' : '') + '>' +
                 t(lvl ? 'Naik tahap {p}' : 'Beli {p}', { p: rm0(next.price) }) + '</button>') +
         '</div>';
@@ -173,7 +184,36 @@ KR.ui = (function () {
         { r: T.rare.rep, u: T.unique.rep }) + '</p>';
   }
 
-  function plan(s) { header(s); forecast(s); products(s); upgrades(s); customers(s); records(s); }
+  // Bank tab: savings that earn a daily return, and the relationship upgrades.
+  var BANK_LEVELS = ['Pelanggan biasa', 'Pelanggan setia', 'Pelanggan premium'];
+  function bankTab(s) {
+    var B = S.bank(s), rate = S.bankRate(s), next = S.bankNextPrice(s), free = S.bankFree(s);
+    function btns(kind, max) {
+      return [50, 100, 500].map(function (n) {
+        return '<button class="btn small" data-bank="' + kind + '" data-n="' + n + '"' + (max >= n ? '' : ' disabled') + '>' + rm0(n) + '</button>';
+      }).join('') + '<button class="btn small" data-bank="' + kind + '" data-n="all"' + (max > 0 ? '' : ' disabled') + '>' + t('Semua') + '</button>';
+    }
+    $('bankPanel').innerHTML =
+      '<div class="card bank-card"><div class="uicon">' + A.upgrade('bank') + '</div><div>' +
+        '<h3 class="sub-title">' + t('Simpanan bank') + '</h3>' +
+        '<div class="big-num">' + rm(B.balance) + '</div>' +
+        '<p class="hint">' + t('Pulangan {p}% sehari atas baki dalam bank, dibayar setiap malam. Jumlah dapat setakat ini: {e}.', { p: +(rate * 100).toFixed(2), e: rm(B.earned || 0) }) + '</p>' +
+        (B.balance ? '<p class="hint">' + t('Malam ini dijangka dapat {v}.', { v: rm(S.round2(B.balance * rate)) }) + '</p>' : '') +
+      '</div></div>' +
+      '<div class="card"><h4>' + t('Simpan') + ' <small>' + t('(duit boleh simpan: {v})', { v: rm(free) }) + '</small></h4><div class="bank-btns">' + btns('in', free) + '</div>' +
+      '<h4>' + t('Keluarkan') + '</h4><div class="bank-btns">' + btns('out', B.balance) + '</div>' +
+      '<p class="hint">' + t('Duit untuk stok yang dah dipesan hari ini tak boleh disimpan. Duit dalam bank dikira dalam nilai kedai.') + '</p></div>' +
+      '<div class="card"><h4>' + t('Hubungan dengan bank') + '</h4>' +
+        C.bank.rates.map(function (r, i) {
+          return '<div class="bank-level' + (i === B.level ? ' on' : i < B.level ? ' done' : '') + '"><strong>' + t(BANK_LEVELS[i]) + '</strong><span>' +
+            t('{p}% sehari', { p: +(r * 100).toFixed(2) }) + (i ? ' · ' + rm0(C.bank.upgrades[i - 1]) : '') + '</span></div>';
+        }).join('') +
+        (next != null ? '<button class="btn primary" id="bankUpBtn"' + (s.cash < next ? ' disabled' : '') + '>' + t('Naik taraf hubungan {p}', { p: rm0(next) }) + '</button>'
+          : '<strong class="pos">' + t('Hubungan tertinggi') + '</strong>') +
+      '</div>';
+  }
+
+  function plan(s) { header(s); forecast(s); products(s); upgrades(s); bankTab(s); customers(s); records(s); }
 
   function tips(r) {
     var out = [];
@@ -216,14 +256,18 @@ KR.ui = (function () {
       (r.regulars && r.regulars.some(function (v) { return v.ok; }) ? '<p class="hint special">' + t('Pelanggan tetap yang gembira: {list}',
         { list: r.regulars.filter(function (v) { return v.ok; }).map(function (v) { return esc(S.regular(v.id).name); }).join(', ') }) + '</p>' : '') +
       (r.factoryDay ? '<p class="hint">' + t('Pekerja kilang singgah waktu rehat tengah hari dan lepas habis syif.') + '</p>' : '') +
+      (r.tcgRelease ? '<p class="hint special">' + t('Set TCG baru! {n} peminat kad datang cari pek booster.', { n: r.collectors }) + '</p>'
+        : r.collectors ? '<p class="hint">' + t('{n} peminat kad singgah cari pek booster.', { n: r.collectors }) + '</p>' : '') +
       (r.multiBuys ? '<p class="hint special">' + t('{n} orang beli berganda hari ini.', { n: r.multiBuys }) + '</p>' : '') +
       sold +
       row(t('Hasil jualan'), '<span class="pos">' + rm(r.revenue) + '</span>') +
       row(t('Beli stok'), '<span class="loss">' + rm(-r.stockSpend) + '</span>') +
       (r.midSpend ? row(t('Tambah stok (siang)'), '<span class="loss">' + rm(-r.midSpend) + '</span>') : '') +
       row(t('Sewa dan bil'), '<span class="loss">' + rm(-r.bills) + '</span>') +
+      (r.claw ? row(t('Mesin capit ({n} kali main)', { n: r.claw.plays }), '<span class="pos">' + rm(r.claw.net) + '</span>') : '') +
       row(t('Untung hari ini'), '<span class="' + (r.profit >= 0 ? 'pos' : 'loss') + '">' + rm(r.profit) + '</span>', 'total') +
       row(t('Reputasi'), r.repBefore + ' → ' + r.repAfter + ' (' + (repDiff >= 0 ? '+' : '') + repDiff + ')') +
+      (r.bankInterest ? row(t('Pulangan bank malam ini'), '<span class="pos">+' + rm(r.bankInterest) + '</span> <small>(' + t('baki {v}', { v: rm(r.bankBalance) }) + ')</small>') : '') +
       (r.milestones && r.milestones.length ? '<div class="earned">' + r.milestones.map(function (id) {
         var m = C.milestones.find(function (x) { return x.id === id; });
         return '<p>' + t('Pencapaian baru: {m} (+{v})', { m: t(m.name), v: rm0(m.reward) }) + '</p>';
@@ -249,7 +293,8 @@ KR.ui = (function () {
                'Bagus! Kedai korang dah mula dikenali.',
                'Hebat! Kedai korang jadi pilihan orang taman.',
                'Tauke sebenar! Kedai korang paling laku.'][stars];
-    var owned = C.upgrades.filter(function (u) { return S.level(s, u.id); }).length;
+    var normal = C.upgrades.filter(function (u) { return !u.hidden; });
+    var owned = normal.filter(function (u) { return S.level(s, u.id); }).length;
     $('reportBox').innerHTML =
       '<h2>' + t('Rekod {n} Hari', { n: C.seasonDays }) + '</h2>' +
       '<div class="big-stars">' + starsHtml(stars) + '</div>' +
@@ -264,15 +309,28 @@ KR.ui = (function () {
       row(t('Beli berganda'), st.multiBuys || 0) +
       row(t('Balik sebab beratur lama'), st.turnedAway || 0) +
       row(t('Reputasi'), s.rep) +
-      row(t('Naik taraf dimiliki'), owned + '/' + C.upgrades.length) +
+      row(t('Naik taraf dimiliki'), owned + '/' + normal.length) +
       row(t('Pencapaian'), Object.keys(s.milestones).length + '/' + C.milestones.length) +
       row(t('Rekod terbaik'), rm0(best.value) + (isNewBest ? t(' (baru!)') : '')) +
-      '<p class="hint">' + t('Sasaran bintang: {list}. Nilai kedai = duit + stok + naik taraf.', { list: C.starTargets.map(rm0).join(' / ') }) + '</p>' +
+      row(t('Simpanan bank'), rm(S.bank(s).balance)) +
+      '<p class="hint">' + t('Sasaran bintang: {list}. Nilai kedai = duit + bank + stok + naik taraf.', { list: C.starTargets.map(rm0).join(' / ') }) + '</p>' +
       '<button class="btn primary wide" id="continueBtn">' + t('Teruskan main (mod bebas)') + '</button>' +
       '<button class="btn wide" id="newSeasonBtn">' + t('Mula musim baru') + '</button>';
     $('reportModal').classList.remove('hidden');
   }
 
-  return { $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
+  // Cash + bank reached RM7,500: celebrate, and offer a second branch (coming in a later update).
+  function celebrate(s) {
+    $('reportBox').innerHTML =
+      '<h2>' + t('Tahniah, tauke!') + '</h2>' +
+      '<div class="big-stars">' + starsHtml(3) + '</div>' +
+      '<p>' + t('Duit dan simpanan korang dah capai {v} pada hari {d}. Kedai runcit kecil ni dah jadi perniagaan sebenar!', { v: rm0(s.cash + S.bank(s).balance), d: s.day }) + '</p>' +
+      '<p class="hint">' + t('Langkah seterusnya: buka cawangan baru di jalan yang lebih sibuk, dengan barang jualan baru. Pengurus Kedai boleh jaga kedai ini untuk korang.') + '</p>' +
+      '<button class="btn primary wide" id="expandBtn" disabled>' + t('Buka cawangan baru (akan datang)') + '</button>' +
+      '<button class="btn wide" id="celebrateOk">' + t('Teruskan berniaga') + '</button>';
+    $('reportModal').classList.remove('hidden');
+  }
+
+  return { celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
            customers: customers, records: records, report: report, bankrupt: bankrupt };
 })();

@@ -11,8 +11,35 @@
   function showPlan() {
     $('plan').classList.remove('hidden');
     $('dayView').classList.add('hidden');
+    managerMorning();
     UI.plan(state);
+    renderManager();
   }
+
+  // ---------- Store manager ----------
+  // Once hired (hidden upgrade 'pengurus') and switched on, each morning the manager orders stock
+  // from yesterday's sales, opens the shop at x8, and moves on from the report by itself.
+  var managerTimer = 0;
+  function managerActive() { return !!S.level(state, 'pengurus') && state.managerOn; }
+  function managerMorning() {
+    clearTimeout(managerTimer);
+    if (!managerActive() || state.today || state.lastReport) return;
+    S.autoOrder(state); save();
+    managerTimer = setTimeout(function () {
+      if (managerActive() && !$('plan').classList.contains('hidden') && $('reportModal').classList.contains('hidden')) openShop(true);
+    }, 2500);
+  }
+  function renderManager() {
+    var has = !!S.level(state, 'pengurus');
+    $('managerBtn').classList.toggle('hidden', !has);
+    $('managerBtn').textContent = t(state.managerOn ? 'Pengurus: buka (tekan untuk henti)' : 'Pengurus: tutup');
+    $('managerBtn').classList.toggle('on', has && state.managerOn);
+  }
+  $('managerBtn').addEventListener('click', function () {
+    state.managerOn = !state.managerOn; save(); SFX.click();
+    if (!state.managerOn) clearTimeout(managerTimer); else managerMorning();
+    UI.plan(state); renderManager();
+  });
 
   // ---------- Planning ----------
   $('products').addEventListener('click', function (e) {
@@ -27,16 +54,29 @@
       var p = S.product(id);
       state.prices[id] = Math.min(p.ref * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
     }
-    UI.header(state); UI.products(state); save();
+    UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
 
   $('repeatBtn').addEventListener('click', function () {
-    SFX.click(); S.repeatOrder(state); UI.header(state); UI.products(state); save();
+    SFX.click(); S.repeatOrder(state); UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
 
   $('upgrades').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-up]');
-    if (b && S.buyUpgrade(state, b.dataset.up)) { SFX.kaching(); P.sdk.happytime(); save(); UI.plan(state); }
+    if (b && S.buyUpgrade(state, b.dataset.up)) {
+      SFX.kaching(); P.sdk.happytime();
+      if (b.dataset.up === 'pengurus') { state.managerOn = true; managerMorning(); }
+      save(); UI.plan(state); renderManager();
+    }
+  });
+
+  $('bankPanel').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    if (b.id === 'bankUpBtn') { if (S.bankUpgrade(state)) { SFX.kaching(); save(); UI.plan(state); } return; }
+    var kind = b.dataset.bank; if (!kind) return;
+    var n = b.dataset.n === 'all' ? Infinity : +b.dataset.n;
+    if ((kind === 'in' ? S.deposit(state, n) : S.withdraw(state, n)) > 0) { SFX.coin(); save(); UI.plan(state); }
   });
 
   document.querySelectorAll('.tab').forEach(function (t) {
@@ -65,14 +105,17 @@
     showPlan();
   }
 
-  $('openBtn').addEventListener('click', function () {
-    if (S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
+  $('openBtn').addEventListener('click', function () { openShop(false); });
+  function openShop(auto) {
+    clearTimeout(managerTimer);
+    if (!auto && S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
       if (!window.confirm(t('Tiada stok langsung. Buka kedai juga?'))) return;
     }
     S.openDay(state);
     save(); // the day in progress is saved, so a reload finishes it instead of replaying it
     playDay();
-  });
+    if (auto) setSpeed(8);
+  }
 
   // ---------- Day playback ----------
   function playDay() {
@@ -90,7 +133,10 @@
     scene.classList.toggle('is3d', use3d);
     if (use3d) S3.start({
       host: scene, overlay: $('walkers'), weather: today.weather, shopName: state.shopName,
-      products: S.unlockedProducts(state).map(function (p) { return A.product(p.id); }),
+      lotProducts: C.lots.map(function (l, i) {                  // what each lot's shelves show
+        return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return A.product(p.id); });
+      }),
+      claw: !!S.level(state, 'capit'), tcg: !!S.level(state, 'tcg'),
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
       capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
@@ -162,6 +208,8 @@
     S3.spawn({
       seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
       from: entry.from, back: entry.back, regular: !!entry.regular,
+      across: !entry.from && Math.random() < 0.3,                // some live across the road and use the zebra crossing
+      lot: entry.wants && entry.wants.length ? S.lotOf(S.product(entry.wants[0].id)) - 1 : 0,   // browse in the lot that sells it
       dwell: day.dwell, patience: 2500, bx: (Math.random() - 0.5) * 1.6,
       giveUp: !!(entry.complaint && entry.complaint.type === 'queue'),
       outcome: function () { return outcome(entry); }
@@ -252,10 +300,16 @@
     UI.header(state);
     if (report.profit > 0 || report.milestones.length) SFX.kaching();
     UI.report(report, state);
+    if (managerActive()) managerTimer = setTimeout(function () { var b = $('nextBtn'); if (b && managerActive()) b.click(); }, 3000);
   }
 
   $('reportBox').addEventListener('click', function (e) {
     if (e.target.id === 'restartBtn' || e.target.id === 'newSeasonBtn') return restart();
+    if (e.target.id === 'celebrateOk') {
+      state.celebrated = true; save();
+      $('reportModal').classList.add('hidden');
+      return showPlan();
+    }
     if (e.target.id === 'continueBtn') {
       state.seasonDone = true; save();
       $('reportModal').classList.add('hidden');
@@ -263,11 +317,17 @@
     }
     if (e.target.id !== 'nextBtn') return;
     $('reportModal').classList.add('hidden');
+    clearTimeout(managerTimer);
     S.nextDay(state); save();
     if (S.seasonOver(state)) return endSeason();
     if (S.isBankrupt(state)) return UI.bankrupt(state);
+    if (S.canExpand(state)) { clearTimeout(managerTimer); showPlanQuiet(); SFX.kaching(); return UI.celebrate(state); }
     showPlan();
   });
+
+  function showPlanQuiet() {           // plan screen behind a modal, without the manager starting the day
+    $('plan').classList.remove('hidden'); $('dayView').classList.add('hidden'); UI.plan(state); renderManager();
+  }
 
   function endSeason() {
     var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
@@ -275,7 +335,7 @@
     P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
     P.sdk.happytime();
     SFX.kaching();
-    showPlan();
+    showPlanQuiet();
     UI.seasonEnd(state, best, isNew);
   }
 
@@ -311,7 +371,7 @@
   $('introLang').addEventListener('click', function () { $('langBtn').click(); });
   $('langBtn').addEventListener('click', function () {
     I18N.set(I18N.lang() === 'en' ? 'ms' : 'en'); SFX.click();
-    renderLang(); renderMute(); renderGfx();
+    renderLang(); renderMute(); renderGfx(); renderManager();
     UI.plan(state);
     if (!$('reportModal').classList.contains('hidden')) {        // re-show whatever the modal was showing
       if ($('nextBtn') && state.lastReport) UI.report(state.lastReport, state);

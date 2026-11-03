@@ -256,3 +256,27 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .hearts i { font-style: normal; color: #ddd3c2; font-size: 15px; margin-left: 1px; }
 .hearts i.on { color: #d6455d; }
 .bubble .who { font-size: 11px; color: var(--green-d); margin-right: 3px; }
+
+/* Products grouped by shop lot */
+.lot-title { margin: 10px 2px 0; font-size: 14px; color: var(--ink, #1d2b24); }
+.lot-title:first-child { margin-top: 0; }
+.lot-title small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+.lot-title.locked { color: var(--muted); }
+.upgrade.locked { opacity: .6; }
+.upgrade .muted { color: var(--muted); font-size: 13px; }
+.event-tag.tcg { background: #efe3ff; color: #5b2a9e; }
+
+/* Bank tab */
+.bank-panel { display: grid; gap: 8px; }
+.bank-panel h4 { margin: 4px 0 6px; }
+.bank-panel h4 small { font-weight: 500; color: var(--muted); }
+.bank-card { display: flex; gap: 12px; align-items: flex-start; }
+.bank-card .uicon { width: 44px; height: 44px; flex: none; }
+.bank-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.bank-level { display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: 8px; font-size: 13px; color: var(--muted); }
+.bank-level.on { background: #e3f1ea; color: inherit; }
+.bank-level.done { text-decoration: line-through; opacity: .6; }
+.bank-panel .btn.primary { margin-top: 8px; }
+
+.upgrade.secret { background: #f3ecff; border-color: #cdb6f2; }
+#managerBtn.on { background: #e3f1ea; border-color: #b9dccb; }

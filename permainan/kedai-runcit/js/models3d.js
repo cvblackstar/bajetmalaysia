@@ -17,6 +17,46 @@ KR.models = (function () {
   var RARE = { rep: 80, chance: 0.08 }, UNIQUE = { rep: 95, chance: 0.03 };
   var SCALE = 0.85, HEIGHT = 0.77,  uniqueOut = 0;          // HEIGHT squashes only the vertical
 
+  // Auras for special customers: rare = a light blue outline, unique = a purple outline with a
+  // soft glow around it. Each is an "inverted hull": a copy of the mesh on the same skeleton,
+  // pushed out along its normals and drawn from the back, so it reads as an outline.
+  // width is in world units; the meshes' own units are the character's before SCALE.
+  var AURA = {
+    rare:   [{ color: 0x8fdcff, width: 0.018, opacity: 1 }],
+    unique: [{ color: 0xb46cff, width: 0.02, opacity: 1 }, { color: 0xc58bff, width: 0.06, opacity: 0.3 }]
+  };
+  function addAura(model, layers, bag) {
+    var meshes = [];
+    model.traverse(function (o) { if (o.isSkinnedMesh && o !== bag) meshes.push(o); });
+    return layers.map(function (L) {
+      var m = new T.MeshBasicMaterial({ color: L.color, side: T.BackSide, transparent: L.opacity < 1, opacity: L.opacity, depthWrite: L.opacity >= 1 });
+      meshes.forEach(function (o) {
+        var w = L.width / SCALE;
+        var mm = m.clone();
+        mm.onBeforeCompile = function (sh) {
+          sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>',
+            '#include <begin_vertex>\n transformed += normalize(normal) * ' + w.toFixed(5) + ';');
+        };
+        mm.customProgramCacheKey = function () { return 'aura' + w.toFixed(5); };
+        var hull = new T.SkinnedMesh(o.geometry, mm);
+        hull.bind(o.skeleton, o.bindMatrix);
+        hull.position.copy(o.position); hull.quaternion.copy(o.quaternion); hull.scale.copy(o.scale);
+        hull.frustumCulled = false; hull.renderOrder = -1;
+        o.parent.add(hull);
+        m.userData.copies = (m.userData.copies || []).concat(mm);
+      });
+      return m.userData.copies ? proxy(m.userData.copies) : m;
+    });
+  }
+  // One handle for every copy of a layer's material, so opacity and dispose reach them all.
+  function proxy(list) {
+    return {
+      set opacity(v) { list.forEach(function (m) { m.opacity = v; }); },
+      get opacity() { return list[0].opacity; },
+      dispose: function () { list.forEach(function (m) { m.dispose(); }); }
+    };
+  }
+
   function load(THREE) {
     T = THREE;
     var names = [].concat(TIERS.common, TIERS.rare, TIERS.unique);
@@ -68,6 +108,7 @@ KR.models = (function () {
     g.add(model);
     g.scale.set(SCALE, SCALE * HEIGHT, SCALE);
     if (tier === 'unique') uniqueOut++;
+    var aura = AURA[tier] ? addAura(model, AURA[tier], bag) : [];
 
     var head = model.getObjectByName('Head').getWorldPosition(new T.Vector3());
     var mixer = new T.AnimationMixer(model), actions = {};
@@ -77,7 +118,7 @@ KR.models = (function () {
     });
     actions.Idle.play();
     mixer.update(Math.random());                                // so neighbours aren't in lockstep
-    g.userData = { mixer: mixer, actions: actions, current: 'Idle', bag: bag, skin: skin, tier: tier, top: (head.y + 1.3) * SCALE * HEIGHT };
+    g.userData = { mixer: mixer, actions: actions, current: 'Idle', bag: bag, skin: skin, tier: tier, aura: aura, t: Math.random() * 6, top: (head.y + 1.3) * SCALE * HEIGHT };
     return g;
   }
 
@@ -91,12 +132,17 @@ KR.models = (function () {
       u.current = want;
     }
     u.mixer.update(dt);
+    if (u.aura.length > 1) {                                    // unique: the outer glow breathes gently
+      u.t += dt;
+      u.aura[1].opacity = 0.22 + 0.12 * Math.sin(u.t * 3);
+    }
   }
 
   function dispose(g) {
     g.userData.mixer.stopAllAction();
     if (g.userData.tier === 'unique') uniqueOut--;
     g.userData.bag.material.dispose();
+    g.userData.aura.forEach(function (m) { m.dispose(); });
     g.userData.skin.dispose();
   }
 

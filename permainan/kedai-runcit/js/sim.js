@@ -43,7 +43,12 @@ KR.sim = (function () {
     return p.expiry - (s.day - batches(s, id)[0].day);
   }
 
-  function isUnlocked(s, p) { return !p.requires || !!s.upgrades[p.requires]; }
+  // Lots open: 1 for the first shop, +1 for each "Besarkan Kedai" level.
+  function lotsOpen(s) { return 1 + level(s, 'rak'); }
+  function lotOf(p) { return p.lot || 1; }
+  function isUnlocked(s, p) { return lotOf(p) <= lotsOpen(s) && (!p.requires || !!level(s, p.requires)); }
+  // Some upgrades (mesin capit, kad TCG) need their lot rented first.
+  function upgradeOpen(s, u) { return lotOf(u) <= lotsOpen(s); }
   function unlockedProducts(s) { return C.products.filter(function (p) { return isUnlocked(s, p); }); }
 
   function weekday(day) { return (day - 1) % 7; }
@@ -75,6 +80,40 @@ KR.sim = (function () {
     var r = rnd() * total;
     for (var i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
     return items[items.length - 1];
+  }
+
+  // ---------- Kad TCG ----------
+  // A new set comes out every C.tcg.every days (day 1, 15, 29...). hype(s) is 1 on release day and
+  // fades each day after; tcgRelease(s) is true on the day a new set comes out.
+  function tcgDays(s) { return (s.day - 1) % C.tcg.every; }
+  function tcgRelease(s) { return tcgDays(s) === 0; }
+  function hype(s) { return Math.pow(C.tcg.fade, tcgDays(s)); }
+  function tcgOn(s) { return isUnlocked(s, product('tcg')); }
+
+  // ---------- Bank ----------
+  // Savings earn rates[level] of the balance every night. Deposits and withdrawals happen in the morning.
+  function bank(s) { return s.bank = s.bank || { balance: 0, level: 0, earned: 0 }; }
+  function bankRate(s) { return C.bank.rates[bank(s).level]; }
+  function bankNextPrice(s) { return C.bank.upgrades[bank(s).level] || null; }
+  // Cash that can go to the bank: keep enough for the stock already on today's order.
+  function bankFree(s) { return Math.max(0, round2(s.cash - orderCost(s))); }
+  function deposit(s, amt) {
+    amt = round2(Math.min(amt, bankFree(s)));
+    if (amt <= 0) return 0;
+    s.cash = round2(s.cash - amt); bank(s).balance = round2(bank(s).balance + amt);
+    return amt;
+  }
+  function withdraw(s, amt) {
+    amt = round2(Math.min(amt, bank(s).balance));
+    if (amt <= 0) return 0;
+    bank(s).balance = round2(bank(s).balance - amt); s.cash = round2(s.cash + amt);
+    return amt;
+  }
+  function bankUpgrade(s) {
+    var price = bankNextPrice(s);
+    if (price == null || s.cash < price) return false;
+    s.cash = round2(s.cash - price); bank(s).level++;
+    return true;
   }
 
   function event(s) { return s.forecast && s.forecast.event ? C.events[s.forecast.event] : null; }
@@ -113,9 +152,27 @@ KR.sim = (function () {
     return orderCost(s) + qty * buyCost(s, p) <= s.cash + 1e-9;
   }
 
+  // Every normal (not hidden) upgrade bought at its top level.
+  function allUpgradesOwned(s) {
+    return C.upgrades.every(function (u) { return u.hidden || level(s, u.id) >= u.levels.length; });
+  }
+  // Hidden upgrades (the store manager) only appear once everything else is bought.
+  function upgradeVisible(s, u) { return !u.hidden || allUpgradesOwned(s) || !!level(s, u.id); }
+
+  // Store manager's morning order: yesterday's sales plus what ran out, +10%, minus stock on hand.
+  function autoOrder(s) {
+    unlockedProducts(s).forEach(function (p) {
+      var d = s.lastDemand && s.lastDemand[p.id], want = d ? Math.ceil((d.sold + d.out * C.buyQty) * 1.1) + 2 : 10;
+      s.order[p.id] = 0;
+      for (var i = 0; i < want - s.stock[p.id] && canOrder(s, p.id, 1); i++) s.order[p.id]++;
+    });
+  }
+  // Time to celebrate: cash + savings reached C.expandAt (once per game).
+  function canExpand(s) { return !s.celebrated && s.cash + bank(s).balance >= C.expandAt; }
+
   function buyUpgrade(s, id) {
     var u = upgrade(id), next = u && nextLevel(s, id);
-    if (!next || s.cash < next.price) return false;
+    if (!next || s.cash < next.price || !upgradeOpen(s, u) || !upgradeVisible(s, u)) return false;
     s.cash = round2(s.cash - next.price);
     s.upgrades[id] = level(s, id) + 1;
     return true;
@@ -169,9 +226,12 @@ KR.sim = (function () {
       var out = [];
       for (var k = 0; k < n; k++) {
         var p = pickWeighted(available, function (x) {
-          return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1);
+          var tcgMult = x.id === 'tcg' ? (1 + 2 * hype(s)) * (weekday(s.day) >= 5 ? C.tcg.weekend : 1) : 1;
+          return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1) * tcgMult;
         });
-        out.push({ id: p.id, qty: multi, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
+        var w = p.ref * (0.8 + rnd() * 0.6) * willingMult;
+        if (p.id === 'tcg') w *= 1 + C.tcg.willing * hype(s);      // hyped sets: collectors pay more
+        out.push({ id: p.id, qty: multi * C.buyQty, willing: w });
       }
       return out;
     }
@@ -189,14 +249,24 @@ KR.sim = (function () {
       var st = s.regulars[r.id];
       if (st.away || !isUnlocked(s, product(r.item)) || rnd() > C.regularRules.visitChance) return;
       timeline.push({ t: at(r.hour + rnd() * 1.5), tier: 'common', regular: r.id, multi: 1,
-        wants: [{ id: r.item, qty: rnd() < 0.3 ? 2 : 1, willing: product(r.item).ref * 1.3 * willingMult }] });
+        wants: [{ id: r.item, qty: (rnd() < 0.3 ? 2 : 1) * C.buyQty, willing: product(r.item).ref * 1.3 * willingMult }] });
     });
+    // Card collectors: they line up for booster packs when a new TCG set is out (fewer as the hype fades).
+    var collectors = 0;
+    if (tcgOn(s)) {
+      collectors = Math.round(C.tcg.collectors * hype(s) * (weekday(s.day) >= 5 ? C.tcg.weekend : 1) * (0.8 + rnd() * 0.4));
+      var tcg = product('tcg');
+      for (var c = 0; c < collectors; c++) {
+        timeline.push({ t: rnd() * 0.999, tier: 'common', collector: true, multi: 1,
+          wants: [{ id: 'tcg', qty: 1 + Math.floor(rnd() * 3), willing: tcg.ref * (1.1 + rnd() * 0.4) * (1 + C.tcg.willing * hype(s)) * willingMult }] });
+      }
+    }
     timeline.sort(function (x, y) { return x.t - y.t; });
     visitors = timeline.length;
 
     s.today = {
       weather: weather, visitors: visitors, timeline: timeline, next: 0,
-      served: 0, queueLost: 0, revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
+      served: 0, queueLost: 0, collectors: collectors, tcgRelease: tcgOn(s) && tcgRelease(s), revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
       perProduct: perProduct
     };
     return s.today;
@@ -231,7 +301,7 @@ KR.sim = (function () {
     });
     e.complaint = e.bought.length ? null : complaint;
     if (e.regular) regularVisit(s, d, e);
-    if (e.multi > 1 && e.bought.length > e.wants.length) d.multiBuys++;
+    if (e.multi > 1 && e.bought.length > e.wants.length * C.buyQty) d.multiBuys++;
     return e;
   }
 
@@ -305,9 +375,21 @@ KR.sim = (function () {
     var bills = dailyCosts(s);
     s.cash = round2(s.cash - bills);
 
+    // Mesin capit: some of today's visitors have a go; prizes cost part of the takings.
+    var claw = null;
+    if (sumUp(s, 'claw')) {
+      var plays = Math.round(d.visitors * C.claw.playRate * (0.8 + rnd() * 0.4));
+      var take = round2(plays * C.claw.price);
+      claw = { plays: plays, take: take, net: round2(take * (1 - C.claw.prizeCost)) };
+      s.cash = round2(s.cash + claw.net);
+    }
+    // Bank: tonight's return on the savings balance (added to the balance, so it compounds).
+    var B = bank(s), interest = round2(B.balance * bankRate(s));
+    B.balance = round2(B.balance + interest); B.earned = round2((B.earned || 0) + interest);
+
     var repBefore = s.rep;
     s.rep = Math.round(clamp(s.rep + clamp(d.repDelta, -8, 8), 0, 100));
-    var profit = round2(d.revenue - d.stockSpend - d.midSpend - bills);
+    var profit = round2(d.revenue - d.stockSpend - d.midSpend - bills + (claw ? claw.net : 0));
 
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
     s.stats.bestDay = Math.max(s.stats.bestDay, profit);
@@ -330,7 +412,8 @@ KR.sim = (function () {
       forecast: s.forecast.weather, weather: d.weather, event: s.forecast.event,
       visitors: d.visitors, served: d.served, regulars: d.regulars || [], factoryDay: d.factoryDay, queueLost: d.queueLost, tiers: d.tiers, multiBuys: d.multiBuys,
       revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
-      spoiled: spoiled, spoiledValue: round2(spoiledValue),
+      spoiled: spoiled, spoiledValue: round2(spoiledValue), claw: claw, collectors: d.collectors || 0, tcgRelease: !!d.tcgRelease,
+      bankInterest: interest, bankRate: bankRate(s), bankBalance: B.balance,
       perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
     };
     report.milestones = checkMilestones(s, report);
@@ -348,7 +431,7 @@ KR.sim = (function () {
   function shopValue(s) {
     var stock = C.products.reduce(function (t, p) { return t + s.stock[p.id] * p.cost; }, 0);
     var ups = ownedLevels(s).reduce(function (t, l) { return t + l.price; }, 0);
-    return round2(s.cash + stock + ups);
+    return round2(s.cash + stock + ups + bank(s).balance);
   }
 
   function starsFor(value) {
@@ -386,11 +469,14 @@ KR.sim = (function () {
   // Broke: no cash to restock and nothing left on the shelves.
   function isBankrupt(s) {
     var cheapest = Math.min.apply(null, unlockedProducts(s).map(function (p) { return buyCost(s, p); }));
-    return totalUnits(s.stock) === 0 && s.cash < cheapest;
+    return totalUnits(s.stock) === 0 && s.cash + bank(s).balance < cheapest;
   }
 
   return {
-    product: product, upgrade: upgrade, isUnlocked: isUnlocked, unlockedProducts: unlockedProducts,
+    allUpgradesOwned: allUpgradesOwned, upgradeVisible: upgradeVisible, autoOrder: autoOrder, canExpand: canExpand,
+    product: product, upgrade: upgrade, isUnlocked: isUnlocked, lotsOpen: lotsOpen, lotOf: lotOf, upgradeOpen: upgradeOpen,
+    tcgOn: tcgOn, tcgRelease: tcgRelease, tcgDays: tcgDays, hype: hype,
+    bank: bank, bankRate: bankRate, bankNextPrice: bankNextPrice, bankFree: bankFree, deposit: deposit, withdraw: withdraw, bankUpgrade: bankUpgrade, unlockedProducts: unlockedProducts,
     dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,

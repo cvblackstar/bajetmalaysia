@@ -17,8 +17,15 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `vendor/GLTFLoader.js`, `SkeletonUtils.js`, `BufferGeometryUtils.js` | three.js r158 add-ons (MIT) used to load and clone the models. |
 | `js/scene3d.js` | Optional three.js town scene: a row of 3 shop lots (the "Besarkan Kedai" upgrade rents lots 2 and 3), zoom (wheel, pinch, +/-) and drag to pan; zoomed in shows a cutaway of the inside, zoomed out shows the roof. A kilang across the road sends workers over at lunch and after 6 petang, and passers-by walk through without shopping. Falls back to the SVG scene without WebGL, when opened from `file://`, or when the player picks 2D. |
 | `vendor/three.module.min.js` | three.js r158 (MIT, see `vendor/three.LICENSE`), loaded in the background with `import()`. |
-| `js/ui.js` | Renders the state into the page. |
+| `js/ui.js` | Renders the state into the page: Stok tab grouped by lot, Naik Taraf, Bank, Pelanggan, Rekod. |
 | `js/main.js` | Wires buttons, plays the day animation, saves. |
+
+Shop lots: lot 1 sells everyday items; renting lot 2 adds kitchen basics (rice, oil, sugar, umbrellas);
+lot 3 is a hobby corner (toys, plus the Mesin Capit and Jual Kad TCG upgrades). A new TCG set comes out
+every 14 days and brings card collectors. The Bank tab holds savings that earn a daily return
+(`bank` in `config.js`). Cars on the main road are built in code (`makeCar` in `scene3d.js`) and stop
+at the zebra crossing for people coming from across the road. Rare customers have a light blue
+outline, unique ones a purple glow (`AURA` in `models3d.js`).
 
 Later plans plug into `platform.js`: Supabase leaderboard (`leaderboard.submit/top`),
 a donation button (`donationUrl`), and the CrazyGames SDK (`sdk.*`). Hosting on Vercel needs no changes.
