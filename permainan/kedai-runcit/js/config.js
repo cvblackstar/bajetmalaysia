@@ -13,7 +13,17 @@ KR.config = {
   // gets 1.5x, which is more than one person can serve, so long queues pull reputation back down.
   trafficRep: { min: 0.3, scale: 1.2, power: 2 },
   baseServe: 70,         // customers the owner alone can serve per day
-  rent: 15,              // RM per day
+  rent: 15,              // RM per day at full price
+  // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
+  // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
+  rentRamp: { start: 0.6, step: 0.2, every: 30 },
+  // Customer tiers. Rare ones (doctors) only come at reputation 80+, unique ones (kimono) at 95+.
+  // multiChance = chance they buy multi times what they planned (common 2x, rare 2x, unique 3x).
+  tiers: {
+    common: { multi: 2, multiChance: 0.08 },
+    rare:   { rep: 80, chance: 0.08, multi: 2, multiChance: 0.6 },
+    unique: { rep: 95, chance: 0.03, multi: 3, multiChance: 0.6 }
+  },
   eventChance: 0.2,
   paydayEvery: 30,
   paydayOn: 25,
@@ -24,8 +34,8 @@ KR.config = {
   bestKey: 'kedaiRuncit.best.v1',
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
-  seasonDays: 30,
-  starTargets: [700, 1500, 3000],
+  seasonDays: 90,
+  starTargets: [3000, 7000, 12000],
 
   dayNames: ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
   dayTraffic: [1, 0.95, 1, 1.05, 1.15, 1.3, 1.25],
@@ -70,8 +80,8 @@ KR.config = {
       desc: 'Boleh jual ais krim. Roti dan telur kurang rosak.', perishMult: 0.5 },
     // An upgrade with levels can be bought once per level (each level's numbers add up).
     { id: 'rak',      name: 'Besarkan Kedai', icon: '🏬', levels: [
-      { price: 250, upkeep: 5, capacity: 150, desc: 'Sewa lot sebelah. +150 ruang stok, lebih ramai boleh masuk, boleh jual payung.' },
-      { price: 450, upkeep: 8, capacity: 150, desc: 'Sewa lot kedua. +150 lagi ruang stok, kedai jadi tiga pintu.' }
+      { price: 250, rent: 5, capacity: 150, desc: 'Sewa lot sebelah. +150 ruang stok, lebih ramai boleh masuk, boleh jual payung.' },
+      { price: 450, rent: 8, capacity: 150, desc: 'Sewa lot kedua. +150 lagi ruang stok, kedai jadi tiga pintu.' }
     ] },
     { id: 'kipas',    name: 'Kipas Siling',   icon: '🌀', price: 120, upkeep: 1,
       desc: 'Kedai lebih selesa, +8% pelanggan.', traffic: 0.08 },
@@ -119,5 +129,5 @@ KR.config = {
 // Every upgrade gets a levels list, so the rules only deal with one shape.
 KR.config.upgrades.forEach(function (u) {
   if (!u.levels) u.levels = [Object.assign({}, u)];
-  u.price = u.levels[0].price; u.upkeep = u.levels[0].upkeep; u.desc = u.levels[0].desc;
+  u.price = u.levels[0].price; u.upkeep = u.levels[0].upkeep; u.rent = u.levels[0].rent; u.desc = u.levels[0].desc;
 });

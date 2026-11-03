@@ -18,11 +18,12 @@
       <strong id="shopName">Kedai Runcit Bajet</strong>
       <button class="mute" id="muteBtn" type="button">Bunyi: buka</button>
       <button class="mute" id="gfxBtn" type="button">Grafik: 3D</button>
+      <button class="mute" id="langBtn" type="button" title="Bahasa / Language">BM | EN</button>
     </div>
     <div class="stats">
-      <div class="stat"><span>Duit</span><strong id="cash">RM0</strong></div>
-      <div class="stat"><span>Reputasi</span><strong id="rep">50</strong><div class="bar"><i id="repBar"></i></div></div>
-      <div class="stat"><span>Stok</span><strong id="cap">0/150</strong></div>
+      <div class="stat"><span data-i18n>Duit</span><strong id="cash">RM0</strong></div>
+      <div class="stat"><span data-i18n>Reputasi</span><strong id="rep">50</strong><div class="bar"><i id="repBar"></i></div></div>
+      <div class="stat"><span data-i18n>Stok</span><strong id="cap">0/150</strong></div>
     </div>
   </header>
 
@@ -33,31 +34,35 @@
     <div class="forecast card" id="forecast"></div>
 
     <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="stok">Stok &amp; Harga</button>
-      <button class="tab" data-tab="upgrade">Naik Taraf</button>
-      <button class="tab" data-tab="info">Rekod</button>
+      <button class="tab active" data-tab="stok" data-i18n>Stok &amp; Harga</button>
+      <button class="tab" data-tab="upgrade" data-i18n>Naik Taraf</button>
+      <button class="tab" data-tab="pelanggan" data-i18n>Pelanggan</button>
+      <button class="tab" data-tab="info" data-i18n>Rekod</button>
     </div>
 
     <div class="tab-panel" id="tab-stok">
-      <p class="hint">Tambah stok untuk hari ini dan tetapkan harga jual. Bayaran borong dibuat bila kedai dibuka.</p>
+      <p class="hint" data-i18n>Tambah stok untuk hari ini dan tetapkan harga jual. Bayaran borong dibuat bila kedai dibuka.</p>
       <div id="products" class="products"></div>
     </div>
     <div class="tab-panel hidden" id="tab-upgrade">
       <div id="upgrades" class="upgrades"></div>
     </div>
+    <div class="tab-panel hidden" id="tab-pelanggan">
+      <div id="custStats" class="cust-stats"></div>
+    </div>
     <div class="tab-panel hidden" id="tab-info">
       <div id="records" class="card"></div>
-      <h3 class="sub-title">Pencapaian</h3>
+      <h3 class="sub-title" data-i18n>Pencapaian</h3>
       <div id="milestones" class="milestones"></div>
       <div class="settings">
-        <label>Nama kedai <input id="nameInput" maxlength="28"></label>
-        <button class="btn ghost" id="resetBtn">Mula semula</button>
+        <label><span data-i18n>Nama kedai</span> <input id="nameInput" maxlength="28"></label>
+        <button class="btn ghost" id="resetBtn" data-i18n>Mula semula</button>
       </div>
     </div>
 
     <div class="open-bar">
-      <div><span>Kos borong</span><strong id="orderCost">RM0.00</strong></div>
-      <button class="btn primary" id="openBtn">Buka Kedai</button>
+      <div><span data-i18n>Kos borong</span><strong id="orderCost">RM0.00</strong></div>
+      <button class="btn primary" id="openBtn" data-i18n>Buka Kedai</button>
     </div>
   </section>
 
@@ -77,44 +82,46 @@
       <div id="walkers"></div>
     </div>
     <div class="live">
-      <div class="stat"><span>Pelanggan</span><strong id="liveCust">0</strong></div>
-      <div class="stat"><span>Jualan</span><strong id="liveSales">RM0.00</strong></div>
+      <div class="stat"><span data-i18n>Pelanggan</span><strong id="liveCust">0</strong></div>
+      <div class="stat"><span data-i18n>Jualan</span><strong id="liveSales">RM0.00</strong></div>
       <div class="speed">
         <button class="btn small" data-speed="1">x1</button>
         <button class="btn small" data-speed="2">x2</button>
         <button class="btn small" data-speed="4">x4</button>
         <button class="btn small" data-speed="8">x8</button>
-        <button class="btn small" id="skipBtn">Langkau</button>
-        <button class="btn small accent" id="restockBtn">Tambah Stok</button>
+        <button class="btn small" id="skipBtn" data-i18n>Langkau</button>
+        <button class="btn small accent" id="restockBtn" data-i18n>Tambah Stok</button>
       </div>
     </div>
   </section>
 
   <!-- MODALS -->
   <div class="modal hidden" id="restockModal"><div class="modal-box">
-    <h2>Tambah stok sekarang</h2>
-    <p>Kedai berhenti sekejap. Stok siang 10% lebih mahal dari order pagi, tapi terus masuk rak. Duit: <strong id="restockCash"></strong></p>
+    <h2 data-i18n>Tambah stok sekarang</h2>
+    <p><span data-i18n>Kedai berhenti sekejap. Stok siang 10% lebih mahal dari order pagi, tapi terus masuk rak. Duit:</span> <strong id="restockCash"></strong></p>
     <div id="restockList"></div>
-    <button class="btn primary" id="restockClose">Sambung berniaga</button>
+    <button class="btn primary" id="restockClose" data-i18n>Sambung berniaga</button>
   </div></div>
   <div class="modal hidden" id="reportModal"><div class="modal-box" id="reportBox"></div></div>
   <div class="modal hidden" id="introModal"><div class="modal-box">
-    <h2>Selamat datang, tauke!</h2>
-    <p>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 30 hari untuk dapat sampai 3 bintang. Setiap pagi:</p>
+    <h2 data-i18n>Selamat datang, tauke!</h2>
+    <p data-i18n>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 90 hari untuk dapat sampai 3 bintang. Sewa murah untuk bulan pertama. Setiap pagi:</p>
     <ol>
-      <li>Tengok ramalan cuaca dan acara hari ini.</li>
-      <li>Beli stok dari pemborong. Ruang kedai terhad.</li>
-      <li>Tetapkan harga. Terlalu mahal, pelanggan lari. Terlalu murah, untung nipis.</li>
-      <li>Buka kedai, kemudian semak laporan dan naik taraf kedai.</li>
+      <li data-i18n>Tengok ramalan cuaca dan acara hari ini.</li>
+      <li data-i18n>Beli stok dari pemborong. Ruang kedai terhad.</li>
+      <li data-i18n>Tetapkan harga. Terlalu mahal, pelanggan lari. Terlalu murah, untung nipis.</li>
+      <li data-i18n>Buka kedai, kemudian semak laporan dan naik taraf kedai.</li>
     </ol>
-    <p class="hint">Roti cepat basi, jadi jangan beli berlebihan. Kemajuan disimpan dalam pelayar ini.</p>
-    <button class="btn primary" id="introBtn">Jom mula</button>
+    <p class="hint" data-i18n>Roti cepat basi, jadi jangan beli berlebihan. Kemajuan disimpan dalam pelayar ini.</p>
+    <button class="btn primary" id="introBtn" data-i18n>Jom mula</button>
+    <button class="btn ghost small" id="introLang" type="button">English</button>
   </div></div>
 
 </div>
 
 <script src="js/config.js"></script>
 <script src="js/platform.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/art.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/state.js"></script>

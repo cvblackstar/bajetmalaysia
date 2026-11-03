@@ -52,7 +52,18 @@ KR.sim = (function () {
   function capacity(s) { return C.baseCapacity + sumUp(s, 'capacity'); }
   function serveCap(s) { return C.baseServe + sumUp(s, 'serve'); }
   function closeHour(s) { return C.closeHour + sumUp(s, 'hours'); }
-  function dailyCosts(s) { return C.rent + sumUp(s, 'upkeep'); }
+  // Rent starts discounted and steps up every C.rentRamp.every days (see config).
+  function rentMult(day) { var R = C.rentRamp; return Math.min(1, R.start + R.step * Math.floor((day - 1) / R.every)); }
+  function rentToday(s) { return round2((C.rent + sumUp(s, 'rent')) * rentMult(s.day)); }
+  function dailyCosts(s) { return round2(rentToday(s) + sumUp(s, 'upkeep')); }
+
+  // Which kind of customer walks in, given today's reputation.
+  function pickTier(rep, r) {
+    var T = C.tiers;
+    if (rep >= T.unique.rep && r < T.unique.chance) return 'unique';
+    if (rep >= T.rare.rep && r < T.unique.chance + T.rare.chance) return 'rare';
+    return 'common';
+  }
 
   function totalUnits(obj) {
     return Object.keys(obj).reduce(function (t, k) { return t + (obj[k] || 0); }, 0);
@@ -143,22 +154,23 @@ KR.sim = (function () {
     var timeline = [];
     for (var i = 0; i < visitors; i++) {
       var t = clamp((i + rnd()) / Math.max(visitors, 1), 0, 0.999);
-      if (i >= cap) { timeline.push({ t: t, queue: true }); continue; }
-      var wants = [], n = rnd() < 0.35 ? 2 : 1;
+      var tier = pickTier(s.rep, rnd()), T = C.tiers[tier];
+      if (i >= cap) { timeline.push({ t: t, queue: true, tier: tier }); continue; }
+      var wants = [], n = rnd() < 0.35 ? 2 : 1, multi = rnd() < T.multiChance ? T.multi : 1;
       for (var k = 0; k < n; k++) {
         var p = pickWeighted(available, function (x) {
           return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1);
         });
-        wants.push({ id: p.id, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
+        wants.push({ id: p.id, qty: multi, willing: p.ref * (0.8 + rnd() * 0.6) * willingMult });
       }
-      timeline.push({ t: t, wants: wants });
+      timeline.push({ t: t, wants: wants, tier: tier, multi: multi });
     }
     // The ones turned away by the queue are spread over the day too.
     timeline.sort(function (x, y) { return x.t - y.t; });
 
     s.today = {
       weather: weather, visitors: visitors, timeline: timeline, next: 0,
-      served: 0, queueLost: 0, revenue: 0, repDelta: 0, stockSpend: stockSpend, midSpend: 0,
+      served: 0, queueLost: 0, revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
       perProduct: perProduct
     };
     return s.today;
@@ -167,6 +179,7 @@ KR.sim = (function () {
   // Serve the next customer in the timeline; returns their entry with bought/complaint filled in.
   function serveNext(s) {
     var d = s.today, e = d.timeline[d.next++];
+    if (!d.tiers) { d.tiers = { common: 0, rare: 0, unique: 0 }; d.multiBuys = 0; }   // a day started before tiers existed
     if (!e) return null;
     e.bought = [];
     if (e.queue) {
@@ -174,6 +187,7 @@ KR.sim = (function () {
       return e;
     }
     d.served++;
+    d.tiers[e.tier || 'common']++;
     var complaint = null;
     e.wants.forEach(function (w) {
       var price = s.prices[w.id], st = d.perProduct[w.id];
@@ -182,12 +196,15 @@ KR.sim = (function () {
       } else if (price > w.willing) {
         st.pricey++; d.repDelta -= 0.25; complaint = complaint || { type: 'pricey', id: w.id };
       } else {
-        takeStock(s, w.id); st.sold++; st.revenue = round2(st.revenue + price);
-        d.revenue = round2(d.revenue + price); s.cash = round2(s.cash + price); e.bought.push(w.id);
+        var q = Math.min(w.qty || 1, s.stock[w.id]);        // big spenders take what's left if stock runs short
+        for (var k = 0; k < q; k++) { takeStock(s, w.id); e.bought.push(w.id); }
+        st.sold += q; st.revenue = round2(st.revenue + price * q);
+        d.revenue = round2(d.revenue + price * q); s.cash = round2(s.cash + price * q);
         d.repDelta += price <= product(w.id).ref ? 0.25 : 0.08;
       }
     });
     e.complaint = e.bought.length ? null : complaint;
+    if (e.multi > 1 && e.bought.length > e.wants.length) d.multiBuys++;
     return e;
   }
 
@@ -228,6 +245,12 @@ KR.sim = (function () {
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
     s.stats.bestDay = Math.max(s.stats.bestDay, profit);
     s.stats.customers += d.served;
+    var tiers = s.stats.tiers = s.stats.tiers || { common: 0, rare: 0, unique: 0 };
+    Object.keys(d.tiers).forEach(function (k) { tiers[k] = (tiers[k] || 0) + d.tiers[k]; });
+    s.stats.multiBuys = (s.stats.multiBuys || 0) + d.multiBuys;
+    s.stats.turnedAway = (s.stats.turnedAway || 0) + d.queueLost;
+    s.stats.revenue = round2((s.stats.revenue || 0) + d.revenue);
+    s.stats.lastDay = { served: d.served, tiers: d.tiers, multiBuys: d.multiBuys, queueLost: d.queueLost };
     s.stats.streak = profit > 0 ? s.stats.streak + 1 : 0;
     s.history.push(profit);
     if (s.history.length > 14) s.history.shift();
@@ -235,7 +258,7 @@ KR.sim = (function () {
     var report = {
       day: s.day, dayName: dayName(s.day),
       forecast: s.forecast.weather, weather: d.weather, event: s.forecast.event,
-      visitors: d.visitors, served: d.served, queueLost: d.queueLost,
+      visitors: d.visitors, served: d.served, queueLost: d.queueLost, tiers: d.tiers, multiBuys: d.multiBuys,
       revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
       spoiled: spoiled, spoiledValue: round2(spoiledValue),
       perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
@@ -298,7 +321,7 @@ KR.sim = (function () {
 
   return {
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, unlockedProducts: unlockedProducts,
-    dayName: dayName, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
+    dayName: dayName, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, level: level, nextLevel: nextLevel, daysLeft: daysLeft, startDay: startDay, runDay: runDay, nextDay: nextDay,

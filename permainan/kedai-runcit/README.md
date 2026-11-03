@@ -4,10 +4,11 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 
 | File | Job |
 | --- | --- |
-| `js/config.js` | All balance data: products, weather, events, upgrades. Tune the game here. |
+| `js/config.js` | All balance data: products, weather, events, upgrades, rent ramp, customer tiers, the 90-day season. Tune the game here. |
 | `js/platform.js` | Storage, leaderboard, donation and portal SDK hooks (stubs for now). |
 | `js/state.js` | New game, load, migrate and save (localStorage via `platform.js`). |
 | `js/sim.js` | Pure game rules, no DOM. `runDay()` simulates a day and returns a report + timeline. |
+| `js/i18n.js` | Bahasa Melayu / English switch. Text is written in Malay and `t()` looks up the English version. |
 | `js/art.js` | Inline SVG sprites (products, people, weather, upgrades, stars). |
 | `js/audio.js` | Web Audio sound effects (ka-ching, coin, sad) and the mute setting. |
 | `js/characters3d.js` | Chibi-style 3D people built from primitives: swappable headwear, tops, bottoms, extras and colours (base for the Reka Tauke creator). |

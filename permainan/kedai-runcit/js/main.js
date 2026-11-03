@@ -1,6 +1,7 @@
 // Controller: wires buttons to the rules, plays the day animation, saves progress.
 (function () {
   var C = KR.config, S = KR.sim, UI = KR.ui, P = KR.platform, A = KR.art, SFX = KR.audio, S3 = KR.scene3d, $ = UI.$;
+  var I18N = KR.i18n, t = I18N.t;
   var state = KR.state.load();
   var day = null; // current playback
   var day0Cash = 0;
@@ -48,7 +49,7 @@
   });
 
   $('resetBtn').addEventListener('click', function () {
-    if (!window.confirm('Padam semua kemajuan dan mula semula?')) return;
+    if (!window.confirm(t('Padam semua kemajuan dan mula semula?'))) return;
     restart();
   });
 
@@ -62,7 +63,7 @@
 
   $('openBtn').addEventListener('click', function () {
     if (S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
-      if (!window.confirm('Tiada stok langsung. Buka kedai juga?')) return;
+      if (!window.confirm(t('Tiada stok langsung. Buka kedai juga?'))) return;
     }
     S.openDay(state);
     save(); // the day in progress is saved, so a reload finishes it instead of replaying it
@@ -119,7 +120,7 @@
     var mins = C.openHour * 60 + Math.min(1, day.elapsed / dur) * day.hours * 60;
     var h = Math.floor(mins / 60), m = Math.floor(mins % 60 / 15) * 15;
     if (day.use3d) S3.setHour(mins / 60);
-    $('clock').textContent = ((h - 1) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' pagi' : h < 19 ? ' petang' : ' malam');
+    $('clock').textContent = ((h - 1) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m + ' ' + t(h < 12 ? 'pagi' : h < 19 ? 'petang' : 'malam');
     if (day.elapsed >= dur + (day.use3d ? 9000 : 2500)) return finishDay();   // let the last customers come out
     requestAnimationFrame(tick);
   }
@@ -135,17 +136,21 @@
       $('liveCust').textContent = day.customers;
       $('liveSales').textContent = UI.rm(day.sales);
       $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
-      return { bad: false, html: entry.bought.map(function (id) { return A.product(id); }).join('') };
+      var counts = {};
+      entry.bought.forEach(function (id) { counts[id] = (counts[id] || 0) + 1; });
+      return { bad: false, tier: entry.tier, html: Object.keys(counts).map(function (id) {
+        return A.product(id) + (counts[id] > 1 ? '<b>×' + counts[id] + '</b>' : '');
+      }).join('') };
     }
     if (day.speed === 1) SFX.sad();
     var c = entry.complaint || {};
-    return { bad: true, html: c.type === 'pricey' ? 'Mahalnya ' + A.product(c.id)
-      : c.type === 'out' ? A.product(c.id) + ' habis?' : 'Lama sangat!' };
+    return { bad: true, html: c.type === 'pricey' ? t('Mahalnya') + ' ' + A.product(c.id)
+      : c.type === 'out' ? t('{p} habis?', { p: A.product(c.id) }) : t('Lama sangat!') };
   }
 
   function spawn3d(entry) {
     S3.spawn({
-      seed: Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep,
+      seed: Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
       dwell: day.dwell, patience: 2500, bx: (Math.random() - 0.5) * 1.6,
       giveUp: !!(entry.complaint && entry.complaint.type === 'queue'),
       outcome: function () { return outcome(entry); }
@@ -196,7 +201,7 @@
   function renderRestock() {
     $('restockList').innerHTML = S.unlockedProducts(state).map(function (p) {
       return '<div class="restock-row" data-id="' + p.id + '"><span class="ricon">' + A.product(p.id) + '</span>' +
-        '<span class="rname">' + p.name + '<small>Stok: ' + state.stock[p.id] + ' | ' + UI.rm(S.restockCost(p.id, 1)) + ' seunit</small></span>' +
+        '<span class="rname">' + t(p.name) + '<small>' + t('Stok: {n} | {c} seunit', { n: state.stock[p.id], c: UI.rm(S.restockCost(p.id, 1)) }) + '</small></span>' +
         [5, 10].map(function (n) {
           return '<button class="btn small" data-n="' + n + '"' + (S.canRestock(state, p.id, n) ? '' : ' disabled') + '>+' + n +
             ' (' + UI.rm(S.restockCost(p.id, n)) + ')</button>';
@@ -270,7 +275,7 @@
 
   function renderMute() {
     var m = SFX.isMuted();
-    $('muteBtn').textContent = m ? 'Bunyi: tutup' : 'Bunyi: buka';
+    $('muteBtn').textContent = t(m ? 'Bunyi: tutup' : 'Bunyi: buka');
     $('muteBtn').setAttribute('aria-pressed', String(!m));
   }
   $('muteBtn').addEventListener('click', function () { SFX.setMuted(!SFX.isMuted()); renderMute(); SFX.click(); });
@@ -278,14 +283,33 @@
 
   function renderGfx() {
     var on = S3.wanted() && !S3.failed();
-    $('gfxBtn').textContent = on ? 'Grafik: 3D' : 'Grafik: 2D';
+    $('gfxBtn').textContent = t(on ? 'Grafik: 3D' : 'Grafik: 2D');
     $('gfxBtn').disabled = S3.failed();
   }
   $('gfxBtn').addEventListener('click', function () {
     S3.setWanted(!S3.wanted()); renderGfx(); S3.load().then(renderGfx);
   });
   renderGfx();
-  S3.load().then(renderGfx); // three.js loads in the background; 2D is used until it's ready
+  S3.load().then(renderGfx);
+
+  // Language: Bahasa Melayu / English
+  function renderLang() {
+    $('langBtn').textContent = I18N.lang() === 'en' ? 'Language: EN' : 'Bahasa: BM';
+    $('introLang').textContent = I18N.lang() === 'en' ? 'Bahasa Melayu' : 'English';
+  }
+  $('introLang').addEventListener('click', function () { $('langBtn').click(); });
+  $('langBtn').addEventListener('click', function () {
+    I18N.set(I18N.lang() === 'en' ? 'ms' : 'en'); SFX.click();
+    renderLang(); renderMute(); renderGfx();
+    UI.plan(state);
+    if (!$('reportModal').classList.contains('hidden')) {        // re-show whatever the modal was showing
+      if ($('nextBtn') && state.lastReport) UI.report(state.lastReport, state);
+      else if ($('continueBtn')) UI.seasonEnd(state, KR.state.loadBest(), false);
+      else if ($('restartBtn')) UI.bankrupt(state);
+    }
+    if (!$('restockModal').classList.contains('hidden')) renderRestock();
+  });
+  I18N.apply(); renderLang(); // three.js loads in the background; 2D is used until it's ready
 
   // ---------- Boot ----------
   // A day left half-played (page closed mid-day): serve the rest of it and show the report.

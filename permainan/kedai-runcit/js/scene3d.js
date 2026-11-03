@@ -70,9 +70,9 @@ KR.scene3d = (function () {
   }
   var prim = {};
   // One shop lot. Height is the model's; cut is where the roof is sliced off when zoomed in.
-  var LOT = { w: 5.4, h: 3.7, cut: 2.3, front: 1.2, back: -4.6 }, LOTS = 3;
+  var LOT = { w: 7.0, h: 3.7, cut: 2.3, front: 1.2, back: -6.0 }, LOTS = 3;
   function lotX(i) { return i * LOT.w; }
-  var TREES = [[-5.2, -3.8], [-6.8, 0.2], [4.6, -6.6], [15.2, -5], [-12.5, 0.5], [3.5, 9.5], [-3, 9.5], [10, 9.8], [-21, -3], [-6, 9.8], [16, 9.6]];
+  var TREES = [[-5.8, -5], [4.6, -8.2], [19.5, -6.5], [3.5, 9.5], [-3, 9.5], [10, 9.8], [-21, -3], [-6, 9.8], [16, 9.6]];
   function tree(x, z, s) {
     s = s || 1;
     box(0.25 * s, 1.2 * s, 0.25 * s, 0x7a5233, x, 0.6 * s, z, prim.trees);
@@ -130,20 +130,20 @@ KR.scene3d = (function () {
 
     // Neighbours, a bus stop and a padang (simple versions until the models load)
     prim.houses = new THREE.Group(); root.add(prim.houses);
-    house(17, -0.8, 0xbfe3d6, 0xc0453a); house(20.6, -0.8, 0xf3d9a4, 0x8e5bd1); house(24.4, -0.8, 0xcfd8f2, 0x2f7fd1);
+    house(20.5, -0.8, 0xbfe3d6, 0xc0453a); house(24.1, -0.8, 0xf3d9a4, 0x8e5bd1); house(27.9, -0.8, 0xcfd8f2, 0x2f7fd1);
     house(-16, -0.8, 0xf6c9c9, 0x2f9e6e);
-    box(2.6, 0.08, 1.1, 0x2f7fd1, 29, 2.2, 3.0);              // bus stop roof
-    box(0.1, 2.2, 0.1, 0x3b3f44, 27.8, 1.1, 3.4); box(0.1, 2.2, 0.1, 0x3b3f44, 30.2, 1.1, 3.4);
-    box(2.2, 0.12, 0.45, 0xf2b705, 29, 0.5, 2.8);            // bench
+    box(2.6, 0.08, 1.1, 0x2f7fd1, 33, 2.2, 3.0);              // bus stop roof
+    box(0.1, 2.2, 0.1, 0x3b3f44, 31.8, 1.1, 3.4); box(0.1, 2.2, 0.1, 0x3b3f44, 34.2, 1.1, 3.4);
+    box(2.2, 0.12, 0.45, 0xf2b705, 33, 0.5, 2.8);            // bench
     var field = box(10, 0.04, 8, 0x6eb24f, -18, 0, -9); field.receiveShadow = true;
     box(0.12, 1.2, 0.12, 0xffffff, -18, 0.6, -12.5); box(0.12, 1.2, 0.12, 0xffffff, -18, 0.6, -5.5);
     prim.trees = new THREE.Group(); root.add(prim.trees);
     TREES.forEach(function (p, j) { tree(p[0], p[1], 0.9 + (j % 3) * 0.15); });
-    [-3.6, 13.6, 26].forEach(function (x) {                // street lamps
+    [-3.9, 10.5, 29.5].forEach(function (x) {                // street lamps
       box(0.12, 3.2, 0.12, 0x3b3f44, x, 1.6, 3.4); lights.push(box(0.35, 0.15, 0.35, 0xfff3c4, x, 3.2, 3.4));
     });
     // Parked kapcai
-    box(0.25, 0.4, 1.1, 0xd6332b, 14.6, 0.45, 2.7); box(0.1, 0.5, 0.5, 0x222222, 14.6, 0.25, 2.2); box(0.1, 0.5, 0.5, 0x222222, 14.6, 0.25, 3.2);
+    box(0.25, 0.4, 1.1, 0xd6332b, 18.6, 0.45, 2.7); box(0.1, 0.5, 0.5, 0x222222, 18.6, 0.25, 2.2); box(0.1, 0.5, 0.5, 0x222222, 18.6, 0.25, 3.2);
 
     // A car that drives along the main road now and then
     car = new THREE.Group();
@@ -226,14 +226,14 @@ KR.scene3d = (function () {
       var o = put(M[m], x, rot ? z + front * 2.64 : z - front * 2.64, 2.64, rot ? Math.PI : 0);
       repaint(o, wall, roof); houses.push(o); return o;
     }
-    home('house_d', 17, 1, 0.65, 0, 0xbfe3d6, 0xc0453a); home('house_a', 20.6, 1, 0.65, 0, 0xf3d9a4, 0x8e5bd1);
-    home('house_b', 25.2, 1, 0.65, 0, 0xcfd8f2, 0x2f7fd1); home('house_c', -16, 1, 1.01, 0, 0xf6c9c9, 0x2f9e6e);
+    home('house_d', 20.5, 1, 0.65, 0, 0xbfe3d6, 0xc0453a); home('house_a', 24.1, 1, 0.65, 0, 0xf3d9a4, 0x8e5bd1);
+    home('house_b', 28.7, 1, 0.65, 0, 0xcfd8f2, 0x2f7fd1); home('house_c', -16, 1, 1.01, 0, 0xf6c9c9, 0x2f9e6e);
     // Second row behind the shops
     home('house_e', -3, -12, 1.06, 0, 0xf6d6a8, 0xc0453a); home('house_a', 2.5, -12, 0.65, 0, 0xd7ecf7, 0x2f9e6e);
     home('house_b', 8.6, -12, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -12, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
     home('house_e', 19.6, -12, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -12, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
     // Taller town buildings sit behind the houses so they never hide the shop row
-    put(M.hospital, -6, -21, 2.0, 0); put(M.bank, 6, -20, 1.7, 0);
+    put(M.hospital, -3, -21, 2.0, 0); put(M.bank, 7, -20, 1.7, 0);
     put(M.flat_a, 16, -21, 2.4, 0); put(M.flat_b, 24, -21, 2.4, 0);
     put(M.flat_a, -30, -8, 2.4, Math.PI / 2); put(M.flat_b, -30, 1, 2.4, Math.PI / 2);
     // Across the road: low houses only, facing the street
@@ -244,7 +244,7 @@ KR.scene3d = (function () {
     prim.houses.visible = false;
 
     var kinds = ['palm_a', 'tree_a', 'palm_b', 'tree_b', 'tree_c'];
-    TREES.concat([[-26, -6], [-24, 2], [31, -2], [33, 8], [-28, 12], [6, -19], [-10, -17], [22, -18], [-1, 16.5], [13, 17]])
+    TREES.concat([[-25, -15], [-25, 0], [34, -2], [36, 10.5], [-28, 12], [11.5, -27], [-14, -17], [20, -27], [-0.5, 18.5], [13.5, 19.5]])
       .forEach(function (p, j) {
         var k = kinds[j % kinds.length];
         put(M[k], p[0], p[1], k.indexOf('palm') === 0 ? 1.1 : 1.35, j * 1.3);
@@ -254,7 +254,7 @@ KR.scene3d = (function () {
     // Greenery around the shop front and the houses
     put(M.plant, -LOT.w / 2 - 0.35, 1.65, 0.6);
     put(M.flowers, -7.3, 1.5, 1.1); put(M.bush, -4.9, 0.0, 0.9);
-    [[15.2, 1.6], [18.8, 1.6], [22.6, 1.5], [28.2, 1.6], [-13.8, 1.4], [-18.2, 1.4]].forEach(function (p, j) {
+    [[18.7, 1.6], [22.3, 1.6], [26.1, 1.5], [31.7, 1.6], [-13.8, 1.4], [-18.2, 1.4]].forEach(function (p, j) {
       put(j % 2 ? M.bush : M.bush_berry, p[0], p[1], 0.75, j);
     });
     [[-5.5, -1.5], [-6.8, -2.6], [7.2, 9.6], [-1.2, 9.6], [-12.5, 9.6], [24, 9.6]].forEach(function (p, j) { put(M.bush, p[0], p[1], 1, j); });
@@ -264,7 +264,7 @@ KR.scene3d = (function () {
   // Lots 0..level are the player's (open, with shelves inside); the rest are closed with a
   // "Untuk Disewa" notice. Zoomed in, the roof and front walls of the player's lots are cut
   // away so you can see in; zoomed out you see the roofs.
-  var shopGroup = null, cutMats = [], cutaway = true, AISLE = -1.05;
+  var shopGroup = null, cutMats = [], cutaway = true, AISLE = -1.4;
   var SPOTS = [], spotUsed = [], PAY = [];
 
   function shelf(w, h, d, x, z, rot) {
@@ -283,12 +283,13 @@ KR.scene3d = (function () {
       if (ENVM) {
         var sx = LOT.w / 2.48, sy = LOT.h / 1.397, sz = depth / 1.8, oz = front - 0.72 * sz;
         var planes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), oz + 0.64 * sz), new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
-        if (mine && i > 0) planes.push(new THREE.Plane(new THREE.Vector3(1, 0, 0), -(cx - SW + 0.85)));          // open to the lot on the left
-        if (mine && i < level) planes.push(new THREE.Plane(new THREE.Vector3(-1, 0, 0), cx + SW - 0.85));        // and on the right
+        if (mine && i > 0) planes.push(new THREE.Plane(new THREE.Vector3(1, 0, 0), -(cx - 0.85 * sx)));          // open to the lot on the left
+        if (mine && i < level) planes.push(new THREE.Plane(new THREE.Vector3(-1, 0, 0), cx + 0.85 * sx));        // and on the right
+        if (!mine) planes = [planes[1]];                       // empty lots: just the roof comes off, so they don't hide your shop
         put(ENVM.shop, cx, oz, [sx, sy, sz], 0, shopGroup).traverse(function (m) {
           if (!m.isMesh) return;
           m.material = m.material.clone(); m.material.side = THREE.DoubleSide;
-          if (mine) { m.material.userData.planes = planes; cutMats.push(m.material); }
+          m.material.userData.planes = planes; cutMats.push(m.material);
         });
       } else {                                                // plain walls until the model loads
         box(LOT.w - 0.1, LOT.cut, 0.2, 0xf6e7c8, cx, LOT.cut / 2, back, shopGroup);
@@ -296,8 +297,9 @@ KR.scene3d = (function () {
         if (i === LOTS - 1 || i >= level) box(0.2, LOT.cut, depth, 0xf6e7c8, cx + SW, LOT.cut / 2, (front + back) / 2, shopGroup);
       }
       if (!mine) {                                            // shutter down, "for rent" notice
-        box(LOT.w - 0.5, 2.5, 0.12, 0x9aa3ab, cx, 1.25, front + 0.12, shopGroup);
-        for (var r = 0.2; r < 2.5; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, front + 0.13, shopGroup);
+        box(LOT.w - 0.3, 0.06, depth - 0.3, 0xb9b4aa, cx, 0.12, (front + back) / 2 - 0.1, shopGroup);   // bare floor
+        box(LOT.w - 0.5, 2.2, 0.12, 0x9aa3ab, cx, 1.1, front + 0.12, shopGroup);
+        for (var r = 0.2; r < 2.2; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, front + 0.13, shopGroup);
         var note = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), new THREE.MeshBasicMaterial({ map: noticeTexture() }));
         note.position.set(cx, 1.4, front + 0.2); shopGroup.add(note);
         continue;
@@ -306,31 +308,33 @@ KR.scene3d = (function () {
       var fw = LOT.w - 0.3 + (i < level ? 0.3 : 0);           // join the floor to the next rented lot
       box(fw, 0.06, depth - 0.3, 0xe9e2d4, cx + (i < level ? 0.15 : 0), 0.13, (front + back) / 2 - 0.1, shopGroup);
       for (var fx = cx - SW + 0.6; fx < cx + SW - 0.3; fx += 0.8) box(0.03, 0.062, depth - 0.3, 0xcfc6b4, fx, 0.13, (front + back) / 2 - 0.1, shopGroup);
-      var b0 = back + 0.45, spotZ = back + 1.3, isl = -1.9;
+      var b0 = back + 0.45, spotZ = back + 1.3, isl = -3.2, isZ = isl + 0.7;
       if (i === 0) {
-        shelf(3.6, 2.1, 0.5, cx - 0.7, b0);                                             // back wall
-        shelf(0.5, 1.9, 2.4, cx - SW + 0.45, back + 2.3);                                // left wall
-        shelf(1.6, 1.2, 0.7, cx - 0.4, isl);                                             // island
-        box(1.0, 2.2, 0.7, 0xe8f4fb, cx + 1.9, 1.1, back + 0.55, shopGroup);             // drinks fridge
-        box(0.8, 1.8, 0.05, 0x9fd3ea, cx + 1.9, 1.2, back + 0.92, shopGroup);
-        box(1.5, 1.05, 0.6, 0x8a6a3f, cx + 1.65, 0.53, 0.0, shopGroup);                  // counter
-        box(0.45, 0.3, 0.4, 0x3b3f44, cx + 2.0, 1.2, 0.0, shopGroup);                    // till
-        box(1.2, 0.85, 0.7, 0xf4f7fb, cx - 1.7, 0.43, 0.35, shopGroup);                  // peti ais krim
-        box(1.22, 0.1, 0.72, 0x2f7fd1, cx - 1.7, 0.9, 0.35, shopGroup);
-        SPOTS.push([cx - 1.7, spotZ, Math.PI], [cx + 0.4, spotZ, Math.PI], [cx - 1.6, back + 2.3, -Math.PI / 2],
-                   [cx - 0.4, isl + 0.7, Math.PI], [cx + 1.9, spotZ, Math.PI]);
-        for (var k = 0; k < 3; k++) PAY.push([cx + 1.15 + k * 0.5, 0.75]);
-        shelfItems(products, cx - 2.3, cx + 0.9, b0 + 0.27, 3, 0.5, 0);
-        shelfItems(products, back + 1.4, back + 3.3, cx - SW + 0.71, 3, 0.45, Math.PI / 2);
-        shelfItems(products, cx - 1.1, cx + 0.3, isl + 0.37, 1, 0.85, 0);
+        shelf(5.2, 2.1, 0.5, cx - 0.6, b0);                                             // back wall
+        shelf(0.5, 1.9, 3.4, cx - SW + 0.45, back + 2.9);                                // left wall
+        shelf(1.8, 1.2, 0.7, cx - 1.1, isl); shelf(1.4, 1.2, 0.7, cx + 1.6, isl);       // islands
+        box(1.0, 2.2, 0.7, 0xe8f4fb, cx + 2.75, 1.1, back + 0.55, shopGroup);            // drinks fridge
+        box(0.8, 1.8, 0.05, 0x9fd3ea, cx + 2.75, 1.2, back + 0.92, shopGroup);
+        box(0.7, 1.05, 1.6, 0x8a6a3f, cx + 1.9, 0.53, -0.1, shopGroup);                  // counter, right of the door
+        box(0.4, 0.3, 0.45, 0x3b3f44, cx + 2.0, 1.2, -0.3, shopGroup);                   // till
+        box(1.2, 0.85, 0.7, 0xf4f7fb, cx - 2.4, 0.43, 0.2, shopGroup);                   // peti ais krim
+        box(1.22, 0.1, 0.72, 0x2f7fd1, cx - 2.4, 0.9, 0.2, shopGroup);
+        SPOTS.push([cx - 2.5, spotZ, Math.PI], [cx + 0.35, spotZ, Math.PI], [cx - 2.5, back + 2.9, -Math.PI / 2],
+                   [cx - 1.1, isZ, Math.PI], [cx + 1.6, isZ, Math.PI], [cx + 2.75, spotZ, Math.PI]);
+        PAY.push([cx + 1.15, 0.25, Math.PI / 2], [cx + 1.15, -0.35, Math.PI / 2]);        // queue at the counter, facing the tauke
+        shelfItems(products, cx - 3.0, cx + 1.8, b0 + 0.27, 3, 0.5, 0);
+        shelfItems(products, back + 1.4, back + 4.4, cx - SW + 0.71, 3, 0.45, Math.PI / 2);
+        shelfItems(products, cx - 1.8, cx - 0.4, isl + 0.37, 1, 0.85, 0);
+        shelfItems(products, cx + 1.1, cx + 2.1, isl + 0.37, 1, 0.85, 0);
       } else {
         shelf(LOT.w - 0.9, 2.1, 0.5, cx, b0);
-        shelf(1.7, 1.2, 0.7, cx - 1.15, isl); shelf(1.7, 1.2, 0.7, cx + 1.15, isl);
-        if (i === 2) { box(1.2, 0.85, 0.7, 0xf4f7fb, cx, 0.43, 0.3, shopGroup); box(1.22, 0.1, 0.72, 0x2f7fd1, cx, 0.9, 0.3, shopGroup); }
-        SPOTS.push([cx, spotZ, Math.PI], [cx - 1.15, isl + 0.7, Math.PI], [cx + 1.15, isl + 0.7, Math.PI], [cx + 1.9, spotZ, Math.PI]);
+        shelf(1.8, 1.2, 0.7, cx - 1.5, isl); shelf(1.8, 1.2, 0.7, cx + 1.5, isl);
+        if (i === 2) { box(1.2, 0.85, 0.7, 0xf4f7fb, cx, 0.43, 0.2, shopGroup); box(1.22, 0.1, 0.72, 0x2f7fd1, cx, 0.9, 0.2, shopGroup); }
+        SPOTS.push([cx - 2.9, spotZ, Math.PI], [cx, spotZ, Math.PI], [cx + 2.9, spotZ, Math.PI],
+                   [cx - 1.5, isZ, Math.PI], [cx + 1.5, isZ, Math.PI]);
         shelfItems(products, cx - SW + 0.7, cx + SW - 0.7, b0 + 0.27, 3, 0.5, 0);
-        shelfItems(products, cx - 1.85, cx - 0.45, isl + 0.37, 1, 0.85, 0);
-        shelfItems(products, cx + 0.45, cx + 1.85, isl + 0.37, 1, 0.85, 0);
+        shelfItems(products, cx - 2.2, cx - 0.8, isl + 0.37, 1, 0.85, 0);
+        shelfItems(products, cx + 0.8, cx + 2.2, isl + 0.37, 1, 0.85, 0);
       }
     }
     spotUsed = SPOTS.map(function () { return false; });
@@ -361,7 +365,7 @@ KR.scene3d = (function () {
     var g = c.getContext('2d');
     g.fillStyle = '#fff8e6'; g.fillRect(0, 0, 320, 100); g.strokeStyle = '#c0453a'; g.lineWidth = 8; g.strokeRect(4, 4, 312, 92);
     g.fillStyle = '#c0453a'; g.font = 'bold 40px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('UNTUK DISEWA', 160, 52, 290);
+    g.fillText(KR.i18n.t('UNTUK DISEWA'), 160, 52, 290);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
 
@@ -401,7 +405,7 @@ KR.scene3d = (function () {
     if (!host.querySelector('.zoombar')) {
       var bar = document.createElement('div');
       bar.className = 'zoombar';
-      bar.innerHTML = '<button type="button" data-z="in" aria-label="Zum masuk">+</button><button type="button" data-z="out" aria-label="Zum keluar">−</button>';
+      bar.innerHTML = '<button type="button" data-z="in" aria-label="' + KR.i18n.t('Zum masuk') + '">+</button><button type="button" data-z="out" aria-label="' + KR.i18n.t('Zum keluar') + '">−</button>';
       bar.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (b) zoomBy(b.dataset.z === 'in' ? 1.25 : 0.8);
       });
@@ -444,8 +448,9 @@ KR.scene3d = (function () {
     rain.visible = opts.weather === 'hujan' || opts.weather === 'ribut';
     shopSign.material[4].map.dispose();
     shopSign.material[4].map = signTexture(opts.shopName.toUpperCase());
-    if (opts.lots !== builtLots || opts.products.join() !== builtProducts) {
-      buildShop(opts.lots, opts.products); builtLots = opts.lots; builtProducts = opts.products.join();
+    var key = opts.products.join() + KR.i18n.lang();                  // the "for rent" notice is in the current language
+    if (opts.lots !== builtLots || key !== builtProducts) {
+      buildShop(opts.lots, opts.products); builtLots = opts.lots; builtProducts = key;
     }
     controls(host);
     resize(host);
@@ -482,14 +487,14 @@ KR.scene3d = (function () {
   // Times are in game milliseconds, so the x2/x4/x8 buttons speed everything up together.
   // Customers come in at the door of the first lot, walk along the aisle (AISLE, between the
   // counter and the islands) to a browsing spot (SPOTS, set by buildShop), then pay at PAY.
-  var DOOR = [0.4, 2.0], INSIDE = [0.4, 0.9], WALK_SPEED = 3.0, EDGE = 30, staff = [];
+  var DOOR = [0.5, 2.0], INSIDE = [0.5, 0.6], WALK_SPEED = 3.0, EDGE = 30, staff = [];
   var queue = [], inside = 0, loiter = 0, cfg = {};
 
   function slot(i) { return [DOOR[0] - 1.2 - (i % 9) * 1.0, 2.75 + Math.floor(i / 9) * 0.5]; }   // a long line doubles back
   function go(p, pts, then) { p.path = pts.slice(); p.then = then; p.walking = true; }
 
   function spawn(o) {
-    var g = KR.models.isReady() ? KR.models.make(o.seed, o.rep) : KR.chars.make(o.seed);
+    var g = KR.models.isReady() ? KR.models.make(o.seed, o.tier || o.rep) : KR.chars.make(o.seed);
     var lane = 3.0 + Math.random() * 0.35, fromLeft = o.fromLeft;
     var p = { g: g, o: o, bubble: null, lane: lane, exitLeft: Math.random() < 0.5, path: [], walking: false, timer: 0 };
     var viaSide = fromLeft && Math.random() < 0.35;          // some come up the side road
@@ -518,7 +523,7 @@ KR.scene3d = (function () {
 
   function bubble(p, o) {
     var b = document.createElement('div');
-    b.className = 'bubble' + (o.bad ? ' bad' : '');
+    b.className = 'bubble' + (o.bad ? ' bad' : '') + (o.tier && o.tier !== 'common' ? ' ' + o.tier : '');
     b.innerHTML = o.html;
     overlay.appendChild(b); p.bubble = b;
     if (!o.bad) p.g.userData.bag.visible = true;           // walks out carrying a plastic bag
@@ -569,7 +574,7 @@ KR.scene3d = (function () {
           var pay = PAY[p.spot % PAY.length];
           p.state = 'pay';
           go(p, out.concat([[INSIDE[0], pay[1]], pay]), function () {
-            p.face = Math.PI; bubble(p, o); p.state = 'done'; p.timer = p.o.dwell * 0.4 + 400; p.exit = [INSIDE];
+            p.face = pay[2] != null ? pay[2] : Math.PI; bubble(p, o); p.state = 'done'; p.timer = p.o.dwell * 0.4 + 400; p.exit = [INSIDE];
           });
         }
       }
@@ -581,7 +586,7 @@ KR.scene3d = (function () {
     });
   }
 
-  // The tauke (and the pembantu once hired) stand behind the counter.
+  // The tauke (and the pembantu once hired) stand behind the counter, right of the door, facing in.
   function updateStaff(dt) {
     var want = cfg.staff || 1;
     if (staff.length !== want && KR.models.isReady()) {
@@ -589,7 +594,7 @@ KR.scene3d = (function () {
       staff = [];
       for (var i = 0; i < want; i++) {
         var g = KR.models.make(i ? 11 : 4, 0);                  // fixed looks, always a common character
-        g.position.set(i ? 0.9 : 1.75, 0.1, i ? -3.4 : -0.6); g.rotation.y = i ? Math.PI : 0;   // tauke at the till, pembantu at the shelves
+        g.position.set(2.6, 0.1, i ? 0.45 : -0.3); g.rotation.y = -Math.PI / 2;   // behind the counter, facing the door
         root.add(g); staff.push(g);
       }
     }
@@ -637,6 +642,7 @@ KR.scene3d = (function () {
   return {
     load: load, start: start, stop: stop, spawn: spawn, setHour: setHour,
     isReady: function () { return ready && wanted(); },
-    wanted: wanted, setWanted: setWanted, failed: function () { return failed; }
+    wanted: wanted, setWanted: setWanted, failed: function () { return failed; },
+    _debug: function () { return { THREE: THREE, root: root, camera: camera }; }
   };
 })();

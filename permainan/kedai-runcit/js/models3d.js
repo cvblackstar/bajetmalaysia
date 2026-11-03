@@ -39,8 +39,10 @@ KR.models = (function () {
     return 'common';
   }
 
-  function make(seed, rep) {
-    var tier = pickTier(rep || 0, Math.random());
+  // tier: 'common' / 'rare' / 'unique' as decided by the game rules (sim.js), or a reputation
+  // number to pick one here.
+  function make(seed, tier) {
+    if (typeof tier !== 'string') tier = pickTier(tier || 0, Math.random());
     var list = TIERS[tier], src = base[list[seed % list.length]];
     var model = SU.clone(src.scene);                            // the model as provided, no add-ons
     // The pack ships skin as a near-black placeholder meant to be tinted, so give it a real skin tone.
