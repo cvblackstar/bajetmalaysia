@@ -183,7 +183,11 @@ KR.art = (function () {
   return {
     product: function (id) { return svg(products[id] || ''); },
     weather: weather,
-    upgrade: function (id) { return id === 'pembantu' ? person(7, { shirt: '#1f7a55', head: 'songkok', apron: true }) : svg(upgrades[id] || ''); },
+    upgrade: function (id) {
+      if (id === 'pembantu') return person(7, { shirt: '#1f7a55', head: 'songkok', apron: true });
+      if (id === 'pengurus') return person(21, { shirt: '#2d3a4a', head: 'hair' });
+      return svg(upgrades[id] || '');
+    },
     person: person,
     star: star
   };

@@ -277,3 +277,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .bank-level.on { background: #e3f1ea; color: inherit; }
 .bank-level.done { text-decoration: line-through; opacity: .6; }
 .bank-panel .btn.primary { margin-top: 8px; }
+
+.upgrade.secret { background: #f3ecff; border-color: #cdb6f2; }
+#managerBtn.on { background: #e3f1ea; border-color: #b9dccb; }

@@ -106,10 +106,10 @@ KR.ui = (function () {
   }
 
   function upgrades(s) {
-    $('upgrades').innerHTML = C.upgrades.map(function (u) {
+    $('upgrades').innerHTML = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); }).map(function (u) {
       var lvl = S.level(s, u.id), next = S.nextLevel(s, u.id), info = next || u.levels[u.levels.length - 1];
       var steps = u.levels.length > 1 ? ' <small>' + t(' (Tahap {l}/{n})', { l: lvl, n: u.levels.length }) + '</small>' : '';
-      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + '">' +
+      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (u.hidden ? ' secret' : '') + '">' +
         '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + t(u.name) + steps + '</h4><p>' + t(info.desc) +
         (info.upkeep ? t(' Kos {c}/hari.', { c: 'RM' + info.upkeep }) : '') +
         (info.rent ? t(' Sewa {c}/hari.', { c: 'RM' + info.rent }) : '') + '</p>' +
@@ -293,7 +293,8 @@ KR.ui = (function () {
                'Bagus! Kedai korang dah mula dikenali.',
                'Hebat! Kedai korang jadi pilihan orang taman.',
                'Tauke sebenar! Kedai korang paling laku.'][stars];
-    var owned = C.upgrades.filter(function (u) { return S.level(s, u.id); }).length;
+    var normal = C.upgrades.filter(function (u) { return !u.hidden; });
+    var owned = normal.filter(function (u) { return S.level(s, u.id); }).length;
     $('reportBox').innerHTML =
       '<h2>' + t('Rekod {n} Hari', { n: C.seasonDays }) + '</h2>' +
       '<div class="big-stars">' + starsHtml(stars) + '</div>' +
@@ -308,7 +309,7 @@ KR.ui = (function () {
       row(t('Beli berganda'), st.multiBuys || 0) +
       row(t('Balik sebab beratur lama'), st.turnedAway || 0) +
       row(t('Reputasi'), s.rep) +
-      row(t('Naik taraf dimiliki'), owned + '/' + C.upgrades.length) +
+      row(t('Naik taraf dimiliki'), owned + '/' + normal.length) +
       row(t('Pencapaian'), Object.keys(s.milestones).length + '/' + C.milestones.length) +
       row(t('Rekod terbaik'), rm0(best.value) + (isNewBest ? t(' (baru!)') : '')) +
       row(t('Simpanan bank'), rm(S.bank(s).balance)) +
@@ -318,6 +319,18 @@ KR.ui = (function () {
     $('reportModal').classList.remove('hidden');
   }
 
-  return { bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
+  // Cash + bank reached RM7,500: celebrate, and offer a second branch (coming in a later update).
+  function celebrate(s) {
+    $('reportBox').innerHTML =
+      '<h2>' + t('Tahniah, tauke!') + '</h2>' +
+      '<div class="big-stars">' + starsHtml(3) + '</div>' +
+      '<p>' + t('Duit dan simpanan korang dah capai {v} pada hari {d}. Kedai runcit kecil ni dah jadi perniagaan sebenar!', { v: rm0(s.cash + S.bank(s).balance), d: s.day }) + '</p>' +
+      '<p class="hint">' + t('Langkah seterusnya: buka cawangan baru di jalan yang lebih sibuk, dengan barang jualan baru. Pengurus Kedai boleh jaga kedai ini untuk korang.') + '</p>' +
+      '<button class="btn primary wide" id="expandBtn" disabled>' + t('Buka cawangan baru (akan datang)') + '</button>' +
+      '<button class="btn wide" id="celebrateOk">' + t('Teruskan berniaga') + '</button>';
+    $('reportModal').classList.remove('hidden');
+  }
+
+  return { celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
            customers: customers, records: records, report: report, bankrupt: bankrupt };
 })();

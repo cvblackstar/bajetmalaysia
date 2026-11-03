@@ -11,8 +11,35 @@
   function showPlan() {
     $('plan').classList.remove('hidden');
     $('dayView').classList.add('hidden');
+    managerMorning();
     UI.plan(state);
+    renderManager();
   }
+
+  // ---------- Store manager ----------
+  // Once hired (hidden upgrade 'pengurus') and switched on, each morning the manager orders stock
+  // from yesterday's sales, opens the shop at x8, and moves on from the report by itself.
+  var managerTimer = 0;
+  function managerActive() { return !!S.level(state, 'pengurus') && state.managerOn; }
+  function managerMorning() {
+    clearTimeout(managerTimer);
+    if (!managerActive() || state.today || state.lastReport) return;
+    S.autoOrder(state); save();
+    managerTimer = setTimeout(function () {
+      if (managerActive() && !$('plan').classList.contains('hidden') && $('reportModal').classList.contains('hidden')) openShop(true);
+    }, 2500);
+  }
+  function renderManager() {
+    var has = !!S.level(state, 'pengurus');
+    $('managerBtn').classList.toggle('hidden', !has);
+    $('managerBtn').textContent = t(state.managerOn ? 'Pengurus: buka (tekan untuk henti)' : 'Pengurus: tutup');
+    $('managerBtn').classList.toggle('on', has && state.managerOn);
+  }
+  $('managerBtn').addEventListener('click', function () {
+    state.managerOn = !state.managerOn; save(); SFX.click();
+    if (!state.managerOn) clearTimeout(managerTimer); else managerMorning();
+    UI.plan(state); renderManager();
+  });
 
   // ---------- Planning ----------
   $('products').addEventListener('click', function (e) {
@@ -36,7 +63,11 @@
 
   $('upgrades').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-up]');
-    if (b && S.buyUpgrade(state, b.dataset.up)) { SFX.kaching(); P.sdk.happytime(); save(); UI.plan(state); }
+    if (b && S.buyUpgrade(state, b.dataset.up)) {
+      SFX.kaching(); P.sdk.happytime();
+      if (b.dataset.up === 'pengurus') { state.managerOn = true; managerMorning(); }
+      save(); UI.plan(state); renderManager();
+    }
   });
 
   $('bankPanel').addEventListener('click', function (e) {
@@ -74,14 +105,17 @@
     showPlan();
   }
 
-  $('openBtn').addEventListener('click', function () {
-    if (S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
+  $('openBtn').addEventListener('click', function () { openShop(false); });
+  function openShop(auto) {
+    clearTimeout(managerTimer);
+    if (!auto && S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
       if (!window.confirm(t('Tiada stok langsung. Buka kedai juga?'))) return;
     }
     S.openDay(state);
     save(); // the day in progress is saved, so a reload finishes it instead of replaying it
     playDay();
-  });
+    if (auto) setSpeed(8);
+  }
 
   // ---------- Day playback ----------
   function playDay() {
@@ -266,10 +300,16 @@
     UI.header(state);
     if (report.profit > 0 || report.milestones.length) SFX.kaching();
     UI.report(report, state);
+    if (managerActive()) managerTimer = setTimeout(function () { var b = $('nextBtn'); if (b && managerActive()) b.click(); }, 3000);
   }
 
   $('reportBox').addEventListener('click', function (e) {
     if (e.target.id === 'restartBtn' || e.target.id === 'newSeasonBtn') return restart();
+    if (e.target.id === 'celebrateOk') {
+      state.celebrated = true; save();
+      $('reportModal').classList.add('hidden');
+      return showPlan();
+    }
     if (e.target.id === 'continueBtn') {
       state.seasonDone = true; save();
       $('reportModal').classList.add('hidden');
@@ -277,11 +317,17 @@
     }
     if (e.target.id !== 'nextBtn') return;
     $('reportModal').classList.add('hidden');
+    clearTimeout(managerTimer);
     S.nextDay(state); save();
     if (S.seasonOver(state)) return endSeason();
     if (S.isBankrupt(state)) return UI.bankrupt(state);
+    if (S.canExpand(state)) { clearTimeout(managerTimer); showPlanQuiet(); SFX.kaching(); return UI.celebrate(state); }
     showPlan();
   });
+
+  function showPlanQuiet() {           // plan screen behind a modal, without the manager starting the day
+    $('plan').classList.remove('hidden'); $('dayView').classList.add('hidden'); UI.plan(state); renderManager();
+  }
 
   function endSeason() {
     var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
@@ -289,7 +335,7 @@
     P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
     P.sdk.happytime();
     SFX.kaching();
-    showPlan();
+    showPlanQuiet();
     UI.seasonEnd(state, best, isNew);
   }
 
@@ -325,7 +371,7 @@
   $('introLang').addEventListener('click', function () { $('langBtn').click(); });
   $('langBtn').addEventListener('click', function () {
     I18N.set(I18N.lang() === 'en' ? 'ms' : 'en'); SFX.click();
-    renderLang(); renderMute(); renderGfx();
+    renderLang(); renderMute(); renderGfx(); renderManager();
     UI.plan(state);
     if (!$('reportModal').classList.contains('hidden')) {        // re-show whatever the modal was showing
       if ($('nextBtn') && state.lastReport) UI.report(state.lastReport, state);

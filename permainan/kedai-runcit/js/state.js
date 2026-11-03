@@ -30,6 +30,8 @@ KR.state = (function () {
       lastOrder: null,     // yesterday's morning order, for "repeat order"
       lastDemand: null,    // yesterday's sold / ran out / too pricey per product         // dated stock for products that expire
       today: null,         // a day in progress (see sim.openDay)
+      managerOn: true,     // the store manager runs the day (once hired)
+      celebrated: false,   // the RM7,500 celebration has been shown
       seenIntro: false
     };
   }

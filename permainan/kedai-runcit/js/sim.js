@@ -152,9 +152,27 @@ KR.sim = (function () {
     return orderCost(s) + qty * buyCost(s, p) <= s.cash + 1e-9;
   }
 
+  // Every normal (not hidden) upgrade bought at its top level.
+  function allUpgradesOwned(s) {
+    return C.upgrades.every(function (u) { return u.hidden || level(s, u.id) >= u.levels.length; });
+  }
+  // Hidden upgrades (the store manager) only appear once everything else is bought.
+  function upgradeVisible(s, u) { return !u.hidden || allUpgradesOwned(s) || !!level(s, u.id); }
+
+  // Store manager's morning order: yesterday's sales plus what ran out, +10%, minus stock on hand.
+  function autoOrder(s) {
+    unlockedProducts(s).forEach(function (p) {
+      var d = s.lastDemand && s.lastDemand[p.id], want = d ? Math.ceil((d.sold + d.out * C.buyQty) * 1.1) + 2 : 10;
+      s.order[p.id] = 0;
+      for (var i = 0; i < want - s.stock[p.id] && canOrder(s, p.id, 1); i++) s.order[p.id]++;
+    });
+  }
+  // Time to celebrate: cash + savings reached C.expandAt (once per game).
+  function canExpand(s) { return !s.celebrated && s.cash + bank(s).balance >= C.expandAt; }
+
   function buyUpgrade(s, id) {
     var u = upgrade(id), next = u && nextLevel(s, id);
-    if (!next || s.cash < next.price || !upgradeOpen(s, u)) return false;
+    if (!next || s.cash < next.price || !upgradeOpen(s, u) || !upgradeVisible(s, u)) return false;
     s.cash = round2(s.cash - next.price);
     s.upgrades[id] = level(s, id) + 1;
     return true;
@@ -455,6 +473,7 @@ KR.sim = (function () {
   }
 
   return {
+    allUpgradesOwned: allUpgradesOwned, upgradeVisible: upgradeVisible, autoOrder: autoOrder, canExpand: canExpand,
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, lotsOpen: lotsOpen, lotOf: lotOf, upgradeOpen: upgradeOpen,
     tcgOn: tcgOn, tcgRelease: tcgRelease, tcgDays: tcgDays, hype: hype,
     bank: bank, bankRate: bankRate, bankNextPrice: bankNextPrice, bankFree: bankFree, deposit: deposit, withdraw: withdraw, bankUpgrade: bankUpgrade, unlockedProducts: unlockedProducts,

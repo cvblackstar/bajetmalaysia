@@ -147,8 +147,13 @@ KR.config = {
     { id: 'capit',    name: 'Mesin Capit',    icon: '🕹️', price: 400, upkeep: 2, lot: 3,
       desc: 'Mesin capit di sudut hobi. Pengunjung main RM1 sekali, duit masuk tiap hari tanpa perlu stok.', claw: true },
     { id: 'tcg',      name: 'Jual Kad TCG',   icon: '🃏', price: 300, upkeep: 0, lot: 3,
-      desc: 'Jual pek booster TCG. Set baru keluar setiap 14 hari dan peminat kad datang beratur.' }
+      desc: 'Jual pek booster TCG. Set baru keluar setiap 14 hari dan peminat kad datang beratur.' },
+    // Hidden: only shows once every other upgrade is bought. Runs the shop for you (see main.js manager).
+    { id: 'pengurus', name: 'Pengurus Kedai', icon: '🧑‍💼', price: 2500, upkeep: 20, hidden: true,
+      desc: 'Pengurus pesan stok ikut jualan semalam dan buka kedai setiap hari untuk korang. Boleh tutup bila-bila masa.' }
   ],
+  // Cash + bank needed to celebrate and offer a second branch (RM5,000 + RM2,500 for the manager).
+  expandAt: 7500,
 
   events: {
     gaji:       { name: 'Hari Gaji', desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
@@ -171,7 +176,7 @@ KR.config = {
     { id: 'naiktaraf', name: 'Pelaburan Pertama', desc: 'Beli naik taraf pertama.', reward: 30,
       check: function (s) { return Object.keys(s.upgrades).length >= 1; } },
     { id: 'semua',    name: 'Kedai Lengkap',    desc: 'Beli semua naik taraf.', reward: 150,
-      check: function (s) { return Object.keys(s.upgrades).length >= KR.config.upgrades.length; } },
+      check: function (s) { return KR.sim.allUpgradesOwned(s); } },
     { id: 'rep80',    name: 'Kedai Kegemaran',  desc: 'Capai reputasi 80.', reward: 50,
       check: function (s) { return s.rep >= 80; } },
     { id: 'pelanggan500', name: 'Kenal Satu Taman', desc: 'Layan 250 pelanggan.', reward: 80,
