@@ -141,7 +141,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .bubble.bad { color: var(--red); }
 
 .live { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-.live .stat { background: var(--paper); border: 1px solid var(--line); }
+.live .stat { background: var(--paper); border: 1px solid var(--line); min-width: 92px; }
 .speed { margin-left: auto; display: flex; gap: 6px; }
 
 /* Modals */
@@ -181,7 +181,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .earned { background: #e3f1ea; border-radius: 10px; padding: 8px 12px; margin: 10px 0; font-size: 13px; }
 .earned p { margin: 3px 0; font-weight: 700; color: var(--green-d); }
 .big-stars { text-align: center; margin: 8px 0; }
-.big-stars .sprite { width: 56px; height: 56px; margin: 0 4px; }
+.big-stars .sprite { display: inline-block; width: 56px; height: 56px; margin: 0 4px; }
 .modal-box .btn + .btn { margin-top: 8px; }
 .modal-box .btn.wide { width: 100%; }
 
@@ -198,3 +198,44 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .scene.is3d .bubble { bottom: auto; transform: translate(-50%, -100%); z-index: 2; }
 .scene.is3d { height: 440px; }
 @media (max-width: 520px) { .scene.is3d { height: 400px; } }
+
+/* Mid-day restock */
+.speed { flex-wrap: wrap; }
+.btn.accent { background: var(--gold); }
+.restock-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,.12); }
+.restock-row .ricon { width: 32px; height: 32px; flex: none; }
+.restock-row .rname { flex: 1; font-weight: 600; font-size: 14px; }
+.restock-row .rname small { display: block; font-weight: 400; opacity: .75; }
+.restock-row .btn + .btn { margin-top: 0; }
+.modal-box .restock-row .btn { white-space: nowrap; }
+#restockList { max-height: 50vh; overflow-y: auto; }
+
+/* Zoom buttons over the 3D scene */
+.zoombar { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 3; }
+.zoombar button { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.92); font-size: 22px; font-weight: 700; color: var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.scene:not(.is3d) .zoombar { display: none; }
+
+/* Rare / unique customers' bubbles, and how many they bought */
+.bubble b { font-size: 11px; margin: 0 3px 0 -1px; color: var(--green-d); }
+.bubble.rare { box-shadow: 0 0 0 2px #4aa3df, 0 2px 6px rgba(0,0,0,.18); }
+.bubble.unique { box-shadow: 0 0 0 2px #e0a526, 0 2px 6px rgba(0,0,0,.18); }
+
+/* Customers tab */
+.cust-stats .card { margin-bottom: 10px; }
+.cust-stats .sub-title { margin-top: 0; }
+.big-num { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.big-num small { font-size: 13px; font-weight: 600; color: var(--muted); }
+.tier-row { display: grid; grid-template-columns: 64px 1fr 92px; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; }
+.tier-row .tname { font-weight: 700; }
+.tier-row .tbar { height: 10px; background: #eee6d6; border-radius: 99px; overflow: hidden; }
+.tier-row .tbar i { display: block; height: 100%; border-radius: 99px; background: #8a9a8f; }
+.tier-row.tier-rare .tbar i { background: #4aa3df; }
+.tier-row.tier-unique .tbar i { background: #e0a526; }
+.tier-row .tnum { text-align: right; font-weight: 700; }
+.tier-row .tnum small { color: var(--muted); font-weight: 500; }
+.cust-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.cust-table td { padding: 4px 0; border-top: 1px dashed var(--line); }
+.cust-table td:last-child { text-align: right; font-weight: 700; }
+.rent-note { color: var(--green-d); font-weight: 600; }
+.hint.special { color: #1d6fa5; font-weight: 600; }
+@media (max-width: 480px) { .tab { padding: 8px 4px; font-size: 13px; } }

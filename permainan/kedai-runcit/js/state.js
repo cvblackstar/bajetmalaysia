@@ -18,11 +18,14 @@ KR.state = (function () {
       order: order,
       upgrades: {},
       forecast: null,
-      stats: { totalProfit: 0, bestDay: 0, customers: 0, streak: 0 },
+      stats: { totalProfit: 0, bestDay: 0, customers: 0, streak: 0, revenue: 0,
+               tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, turnedAway: 0 },
       milestones: {},
       seasonDone: false,
       history: [],
       lastReport: null,
+      batches: {},         // dated stock for products that expire
+      today: null,         // a day in progress (see sim.openDay)
       seenIntro: false
     };
   }
@@ -36,6 +39,7 @@ KR.state = (function () {
       s[k] = Object.assign(fresh()[k], saved[k] || {});
     });
     s.stats = Object.assign(fresh().stats, saved.stats || {});
+    s.stats.tiers = Object.assign(fresh().stats.tiers, (saved.stats && saved.stats.tiers) || {});
     s.milestones = Object.assign({}, saved.milestones || {});
     s.version = C.version;
     return s;

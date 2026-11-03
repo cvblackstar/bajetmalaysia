@@ -8,20 +8,34 @@ KR.config = {
   startCash: 200,
   startRep: 50,
   baseCapacity: 150,     // max units of stock in the shop
-  baseTraffic: 60,       // customers on a normal weekday at reputation 50
+  baseTraffic: 60,       // customers on a normal weekday, scaled by reputation (see trafficRep)
+  // Reputation -> share of baseTraffic: a new shop (rep 50) gets about 60%, a famous one (rep 100)
+  // gets 1.5x, which is more than one person can serve, so long queues pull reputation back down.
+  trafficRep: { min: 0.3, scale: 1.2, power: 2 },
   baseServe: 70,         // customers the owner alone can serve per day
-  rent: 15,              // RM per day
+  rent: 15,              // RM per day at full price
+  // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
+  // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
+  rentRamp: { start: 0.6, step: 0.2, every: 30 },
+  // Customer tiers. Rare ones (doctors) only come at reputation 80+, unique ones (kimono) at 95+.
+  // multiChance = chance they buy multi times what they planned (common 2x, rare 2x, unique 3x).
+  tiers: {
+    common: { multi: 2, multiChance: 0.08 },
+    rare:   { rep: 80, chance: 0.08, multi: 2, multiChance: 0.6 },
+    unique: { rep: 95, chance: 0.03, multi: 3, multiChance: 0.6 }
+  },
   eventChance: 0.2,
   paydayEvery: 30,
   paydayOn: 25,
+  midRestockMarkup: 0.1, // restocking while the shop is open costs 10% more than the morning order
   hourMs: 4000,          // playback length of one opening hour at x1 speed
   openHour: 8,           // 8 pagi
   closeHour: 20,         // 8 malam (the 'lewat' upgrade adds hours)
   bestKey: 'kedaiRuncit.best.v1',
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
-  seasonDays: 30,
-  starTargets: [700, 1500, 3000],
+  seasonDays: 90,
+  starTargets: [3000, 7000, 12000],
 
   dayNames: ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
   dayTraffic: [1, 0.95, 1, 1.05, 1.15, 1.3, 1.25],
@@ -52,15 +66,23 @@ KR.config = {
     { id: 'aiskrim', name: 'Ais Krim',    icon: '🍦', cost: 1.0, ref: 2.5,  demand: 0.8,  perish: 0.03, requires: 'peti',
       weather: { panas: 2.4, cerah: 1.5, mendung: 0.9, hujan: 0.4, ribut: 0.3 } },
     { id: 'payung',  name: 'Payung',      icon: '☂️', cost: 6.0, ref: 12.0, demand: 0.12, perish: 0, requires: 'rak',
-      weather: { panas: 0.2, cerah: 0.3, mendung: 0.8, hujan: 6, ribut: 8 } }
+      weather: { panas: 0.2, cerah: 0.3, mendung: 0.8, hujan: 6, ribut: 8 } },
+    { id: 'cokelat', name: 'Cokelat',     icon: '🍫', cost: 1.5, ref: 3.0,  demand: 0.5,  perish: 0.02,
+      weather: { panas: 0.6, cerah: 1.0, mendung: 1.1, hujan: 1.2, ribut: 1.2 } },
+    // expiry = days a batch lasts on the shelf before it has to be thrown away
+    { id: 'airtin',  name: 'Air Tin',     icon: '🥤', cost: 1.2, ref: 2.2,  demand: 0.7,  perish: 0, expiry: 15,
+      weather: { panas: 2.0, cerah: 1.4, mendung: 0.9, hujan: 0.6, ribut: 0.5 } }
   ],
 
   // upkeep = RM per day once bought
   upgrades: [
     { id: 'peti',     name: 'Peti Sejuk',     icon: '🧊', price: 300, upkeep: 5,
       desc: 'Boleh jual ais krim. Roti dan telur kurang rosak.', perishMult: 0.5 },
-    { id: 'rak',      name: 'Rak Tambahan',   icon: '🗄️', price: 250, upkeep: 0,
-      desc: '+150 ruang stok. Boleh jual payung.', capacity: 150 },
+    // An upgrade with levels can be bought once per level (each level's numbers add up).
+    { id: 'rak',      name: 'Besarkan Kedai', icon: '🏬', levels: [
+      { price: 250, rent: 5, capacity: 150, desc: 'Sewa lot sebelah. +150 ruang stok, lebih ramai boleh masuk, boleh jual payung.' },
+      { price: 450, rent: 8, capacity: 150, desc: 'Sewa lot kedua. +150 lagi ruang stok, kedai jadi tiga pintu.' }
+    ] },
     { id: 'kipas',    name: 'Kipas Siling',   icon: '🌀', price: 120, upkeep: 1,
       desc: 'Kedai lebih selesa, +8% pelanggan.', traffic: 0.08 },
     { id: 'qr',       name: 'DuitNow QR',     icon: '📱', price: 180, upkeep: 0,
@@ -103,3 +125,9 @@ KR.config = {
       check: function (s, r) { return r.served >= 40 && Object.keys(r.perProduct).every(function (k) { return !r.perProduct[k].out; }); } }
   ]
 };
+
+// Every upgrade gets a levels list, so the rules only deal with one shape.
+KR.config.upgrades.forEach(function (u) {
+  if (!u.levels) u.levels = [Object.assign({}, u)];
+  u.price = u.levels[0].price; u.upkeep = u.levels[0].upkeep; u.rent = u.levels[0].rent; u.desc = u.levels[0].desc;
+});
