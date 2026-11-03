@@ -27,16 +27,25 @@
       var p = S.product(id);
       state.prices[id] = Math.min(p.ref * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
     }
-    UI.header(state); UI.products(state); save();
+    UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
 
   $('repeatBtn').addEventListener('click', function () {
-    SFX.click(); S.repeatOrder(state); UI.header(state); UI.products(state); save();
+    SFX.click(); S.repeatOrder(state); UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
 
   $('upgrades').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-up]');
     if (b && S.buyUpgrade(state, b.dataset.up)) { SFX.kaching(); P.sdk.happytime(); save(); UI.plan(state); }
+  });
+
+  $('bankPanel').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    if (b.id === 'bankUpBtn') { if (S.bankUpgrade(state)) { SFX.kaching(); save(); UI.plan(state); } return; }
+    var kind = b.dataset.bank; if (!kind) return;
+    var n = b.dataset.n === 'all' ? Infinity : +b.dataset.n;
+    if ((kind === 'in' ? S.deposit(state, n) : S.withdraw(state, n)) > 0) { SFX.coin(); save(); UI.plan(state); }
   });
 
   document.querySelectorAll('.tab').forEach(function (t) {
@@ -90,7 +99,10 @@
     scene.classList.toggle('is3d', use3d);
     if (use3d) S3.start({
       host: scene, overlay: $('walkers'), weather: today.weather, shopName: state.shopName,
-      products: S.unlockedProducts(state).map(function (p) { return A.product(p.id); }),
+      lotProducts: C.lots.map(function (l, i) {                  // what each lot's shelves show
+        return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return A.product(p.id); });
+      }),
+      claw: !!S.level(state, 'capit'), tcg: !!S.level(state, 'tcg'),
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
       capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
@@ -162,6 +174,8 @@
     S3.spawn({
       seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
       from: entry.from, back: entry.back, regular: !!entry.regular,
+      across: !entry.from && Math.random() < 0.3,                // some live across the road and use the zebra crossing
+      lot: entry.wants && entry.wants.length ? S.lotOf(S.product(entry.wants[0].id)) - 1 : 0,   // browse in the lot that sells it
       dwell: day.dwell, patience: 2500, bx: (Math.random() - 0.5) * 1.6,
       giveUp: !!(entry.complaint && entry.complaint.type === 'queue'),
       outcome: function () { return outcome(entry); }

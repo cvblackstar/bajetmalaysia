@@ -56,7 +56,38 @@ KR.art = (function () {
       '<path d="M4 24C5 12 14 6 24 6s19 6 20 18c-3-2-6-2-8 0-2-2-6-2-8 0-2-2-6-2-8 0-2-2-6-2-8 0-2-2-5-2-8 0z" fill="#2f9e6e" ' + OL + '/>' +
       '<path d="M24 6c-4 4-6 10-4 18M24 6c4 4 6 10 4 18" fill="none" stroke="#1f6e4c" stroke-width="1.4"/>' +
       '<path d="M24 24v14a4 4 0 0 1-8 0" fill="none" ' + OL + ' stroke-width="2.4"/>' +
-      '<path d="M24 3v3" ' + OL + ' stroke-width="2.4"/>'
+      '<path d="M24 3v3" ' + OL + ' stroke-width="2.4"/>',
+    beras:
+      '<path d="M11 12c0-3 4-5 13-5s13 2 13 5l3 28a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" fill="#f4efe2" ' + OL + '/>' +
+      '<path d="M12 10c4 3 20 3 24 0" fill="none" ' + OL + '/>' +
+      '<rect x="13" y="20" width="22" height="13" rx="2" fill="#2f9e6e" ' + OL + '/>' +
+      '<path d="M18 27c2-3 4-3 6 0s4 3 6 0" fill="none" stroke="#ffd23f" stroke-width="2" stroke-linecap="round"/>' +
+      '<circle cx="19" cy="38" r="1" fill="#c9b28a"/><circle cx="24" cy="39" r="1" fill="#c9b28a"/><circle cx="29" cy="38" r="1" fill="#c9b28a"/>',
+    minyak:
+      '<path d="M20 4h8v5h-8z" fill="#d6332b" ' + OL + '/>' +
+      '<path d="M18 9h12l4 8v23a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V17z" fill="#ffd23f" ' + OL + '/>' +
+      '<rect x="14" y="22" width="20" height="12" fill="#f08a24"/>' +
+      '<path d="M24 25c-3 4-3 6 0 6s3-2 0-6z" fill="#fff3d6"/>' +
+      '<path d="M19 14v6" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"/>',
+    gula:
+      '<path d="M12 8h24l2 34H10z" fill="#ffffff" ' + OL + '/>' +
+      '<path d="M12 8l2-3h20l2 3" fill="#e8e2d0" ' + OL + '/>' +
+      '<rect x="12.5" y="18" width="23" height="12" fill="#2f7fd1"/>' +
+      '<path d="M18 24h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<path d="M17 36l2-2 2 2-2 2zM26 36l2-2 2 2-2 2z" fill="#cfd8f2"/>',
+    mainan:
+      '<circle cx="15" cy="12" r="5" fill="#b9772f" ' + OL + '/><circle cx="33" cy="12" r="5" fill="#b9772f" ' + OL + '/>' +
+      '<circle cx="24" cy="20" r="11" fill="#d99a52" ' + OL + '/>' +
+      '<ellipse cx="24" cy="36" rx="11" ry="9" fill="#d99a52" ' + OL + '/>' +
+      '<ellipse cx="24" cy="24" rx="4.5" ry="3.5" fill="#f3d9b6"/>' +
+      '<circle cx="20" cy="18" r="1.4" fill="#3a2a1f"/><circle cx="28" cy="18" r="1.4" fill="#3a2a1f"/><circle cx="24" cy="23" r="1.3" fill="#3a2a1f"/>' +
+      '<path d="M18 30l6 3 6-3-6 4z" fill="#d6332b" ' + OL + '/>',
+    tcg:
+      '<rect x="7" y="9" width="20" height="30" rx="3" fill="#8e5bd1" ' + OL + ' transform="rotate(-12 17 24)"/>' +
+      '<rect x="18" y="7" width="22" height="33" rx="3" fill="#2f7fd1" ' + OL + '/>' +
+      '<rect x="21" y="10" width="16" height="14" rx="1.5" fill="#bfe6ff"/>' +
+      '<path d="M29 12l2 4 4 .5-3 3 .8 4-3.8-2-3.8 2 .8-4-3-3 4-.5z" fill="#ffd23f" ' + OL + ' stroke-width="1"/>' +
+      '<path d="M22 29h14M22 33h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/>'
   };
 
   var weathers = {
@@ -97,8 +128,21 @@ KR.art = (function () {
     papan: '<rect x="3" y="10" width="42" height="20" rx="3" fill="#23312b" ' + OL + '/>' +
       '<g fill="#ffc83d"><circle cx="9" cy="16" r="1.6"/><circle cx="14" cy="16" r="1.6"/><circle cx="19" cy="16" r="1.6"/><circle cx="24" cy="16" r="1.6"/><circle cx="29" cy="16" r="1.6"/><circle cx="34" cy="16" r="1.6"/><circle cx="39" cy="16" r="1.6"/></g>' +
       '<g fill="#5ee0a0"><circle cx="9" cy="24" r="1.6"/><circle cx="14" cy="24" r="1.6"/><circle cx="19" cy="24" r="1.6"/><circle cx="24" cy="24" r="1.6"/><circle cx="29" cy="24" r="1.6"/><circle cx="34" cy="24" r="1.6"/><circle cx="39" cy="24" r="1.6"/></g>' +
-      '<path d="M14 30v12M34 30v12" ' + OL + ' stroke-width="2.4"/>'
+      '<path d="M14 30v12M34 30v12" ' + OL + ' stroke-width="2.4"/>',
+    capit:
+      '<rect x="10" y="4" width="28" height="40" rx="3" fill="#e86f9a" ' + OL + '/>' +
+      '<rect x="13" y="8" width="22" height="20" rx="1.5" fill="#cfe9f3" ' + OL + '/>' +
+      '<path d="M24 8v8" ' + OL + '/><path d="M20 19l4-3 4 3M20 19v3M28 19v3" fill="none" ' + OL + '/>' +
+      '<circle cx="18" cy="25" r="2.5" fill="#ffd23f"/><circle cx="24" cy="26" r="2.5" fill="#2f9e6e"/><circle cx="30" cy="25" r="2.5" fill="#2f7fd1"/>' +
+      '<rect x="14" y="32" width="20" height="8" rx="1.5" fill="#3a2a1f"/><circle cx="19" cy="36" r="2" fill="#d6332b"/><path d="M28 33v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+    bank:
+      '<path d="M4 18L24 6l20 12z" fill="#2f7fd1" ' + OL + '/>' +
+      '<rect x="6" y="18" width="36" height="4" fill="#cfd8f2" ' + OL + '/>' +
+      '<path d="M10 22v14M18 22v14M30 22v14M38 22v14" ' + OL + ' stroke-width="3"/>' +
+      '<rect x="5" y="36" width="38" height="6" rx="1" fill="#cfd8f2" ' + OL + '/>' +
+      '<circle cx="24" cy="29" r="5" fill="#ffd23f" ' + OL + '/><path d="M24 26.5v5" stroke="#3a2a1f" stroke-width="1.4"/>'
   };
+  upgrades.tcg = products.tcg;
 
   // People: a seeded mix of skin tones, clothes and headwear.
   var SKIN = ['#f3c9a4', '#e0a87e', '#c68856', '#9a6440', '#f6d5b8'];
