@@ -4,3 +4,6 @@ Converted to .glb with glTF-Transform: kept Idle, Walk, Walk_Carry and Victory a
 Scenery (models/env): "Buildings pack" (Aug 2017) and "Ultimate Nature Pack" (Jun 2019) by Quaternius, CC0 1.0 public domain.
 Converted from OBJ with obj2gltf, then joined, welded and quantized with glTF-Transform. House colours are repainted in the game.
 tauke_male.glb: casual_male dressed in Blender with a songkok, shop apron and white shirt (tools/build_tauke.py), same CC0 licence.
+Props (models/env/food.glb, arcade.glb, cars.glb): Kenney (www.kenney.nl) "Food Kit", "Mini Arcade" and "Car Kit 3.1", CC0 1.0 public domain.
+Food: soda-bottle, loaf, chinese, egg, popsicle, candy-bar, soda-can, bag, bottle-oil, carton-small. Arcade: claw-machine, cash-register, prizes.
+Cars: sedan, taxi, suv, truck, delivery, truck-flat, ambulance, box. Packed into one file per kit (each model a named node) with tools/pack_kenney.mjs (glTF-Transform: dedup, weld, quantize).

@@ -14,6 +14,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `js/characters3d.js` | Chibi-style 3D people built from primitives: swappable headwear, tops, bottoms, extras and colours (base for the Reka Tauke creator). |
 | `js/models3d.js` | Rigged, animated customers from Quaternius' CC0 character pack (`models/*.glb`), used as provided. Common: casual, worker, suit, plus a tauke (casual male in songkok and apron, built by `tools/build_tauke.py` in Blender). Rare (reputation 80+): doctors. Unique (95+): kimono. Falls back to `characters3d.js` if they fail to load. |
 | `models/env/*.glb` | Shop lots, houses, flats, bank, klinik, trees, palms, bushes and flowers from Quaternius' CC0 Buildings and Nature packs, placed by `scene3d.js` (box versions show until they load). |
+| `models/env/food.glb`, `arcade.glb`, `cars.glb` | Kenney CC0 props packed by `tools/pack_kenney.mjs`: 3D goods on the shelves (`GOODS` in `scene3d.js`; products without a model keep their sprite), the shopping bag's shape, the claw machine, cash register and prize rack, Kenney cars in the traffic, the kilang's lorry, an ambulance at the klinik, and the delivery lorry and boxes that come after a mid-day restock. |
 | `vendor/GLTFLoader.js`, `SkeletonUtils.js`, `BufferGeometryUtils.js` | three.js r158 add-ons (MIT) used to load and clone the models. |
 | `js/scene3d.js` | Optional three.js town scene: a row of 3 shop lots (the "Besarkan Kedai" upgrade rents lots 2 and 3), zoom (wheel, pinch, +/-) and drag to pan; zoomed in shows a cutaway of the inside, zoomed out shows the roof. A kilang across the road sends workers over at lunch and after 6 petang, and passers-by walk through without shopping. Falls back to the SVG scene without WebGL, when opened from `file://`, or when the player picks 2D. |
 | `vendor/three.module.min.js` | three.js r158 (MIT, see `vendor/three.LICENSE`), loaded in the background with `import()`. |
@@ -23,7 +24,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 Shop lots: lot 1 sells everyday items; renting lot 2 adds kitchen basics (rice, oil, sugar, umbrellas);
 lot 3 is a hobby corner (toys, plus the Mesin Capit and Jual Kad TCG upgrades). A new TCG set comes out
 every 14 days and brings card collectors. The Bank tab holds savings that earn a daily return
-(`bank` in `config.js`). Cars on the main road are built in code (`makeCar` in `scene3d.js`) and stop
+(`bank` in `config.js`). Cars on the main road are a mix of ones built in code (`makeCar` in `scene3d.js`) and Kenney's, and stop
 at the zebra crossing for people coming from across the road. Rare customers have a light blue
 outline, unique ones a purple glow (`AURA` in `models3d.js`).
 

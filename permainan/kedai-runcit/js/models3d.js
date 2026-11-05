@@ -99,7 +99,7 @@ KR.models = (function () {
     model.updateMatrixWorld(true);
     var hand = model.getObjectByName('FistR');
     var fr = hand.getWorldPosition(new T.Vector3());
-    var bag = new T.Mesh(geo.bag, new T.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.9 }));
+    var bag = new T.Mesh(geo.bag, geo.bagMat || new T.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.9 }));
     bag.position.set(fr.x, fr.y - 0.22, fr.z);
     model.add(bag); model.updateMatrixWorld(true); hand.attach(bag);
     bag.castShadow = true; bag.visible = false;
@@ -141,10 +141,30 @@ KR.models = (function () {
   function dispose(g) {
     g.userData.mixer.stopAllAction();
     if (g.userData.tier === 'unique') uniqueOut--;
-    g.userData.bag.material.dispose();
+    if (g.userData.bag.material !== geo.bagMat) g.userData.bag.material.dispose();
     g.userData.aura.forEach(function (m) { m.dispose(); });
     g.userData.skin.dispose();
   }
 
-  return { load: load, isReady: function () { return ready; }, make: make, pickTier: pickTier, TIERS: TIERS, animate: animate, dispose: dispose };
+  // The shape of Kenney's shopping bag (food kit) replaces the plain box bag once it has loaded.
+  function setBag(src) {
+    if (!src || !T) return;
+    var mesh = null;
+    src.traverse(function (o) { if (o.isMesh && !mesh) mesh = o; });
+    if (!mesh) return;
+    var g = mesh.geometry.clone();
+    ['position', 'normal'].forEach(function (k) {             // quantized in the file: back to floats so it can be moved
+      var a = g.attributes[k], f = new Float32Array(a.count * 3);
+      for (var i = 0; i < a.count; i++) { f[i * 3] = a.getX(i); f[i * 3 + 1] = a.getY(i); f[i * 3 + 2] = a.getZ(i); }
+      g.setAttribute(k, new T.BufferAttribute(f, 3));
+    });
+    src.updateMatrixWorld(true);
+    g.applyMatrix4(mesh.matrixWorld);
+    g.computeBoundingBox();
+    var b = g.boundingBox, s = 0.44 / (b.max.y - b.min.y);
+    g.center(); g.scale(s, s, s); g.rotateY(Math.PI / 2);
+    geo.bag = g; geo.bagMat = new T.MeshStandardMaterial({ color: 0xf7f7f2, roughness: 0.85 });   // white, like a kedai's plastic bag
+  }
+
+  return { load: load, setBag: setBag, isReady: function () { return ready; }, make: make, pickTier: pickTier, TIERS: TIERS, animate: animate, dispose: dispose };
 })();
