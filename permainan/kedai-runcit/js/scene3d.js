@@ -71,7 +71,7 @@ KR.scene3d = (function () {
   var prim = {};
   // The kilang across the road (built from boxes; the building pack has no factory).
   // FGATE is where its workers come out.
-  var FAC = { x: -12, z: 16.8, w: 11, d: 8 }, FGATE = [-12, 12.6], factorySign = null, factoryLang = '';
+  var FAC = { x: -12, z: 16.8, w: 11, d: 8 }, FGATE = [-12, 12.6], factorySign = null, factoryLang = '', factoryLorry = null;
   function buildFactory() {
     var g = new THREE.Group(); root.add(g);
     var front = FAC.z - FAC.d / 2, x0 = FAC.x - FAC.w / 2;
@@ -95,7 +95,7 @@ KR.scene3d = (function () {
     for (var bx = x0 + 1.1; bx < x1 - 0.6; bx += 1.6) box(1.1, 0.7, 0.06, 0x9fd3ea, bx, 2.1, back + 0.02, g);   // windows the camera sees
     for (var bz = front + 1.2; bz < back - 0.6; bz += 1.6) box(0.06, 0.7, 1.1, 0x9fd3ea, x1 + 0.02, 2.1, bz, g);
     box(0.06, 2.2, 2.6, 0x6f7a82, x1 + 0.03, 1.1, back - 1.6, g);                                    // loading bay door
-    var lorry = new THREE.Group(); g.add(lorry);                                                    // a lorry at the loading bay
+    var lorry = factoryLorry = new THREE.Group(); g.add(lorry);                                     // a lorry at the loading bay (Kenney's flatbed replaces it once loaded)
     box(1.4, 1.5, 3.2, 0xeeeeee, 0, 1.0, 0, lorry); box(1.4, 1.1, 1.1, 0x2f7fd1, 0, 0.8, -2.2, lorry);
     box(1.3, 0.45, 0.06, 0xcfe9f3, 0, 1.05, -2.76, lorry);
     lorry.position.set(x1 + 1.6, 0, back - 1.4);
@@ -238,7 +238,7 @@ KR.scene3d = (function () {
     if (!dt) return;
     var busy = crossingBusy();
     cars.forEach(function (c) {
-      var d = c.lane.dir, x = c.g.position.x, front = x + d * c.len / 2, target = CAR_MAX;
+      var d = c.lane.dir, x = c.g.position.x, front = x + d * c.len / 2, target = c.vmax || CAR_MAX;
       var toStop = (ZX - d * 2.4 - front) * d;                // distance from the bumper to the stop line
       if (busy && toStop > -0.3 && toStop < 9) target = Math.max(0, Math.min(target, toStop * 0.9));
       cars.forEach(function (o) {                             // keep a gap to the car in front
@@ -246,14 +246,132 @@ KR.scene3d = (function () {
         var gap = ((o.g.position.x - d * o.len / 2) - front) * d;
         if (gap > 0 && gap < 6) target = Math.min(target, Math.max(0, (gap - 0.9) * 1.2));
       });
+      if (c.stopAt != null) target = Math.min(target, deliveryTarget(c));
       c.v += Math.max(-9 * dt, Math.min(3 * dt, target - c.v));
       c.g.position.x += d * c.v * dt;
-      c.wheels.forEach(function (w) { w.rotation.z -= c.v * dt / 0.27; });
+      c.wheels.forEach(function (w) { if (c.kenney) w.rotation.x += c.v * dt / 0.3; else w.rotation.z -= c.v * dt / 0.27; });
+      if (c.g.position.x * d > ROAD_END && c.oneWay) { c.gone = true; return; }
       if (c.g.position.x * d > ROAD_END) {                    // round again, well behind the last car in this lane
         var last = cars.reduce(function (m, o) { return o.lane === c.lane && o !== c ? Math.min(m, o.g.position.x * d) : m; }, ROAD_END);
         c.g.position.x = d * Math.min(-ROAD_END, last - 6 - Math.random() * 10);
       }
     });
+    cars.forEach(function (o) { if (o.gone) root.remove(o.g); });
+    cars = cars.filter(function (o) { return !o.gone; });
+    if (van && van.gone) van = null;
+    updateDelivery(dt);
+  }
+
+  // ---------- Kenney props (CC0): goods on the shelves, arcade machines, cars ----------
+  // models/env/food.glb, arcade.glb and cars.glb are packed by tools/pack_kenney.mjs; each model is a
+  // node named after its file. Until they load (or if they can't) the sprites and box versions stay.
+  var KM = null, kdims = {};
+  function loadKenney(loader) {
+    return Promise.all(['food', 'arcade', 'cars'].map(function (n) { return loader.loadAsync('models/env/' + n + '.glb'); }))
+      .then(function (list) {
+        KM = {};
+        list.forEach(function (g) { g.scene.updateMatrixWorld(true); g.scene.children.forEach(function (c) { KM[c.name] = c; }); });
+        KR.models.setBag(KM.bag);
+        if (cfg.lots != null) buildShop(cfg.lots, cfg.lotProducts, cfg);
+        kenneyTown();
+      }).catch(function (e) { KM = null; if (window.console) console.warn('Kenney props not loaded, keeping simple ones', e); });
+  }
+  // Size of a Kenney model: 'y' = height, else its longest side.
+  function kdim(name, dim) {
+    var b = kdims[name] = kdims[name] || new THREE.Box3().setFromObject(KM[name]).getSize(new THREE.Vector3());
+    return dim === 'y' ? b.y : Math.max(b.x, b.y, b.z);
+  }
+  function kput(name, x, y, z, size, rotY, parent, dim) {
+    var o = put(KM[name], x, z, size / kdim(name, dim), rotY, parent || shopGroup);
+    o.position.y = y; return o;
+  }
+
+  // Goods on the shelves: model, size (longest side), how many per slot, and a flat colour for
+  // models that need a different look (a clear-blue bottle for mineral water).
+  var GOODS = {
+    air:     { m: 'soda-bottle', s: 0.4, n: 3, col: 0x8fd0f5 },
+    roti:    { m: 'loaf', s: 0.46, n: 1 },
+    maggi:   { m: 'chinese', s: 0.3, n: 2 },
+    telur:   { m: 'egg', s: 0.15, n: 3 },
+    aiskrim: { m: 'popsicle', s: 0.3, n: 3 },
+    cokelat: { m: 'candy-bar', s: 0.3, n: 2 },
+    airtin:  { m: 'soda-can', s: 0.24, n: 2 },
+    beras:   { m: 'bag', s: 0.44, n: 1 },
+    minyak:  { m: 'bottle-oil', s: 0.4, n: 3 },
+    gula:    { m: 'carton-small', s: 0.26, n: 2 }
+  };
+  var goodsMat = {};
+  function goods(id, t, y, d, rot) {
+    var G = GOODS[id], w = 0.44, n = G.n;
+    for (var q = 0; q < n; q++) {
+      var off = (q - (n - 1) / 2) * (w / n), dz = (q % 2) * 0.04;
+      var o = rot ? kput(G.m, d + dz, y, t + off, G.s, rot) : kput(G.m, t + off, y, d + dz, G.s, rot);
+      o.rotation.y = rot + (q - (n - 1) / 2) * 0.15;
+      if (G.col) {
+        goodsMat[id] = goodsMat[id] || new THREE.MeshStandardMaterial({ color: G.col, roughness: 0.2, transparent: true, opacity: 0.85 });
+        o.traverse(function (m) { if (m.isMesh) m.material = goodsMat[id]; });
+      }
+    }
+  }
+
+  // Cars from Kenney's Car Kit join the code-built ones; a flatbed lorry at the kilang and an
+  // ambulance parked at the klinik with its lights flashing.
+  var ambLights = [];
+  function kenneyCar(name, s) {
+    var g = new THREE.Group(), body = put(KM[name], 0, 0, s, Math.PI / 2, g), wheels = [];
+    body.traverse(function (o) { if (/^wheel/.test(o.name)) wheels.push(o); });
+    return { g: g, wheels: wheels, len: kdim(name) * s, v: 0, kenney: true };
+  }
+  function kenneyTown() {
+    ['sedan', 'taxi', 'suv', 'truck'].forEach(function (n, i) {
+      var c = kenneyCar(n, 0.92), ln = LANES[i % 2];
+      c.lane = ln; c.g.rotation.y = ln.dir > 0 ? 0 : Math.PI;
+      var last = cars.reduce(function (m, o) { return o.lane === ln ? Math.min(m, o.g.position.x * ln.dir) : m; }, -ROAD_END);
+      c.g.position.set(ln.dir * (last - 7 - Math.random() * 4), 0.02, ln.z);
+      c.v = CAR_MAX; root.add(c.g); cars.push(c);
+    });
+    if (factoryLorry) {
+      factoryLorry.visible = false;
+      put(KM['truck-flat'], factoryLorry.position.x, factoryLorry.position.z, 1.0, Math.PI);
+    }
+    put(KM.ambulance, -7.9, -18.5, 0.95, Math.PI);           // in front of the klinik, on the side road
+    [0xff3b30, 0x2f7fd1].forEach(function (c, j) {
+      var m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), new THREE.MeshBasicMaterial({ color: c }));
+      m.position.set(-7.9 + (j ? 0.3 : -0.3), 1.74, -18.5 - 1.1); root.add(m); ambLights.push(m);
+    });
+  }
+
+  // Mid-day restock: a delivery lorry pulls up in front of the shop, drops boxes on the kaki lima
+  // and drives off; the boxes are taken inside a little later.
+  var van = null, boxes = [], VAN_STOP = 2.6;
+  function delivery() {
+    if (!ready) return;
+    if (van && van.stopAt != null) return;                  // one already on its way
+    var c = KM ? kenneyCar('delivery', 0.92) : makeCar('van', 0xffffff), ln = LANES[0];
+    c.lane = ln; c.oneWay = true; c.stopAt = VAN_STOP; c.unload = 0;
+    var x = -19;                                             // just off screen, behind any car close by
+    cars.forEach(function (o) { if (o.lane === ln && Math.abs(o.g.position.x - x) < 5) x = Math.min(x, o.g.position.x - 6); });
+    c.g.position.set(x, 0.02, ln.z); c.v = c.vmax = 6.5;
+    root.add(c.g); cars.push(c); van = c;
+  }
+  function deliveryTarget(c) {
+    var toStop = (c.stopAt - c.g.position.x) * c.lane.dir;
+    return toStop <= 0.05 ? 0 : Math.max(0.6, toStop * 1.1);
+  }
+  var boxT = 0;
+  function updateDelivery(dt) {
+    ambLights.forEach(function (m, j) { m.visible = Math.floor(performance.now() / 350) % 2 === j; });
+    if (van && van.stopAt != null && van.stopAt - van.g.position.x < 0.3 && van.v < 0.05) {
+      van.unload += dt;
+      var want = Math.min(3, Math.floor(van.unload / 1.0));
+      while (boxes.length < want) {
+        var k = boxes.length, bx = KM ? kput('box', 1.5 + (k % 2) * 0.42, 0.13 + (k > 1 ? 0.3 : 0), 2.1, 0.3, k * 0.4, root)
+          : box(0.3, 0.3, 0.3, 0xc8935a, 1.5 + (k % 2) * 0.42, 0.28 + (k > 1 ? 0.3 : 0), 2.1);
+        boxes.push(bx);
+      }
+      if (van.unload > 4) { van.stopAt = null; boxT = 4; }
+    }
+    if (boxT > 0 && (boxT -= dt) <= 0) { boxes.forEach(function (b) { root.remove(b); }); boxes = []; }
   }
 
   function build() {
@@ -340,6 +458,7 @@ KR.scene3d = (function () {
   function loadEnv() {
     import('../vendor/GLTFLoader.js').then(function (m) {
       var loader = new m.GLTFLoader();
+      loadKenney(loader);
       return Promise.all(ENV.map(function (n) {
         return loader.loadAsync('models/env/' + n + '.glb').then(function (g) { return [n, g.scene]; });
       }));
@@ -433,9 +552,12 @@ KR.scene3d = (function () {
   var shopGroup = null, cutMats = [], cutaway = true, AISLE = -1.4;   // SPOTS: [x, z, facing, lot]
   var SPOTS = [], spotUsed = [], PAY = [];
 
+  // A shelf unit; the boards stick out 0.3 at the front so goods can stand on them.
   function shelf(w, h, d, x, z, rot) {
-    var g = box(w, h, d, 0x9c7445, x, h / 2, z, shopGroup); g.rotation.y = rot || 0;
-    for (var k = 1; k < 4; k++) box(w + 0.02, 0.04, d + 0.02, 0xc79a62, x, h * k / 4, z, shopGroup).rotation.y = rot || 0;
+    rot = rot || 0;
+    var g = box(w, h, d, 0x9c7445, x, h / 2, z, shopGroup); g.rotation.y = rot;
+    var ox = Math.sin(rot) * 0.15, oz = Math.cos(rot) * 0.15;
+    for (var k = 1; k < 4; k++) box(w + 0.02, 0.04, d + 0.3, 0xc79a62, x + ox, h * k / 4, z + oz, shopGroup).rotation.y = rot;
     return g;
   }
 
@@ -448,7 +570,7 @@ KR.scene3d = (function () {
     cutMats = []; SPOTS = []; PAY = [];
     var SW = LOT.w / 2, back = LOT.back, front = LOT.front, depth = front - back;
     for (var i = 0; i < LOTS; i++) {
-      var cx = lotX(i), mine = i <= level, items = (lotProducts && lotProducts[i]) || [];
+      var cx = lotX(i), mine = i <= level, items = (lotProducts && lotProducts[i]) || [], ids = (extras.lotIds && extras.lotIds[i]) || [];
       if (ENVM) {
         var planes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), OZ + 0.64 * SZ), new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
         if (mine && i > 0) planes.push(new THREE.Plane(new THREE.Vector3(1, 0, 0), -(cx - 0.85 * SX)));          // open to the lot on the left
@@ -489,26 +611,28 @@ KR.scene3d = (function () {
         // Counter on the left of the door, the tauke behind it facing right (towards the door)
         box(0.7, 1.05, 1.3, 0x8a6a3f, cx - 1.0, 0.53, -0.15, shopGroup);
         box(0.72, 0.06, 1.32, 0xc79a62, cx - 1.0, 1.07, -0.15, shopGroup);
-        box(0.45, 0.3, 0.4, 0x3b3f44, cx - 1.1, 1.25, -0.45, shopGroup);                    // till
+        if (KM) kput('cash-register', cx - 1.0, 1.1, -0.15, 0.95, Math.PI / 2);              // till on the counter, facing the customers
+        else box(0.45, 0.3, 0.4, 0x3b3f44, cx - 1.1, 1.25, -0.45, shopGroup);
         box(1.2, 0.85, 0.7, 0xf4f7fb, cx + 2.3, 0.43, 0.2, shopGroup);                      // peti ais krim, right of the door
         box(1.22, 0.1, 0.72, 0x2f7fd1, cx + 2.3, 0.9, 0.2, shopGroup);
         SPOTS.push([cx - 1.7, spotZ, Math.PI, 0], [cx + 0.6, spotZ, Math.PI, 0], [cx + IN - 0.55, BK + 1.3, Math.PI, 0],
                    [cx - IN + 1.2, -2.6, -Math.PI / 2, 0], [cx - 0.5, isZ, Math.PI, 0], [cx + 1.7, isZ, Math.PI, 0]);
         PAY.push([cx - 0.25, 0.25, -Math.PI / 2], [cx - 0.25, -0.4, -Math.PI / 2]);        // at the counter, facing the tauke
-        shelfItems(items, cx - IN + 0.4, cx + 1.7, bz + 0.27, 3, 0.5, 0);
-        shelfItems(items, -3.4, -1.8, cx - IN + 0.57, 3, 0.45, Math.PI / 2);
-        shelfItems(items, cx - 1.0, cx, isl + 0.37, 1, 0.85, 0);
-        shelfItems(items, cx + 1.2, cx + 2.2, isl + 0.37, 1, 0.85, 0);
+        shelfItems(items, ids, cx - IN + 0.4, cx + 1.7, bz + 0.27, [0.5, 1.1, 1.7], [0.545, 1.07, 1.595], 0);
+        shelfItems(items, ids, -3.4, -1.8, cx - IN + 0.57, [0.45, 1.05, 1.65], [0.495, 0.97, 1.445], Math.PI / 2);
+        shelfItems(items, ids, cx - 1.0, cx, isl + 0.37, [0.85], [1.2], 0);
+        shelfItems(items, ids, cx + 1.2, cx + 2.2, isl + 0.37, [0.85], [1.2], 0);
       } else {
         var w = 2 * IN - 0.6;
         shelf(w, 2.1, 0.5, cx, bz);
         SPOTS.push([cx - 2.6, spotZ, Math.PI, i], [cx, spotZ, Math.PI, i], [cx + 2.6, spotZ, Math.PI, i],
                    [cx - 1.3, isZ, Math.PI, i], [cx + 1.3, isZ, Math.PI, i]);
-        shelfItems(items, cx - w / 2 + 0.3, cx + w / 2 - 0.3, bz + 0.27, 3, 0.5, 0);
+        shelfItems(items, ids, cx - w / 2 + 0.3, cx + w / 2 - 0.3, bz + 0.27, [0.5, 1.1, 1.7], [0.545, 1.07, 1.595], 0);
         if (i === 2 && extras.tcg) tcgCase(cx - 1.3, isl);                               // glass case of booster packs
-        else { shelf(1.4, 1.2, 0.7, cx - 1.3, isl); shelfItems(items, cx - 1.8, cx - 0.8, isl + 0.37, 1, 0.85, 0); }
+        else { shelf(1.4, 1.2, 0.7, cx - 1.3, isl); shelfItems(items, ids, cx - 1.8, cx - 0.8, isl + 0.37, [0.85], [1.2], 0); }
         if (i === 1) sacks(cx + 1.3, isl);                                                // rice sacks on a pallet
-        else { shelf(1.4, 1.2, 0.7, cx + 1.3, isl); shelfItems(items, cx + 0.8, cx + 1.8, isl + 0.37, 1, 0.85, 0); }
+        else if (i === 2 && KM) kput('prizes', cx + 1.3, 0.13, isl, 1.35, 0, null, 'x');     // a rack of prize toys
+        else { shelf(1.4, 1.2, 0.7, cx + 1.3, isl); shelfItems(items, ids, cx + 0.8, cx + 1.8, isl + 0.37, [0.85], [1.2], 0); }
         if (i === 2 && extras.claw) { clawMachine(cx + 2.6, 0.0); SPOTS.push([cx + 2.6, -0.95, 0, i]); }
       }
     }
@@ -540,6 +664,7 @@ KR.scene3d = (function () {
     box(0.6, 0.12, 0.06, 0xffd23f, x, 1.55, z - 0.27, shopGroup);
   }
   function clawMachine(x, z) {
+    if (KM) return kput('claw-machine', x, 0.13, z, 1.55, Math.PI, null, 'y');   // Kenney's, joystick facing inside
     box(0.9, 1.0, 0.9, 0xe86f9a, x, 0.5, z, shopGroup);
     var glass = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.8, 0.86), mat(0xcfe9f3, { transparent: true, opacity: 0.35, roughness: 0.1 }));
     glass.position.set(x, 1.42, z); shopGroup.add(glass);
@@ -552,15 +677,19 @@ KR.scene3d = (function () {
     box(0.05, 0.14, 0.05, 0xd6332b, x - 0.1, 1.14, z - 0.52, shopGroup);
   }
 
-  // Product sprites along a shelf face, from a to b (x, or z when rot is a quarter turn).
-  function shelfItems(products, a, b, at, rows, y0, rot) {
+  // Goods along a shelf, from a to b (x, or z when rot is a quarter turn). at = the shelf's front face.
+  // Products with a Kenney model (GOODS) stand on the boards (heights gy); the rest are sprites on
+  // the face (heights sy).
+  function shelfItems(products, ids, a, b, at, sy, gy, rot) {
     if (!products || !products.length) return;
     var n = Math.max(1, Math.floor((b - a) / 0.55)), k = 0;
     itemGeo = itemGeo || new THREE.PlaneGeometry(0.45, 0.45);
-    for (var r = 0; r < rows; r++) for (var c = 0; c <= n; c++) {
-      var m = new THREE.Mesh(itemGeo, itemMat(products[k++ % products.length]));
-      var t = a + (b - a) * c / n;
-      if (rot) m.position.set(at, y0 + r * 0.6, t); else m.position.set(t, y0 + r * 0.6, at);
+    for (var r = 0; r < sy.length; r++) for (var c = 0; c <= n; c++) {
+      var j = k++ % products.length, t = a + (b - a) * c / n;
+      if (KM && GOODS[ids[j]]) { goods(ids[j], t, gy[r], gy[r] > 1.1 && sy.length === 1 ? at - 0.25 : at + 0.12, rot); continue; }   // island tops, else the board's lip
+      var m = new THREE.Mesh(itemGeo, itemMat(products[j]));
+      var f = at + (sy.length > 1 ? 0.3 : 0);                // in front of the boards' lip
+      if (rot) m.position.set(f, sy[r], t); else m.position.set(t, sy[r], f);
       m.rotation.y = rot; shopGroup.add(m);
     }
   }
@@ -912,7 +1041,7 @@ KR.scene3d = (function () {
   }
 
   return {
-    load: load, start: start, stop: stop, spawn: spawn, setHour: setHour,
+    load: load, start: start, stop: stop, spawn: spawn, setHour: setHour, delivery: delivery,
     isReady: function () { return ready && wanted(); },
     wanted: wanted, setWanted: setWanted, failed: function () { return failed; },
     _debug: function () { return { THREE: THREE, root: root, camera: camera, people: people, cars: cars, spots: SPOTS, queue: queue }; }

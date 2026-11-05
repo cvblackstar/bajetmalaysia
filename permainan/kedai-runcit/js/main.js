@@ -136,6 +136,9 @@
       lotProducts: C.lots.map(function (l, i) {                  // what each lot's shelves show
         return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return A.product(p.id); });
       }),
+      lotIds: C.lots.map(function (l, i) {                       // the same, as product ids (for the 3D goods)
+        return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return p.id; });
+      }),
       claw: !!S.level(state, 'capit'), tcg: !!S.level(state, 'tcg'),
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
@@ -280,6 +283,7 @@
     var id = b.closest('.restock-row').dataset.id;
     if (S.restock(state, id, +b.dataset.n)) {
       SFX.coin(); save(); renderRestock();
+      if (day && day.use3d) S3.delivery();                       // a delivery lorry pulls up outside
       $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
     }
   });
