@@ -98,7 +98,9 @@ KR.i18n = (function () {
     'Stok: {n} | {c} seunit': 'Stock: {n} | {c} each',
     'Padam semua kemajuan dan mula semula?': 'Delete all progress and start over?',
     'Tiada stok langsung. Buka kedai juga?': 'No stock at all. Open the shop anyway?',
-    'UNTUK DISEWA': 'FOR RENT', 'Zum masuk': 'Zoom in', 'Zum keluar': 'Zoom out',
+    'UNTUK DISEWA': 'FOR RENT', 'BARANG DAPUR': 'KITCHEN GOODS', 'SUDUT HOBI': 'HOBBY CORNER',
+    'Perlu {v} lagi': 'Need {v} more', '{n} unit dipesan': '{n} units ordered', '{a}/{b} dijual': '{a}/{b} on sale',
+    'Boleh beli': 'Can buy', 'Belum dibuka': 'Locked', 'Zum masuk': 'Zoom in', 'Zum keluar': 'Zoom out',
 
     // Demand, repeat order, regulars, factory
     'laku {n}': 'sold {n}', 'habis {n}': 'ran out {n}', 'kata mahal {n}': 'too pricey {n}',

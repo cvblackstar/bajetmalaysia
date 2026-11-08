@@ -66,10 +66,15 @@ KR.ui = (function () {
     var open = S.lotsOpen(s);
     $('products').innerHTML = C.lots.map(function (lot, i) {
       var list = C.products.filter(function (p) { return S.lotOf(p) === i + 1; });
-      return '<h3 class="lot-title' + (i + 1 > open ? ' locked' : '') + '">' + t(lot.name) +
-        (i + 1 > open ? ' <small>' + t(LOT_NEED[i]) + '</small>' : '') + '</h3>' + list.map(productRow.bind(null, s)).join('');
+      list = list.filter(function (p) { return S.isUnlocked(s, p); }).concat(list.filter(function (p) { return !S.isUnlocked(s, p); }));   // locked ones last
+      var on = list.filter(function (p) { return S.isUnlocked(s, p); }).length;
+      return '<h3 class="lot-title lot-' + (i + 1) + (i + 1 > open ? ' locked' : '') + '"><span class="lot-chip">' + (i + 1) + '</span><span>' + t(lot.name) +
+        (i + 1 > open ? ' <small>' + t(LOT_NEED[i]) + '</small>' : '') + '</span><em>' + (i + 1 > open ? t('Belum dibuka') : t('{a}/{b} dijual', { a: on, b: list.length })) + '</em></h3>' +
+        list.map(productRow.bind(null, s)).join('');
     }).join('');
     $('orderCost').textContent = rm(S.orderCost(s));
+    var ordered = S.totalUnits(s.order);
+    $('orderUnits').textContent = ordered ? t('{n} unit dipesan', { n: ordered }) : '';
     var last = s.lastOrder ? S.totalUnits(s.lastOrder) : 0;
     $('repeatBtn').classList.toggle('hidden', !last);
     $('repeatBtn').textContent = t('Ulang order semalam ({n} unit)', { n: last });
@@ -78,7 +83,7 @@ KR.ui = (function () {
       if (!S.isUnlocked(s, p)) {
         var need = S.lotOf(p) > S.lotsOpen(s) ? t('Perlu lot {n}', { n: S.lotOf(p) }) : t('Perlu {u}', { u: t(S.upgrade(p.requires).name) });
         return '<div class="product locked"><div class="picon">' + A.product(p.id) + '</div>' +
-          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta">' + need + '</div></div><div></div></div>';
+          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta"><span class="lock">🔒</span> ' + need + '</div></div><div></div></div>';
       }
       var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
       var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id), dem = s.lastDemand && s.lastDemand[p.id];
@@ -106,19 +111,29 @@ KR.ui = (function () {
   }
 
   function upgrades(s) {
-    $('upgrades').innerHTML = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); }).map(function (u) {
+    // Not bought yet first (ones you can buy now before ones that need a lot), owned ones last.
+    function rank(u) { return !S.nextLevel(s, u.id) ? 2 : S.upgradeOpen(s, u) ? 0 : 1; }
+    var list = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); });
+    list = list.map(function (u, i) { return [u, i]; }).sort(function (a, b) { return rank(a[0]) - rank(b[0]) || a[1] - b[1]; }).map(function (x) { return x[0]; });
+    $('upgrades').innerHTML = list.map(function (u) {
       var lvl = S.level(s, u.id), next = S.nextLevel(s, u.id), info = next || u.levels[u.levels.length - 1];
       var steps = u.levels.length > 1 ? ' <small>' + t(' (Tahap {l}/{n})', { l: lvl, n: u.levels.length }) + '</small>' : '';
-      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (u.hidden ? ' secret' : '') + '">' +
+      var buyable = next && S.upgradeOpen(s, u) && s.cash >= next.price;
+      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (buyable ? ' buyable' : '') + (u.hidden ? ' secret' : '') + '">' +
         '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + t(u.name) + steps + '</h4><p>' + t(info.desc) +
         (info.upkeep ? t(' Kos {c}/hari.', { c: 'RM' + info.upkeep }) : '') +
         (info.rent ? t(' Sewa {c}/hari.', { c: 'RM' + info.rent }) : '') + '</p>' +
         (!next ? '<strong class="pos">' + t('Sudah ada') + '</strong>'
               : !S.upgradeOpen(s, u) ? '<strong class="muted">' + t('Perlu lot {n}', { n: S.lotOf(u) }) + '</strong>'
               : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < next.price ? ' disabled' : '') + '>' +
-                t(lvl ? 'Naik tahap {p}' : 'Beli {p}', { p: rm0(next.price) }) + '</button>') +
+                t(lvl ? 'Naik tahap {p}' : 'Beli {p}', { p: rm0(next.price) }) + '</button>' +
+                (s.cash < next.price ? '<span class="short">' + t('Perlu {v} lagi', { v: rm0(next.price - s.cash) }) + '</span>' : '')) +
         '</div>';
     }).join('');
+    // How many upgrades the player can afford right now, as a badge on the tab
+    var canBuy = list.filter(function (u) { var n = S.nextLevel(s, u.id); return n && S.upgradeOpen(s, u) && s.cash >= n.price; }).length;
+    var tab = document.querySelector('.tab[data-tab="upgrade"]');
+    if (tab) { if (canBuy) tab.setAttribute('data-badge', canBuy); else tab.removeAttribute('data-badge'); }
   }
 
   function records(s) {

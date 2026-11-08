@@ -142,7 +142,7 @@
       claw: !!S.level(state, 'capit'), tcg: !!S.level(state, 'tcg'),
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
-      capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
+      capacity: S.shopRoom(state),                               // customers inside at once (same rule as the sim)
       timeScale: function () { return day && !day.paused ? day.speed : 0; },
       factoryDay: !!today.factoryDay, closeHour: S.closeHour(state)
     });

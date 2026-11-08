@@ -51,10 +51,10 @@ KR.scene3d = (function () {
     return tex;
   }
 
-  function signTexture(text) {
+  function signTexture(text, bg) {
     var c = document.createElement('canvas'); c.width = 1024; c.height = 128;
     var g = c.getContext('2d');
-    g.fillStyle = '#1f7a55'; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = bg || '#1f7a55'; g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = '#fff'; g.font = 'bold 64px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(text, c.width / 2, c.height / 2 + 4, c.width - 40);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
@@ -71,7 +71,7 @@ KR.scene3d = (function () {
   var prim = {};
   // The kilang across the road (built from boxes; the building pack has no factory).
   // FGATE is where its workers come out.
-  var FAC = { x: -12, z: 16.8, w: 11, d: 8 }, FGATE = [-12, 12.6], factorySign = null, factoryLang = '', factoryLorry = null;
+  var FAC = { x: -26, z: 16.8, w: 11, d: 8 }, FGATE = [-26, 12.6], factorySign = null, factoryLang = '', factoryLorry = null;
   function buildFactory() {
     var g = new THREE.Group(); root.add(g);
     var front = FAC.z - FAC.d / 2, x0 = FAC.x - FAC.w / 2;
@@ -124,11 +124,13 @@ KR.scene3d = (function () {
   // The shop model has thick double walls, so the room inside is smaller than the lot:
   // IN = inner side wall (from the lot's centre), BK = inner back wall. Shelves and the spots where
   // customers stand are laid out from these, so nobody stands inside a wall.
-  var SX = LOT.w / 2.48, SZ = (LOT.front - LOT.back) / 1.8, OZ = LOT.front - 0.72 * SZ;
-  var IN = 1.03 * SX, BK = OZ - 0.73 * SZ;
+  // The three lots are one linked row of shophouses (kedai deret) built here: shared party walls,
+  // one roof and a covered kaki lima. FZ = shop front, BZ = outside of the back wall.
+  var FZ = 1.0, BZ = -6.0, WALL = 0.25, ROW_H = 3.5;
+  var IN = LOT.w / 2 - WALL, BK = BZ + WALL;
   // Everything on the shop's side of the road to the right of the row moves with the row's length.
   var RX = 3 * (LOT.w - 7);
-  var TREES = [[-6.3, -5], [4.6, -9.6], [19.5 + RX, -6.5], [3.5, 10.9], [-3.6, 11.4], [10, 11.2], [-21, -3], [16, 11]];
+  var TREES = [[-6.3, -5], [4.6, -11.6], [19.5 + RX, -6.2], [3.5, 10.9], [-3.6, 11.4], [10, 11.2], [-21, -3], [16, 11]];
   function tree(x, z, s) {
     s = s || 1;
     box(0.25 * s, 1.2 * s, 0.25 * s, 0x7a5233, x, 0.6 * s, z, prim.trees);
@@ -334,10 +336,10 @@ KR.scene3d = (function () {
       factoryLorry.visible = false;
       put(KM['truck-flat'], factoryLorry.position.x, factoryLorry.position.z, 1.0, Math.PI);
     }
-    put(KM.ambulance, -7.9, -18.5, 0.95, Math.PI);           // in front of the klinik, on the side road
+    put(KM.ambulance, -3.5, -22.0, 0.95, Math.PI / 2);      // parked outside the klinik
     [0xff3b30, 0x2f7fd1].forEach(function (c, j) {
       var m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), new THREE.MeshBasicMaterial({ color: c }));
-      m.position.set(-7.9 + (j ? 0.3 : -0.3), 1.74, -18.5 - 1.1); root.add(m); ambLights.push(m);
+      m.position.set(-3.5 + 1.1, 1.74, -22.0 + (j ? 0.3 : -0.3)); root.add(m); ambLights.push(m);
     });
   }
 
@@ -402,13 +404,16 @@ KR.scene3d = (function () {
     box(160, 0.1, 0.5, 0x6d6a60, 0, 0.0, 8.55);            // longkang across the road
     var walk2 = box(160, 0.12, 2.0, 0xd9d0bd, 0, 0, 9.8); walk2.receiveShadow = true;  // pavement across the road
 
-    // The kedai runcit: a row of three shop lots. The first is yours; the other two can be
-    // rented with the "Besarkan Kedai" upgrade. buildShop() fills them in for the current level.
+    // The kedai runcit: a linked row of three shop lots. The first is yours; the other two can be
+    // rented with the "Besarkan Kedai" upgrade. buildShop() builds the row for the current level.
     var SW = LOT.w / 2;
-    [-SW - 2.85, -SW - 0.85].forEach(function (x) { box(0.12, 2.6, 0.12, 0x3b3f44, x, 1.3, 1.75); });   // signboard posts
-    var sign = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.75, 0.12),
-      [mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), new THREE.MeshBasicMaterial({ map: signTexture('KEDAI RUNCIT') }), mat(0x1f7a55)]);
-    sign.position.set(-SW - 1.85, 2.45, 1.8); root.add(sign); shopSign = sign;
+    // Back lanes: one behind the shops (the second row of houses faces it) and one further back
+    // that the klinik, bank and flats face. Both join the side road.
+    [-8.6, -21].forEach(function (z) {
+      var l = box(72, 0.06, 3.4, 0x5c5f63, 26.5, -0.008, z); l.receiveShadow = true;
+      for (var x = -6; x < 62; x += 2.5) box(1.0, 0.02, 0.12, 0xf2efe6, x, 0.03, z);
+      box(72, 0.1, 0.9, 0xd9d0bd, 26.5, 0, z - 2.15);           // pavement on the far side
+    });
     shopLamp = new THREE.PointLight(0xffd9a0, 0, 16); shopLamp.position.set(LOT.w, 3.2, -1.6); scene.add(shopLamp);
     // Kaki lima tiles in front of the row
     var rowW = LOT.w * LOTS, rowX = (LOTS - 1) * LOT.w / 2;
@@ -453,7 +458,7 @@ KR.scene3d = (function () {
   // ---------- Scenery models ----------
   // Quaternius CC0 "Buildings pack" and "Ultimate Nature Pack" (models/env). Until they load,
   // or if they can't, the simple box versions built above stay.
-  var ENV = ['shop', 'house_a', 'house_b', 'house_c', 'house_d', 'house_e', 'flat_a', 'flat_b', 'bank', 'hospital', 'tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b',
+  var ENV = ['house_a', 'house_b', 'house_c', 'house_d', 'house_e', 'flat_a', 'flat_b', 'bank', 'hospital', 'tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b',
              'bush', 'bush_berry', 'flowers', 'plant'];
   function loadEnv() {
     import('../vendor/GLTFLoader.js').then(function (m) {
@@ -499,6 +504,11 @@ KR.scene3d = (function () {
   }
 
   var ENVM = null;
+  // Shade trees along the roads and around the padang
+  var MORE_TREES = [[-38, 10.6], [-17.5, 10.6], [-11, 10.6], [-4.5, 10.9], [5, 10.6], [18, 10.6], [27, 10.6], [33, 10.6], [42, 10.6],
+    [-12.4, -3.5], [-12.4, -14], [-12.4, -27], [-12.4, -34], [-6.8, -16], [-6.8, -27], [-6.8, -34],
+    [-0.2, -11.6], [5.6, -11.6], [11.5, -11.6], [17, -11.6], [22.6, -11.6], [28.6, -11.6],
+    [-23.5, -5.5], [-23.5, -12.5], [-13.2, -12.8], [-18, -13.6], [2, -24], [12, -24], [28.5, -24], [-8, -40], [-17, -22]];
   function placeEnv(M) {
     ['tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b', 'bush', 'bush_berry', 'flowers', 'plant'].forEach(function (n) {
       M[n].traverse(function (m) { if (m.isMesh) m.material.color.multiplyScalar(1.9); });   // the pack's greens are very dark
@@ -519,17 +529,20 @@ KR.scene3d = (function () {
     home('house_b', 8.6, -13, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -13, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
     home('house_e', 19.6, -13, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -13, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
     // Taller town buildings sit behind the houses so they never hide the shop row
-    put(M.hospital, -3, -21, 2.0, 0); put(M.bank, 7, -20, 1.7, 0);
-    put(M.flat_a, 16, -21, 2.4, 0); put(M.flat_b, 24, -21, 2.4, 0);
-    put(M.flat_a, -30, -8, 2.4, Math.PI / 2); put(M.flat_b, -30, 1, 2.4, Math.PI / 2);
+    // (fronts on the pavement of the back road at z = -21)
+    put(M.hospital, -3, -23.3 - 1.97 * 2.0, 2.0, 0); put(M.bank, 7, -23.3 - 1.9 * 1.7, 1.7, 0);
+    put(M.flat_a, 16, -23.3 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, 24, -23.3 - 0.95 * 2.4, 2.4, 0);
+    // Flats along the main road on the left, past the side road, facing the street
+    put(M.flat_a, -24, 1 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, -31, 1 - 0.95 * 2.4, 2.4, 0);
     // Across the road: low houses only, facing the street
-    home('house_d', -1.5, 13.4, 0.65, 1, 0xd7ecf7, 0x2f9e6e);              // the kilang takes the plots further left
+    home('house_d', -1.5, 13.4, 0.65, 1, 0xd7ecf7, 0x2f9e6e);
+    home('house_a', -8, 13.4, 0.65, 1, 0xf3d9a4, 0xc0453a); home('house_b', -14.5, 13.4, 0.65, 1, 0xe2f0c9, 0x2f7fd1);   // the kilang is further left
     home('house_e', 11, 13.4, 1.06, 1, 0xbfe3d6, 0x8e5bd1); home('house_a', 15.6, 13.4, 0.65, 1, 0xf6c9c9, 0xc0453a);
     home('house_d', 20.2, 13.4, 0.65, 1, 0xf3d9a4, 0x2f7fd1); home('house_b', 24.8, 13.4, 0.65, 1, 0xcfd8f2, 0x8e5bd1);
     prim.houses.visible = false;
 
     var kinds = ['palm_a', 'tree_a', 'palm_b', 'tree_b', 'tree_c'];
-    TREES.concat([[-25, -15], [-25, 0], [34 + RX, -2], [36, 12], [-26, 14], [11.5, -27], [-14, -17], [20, -27], [-0.5, 20], [13.5, 21]])
+    TREES.concat([[-25, -15], [34 + RX, -2], [36, 12], [-36, 14], [11.5, -27], [-14, -17], [20, -27], [-0.5, 20], [13.5, 21]], MORE_TREES)
       .forEach(function (p, j) {
         var k = kinds[j % kinds.length];
         put(M[k], p[0], p[1], k.indexOf('palm') === 0 ? 1.1 : 1.35, j * 1.3);
@@ -568,35 +581,21 @@ KR.scene3d = (function () {
     if (shopGroup) root.remove(shopGroup);
     shopGroup = new THREE.Group(); root.add(shopGroup);
     cutMats = []; SPOTS = []; PAY = [];
-    var SW = LOT.w / 2, back = LOT.back, front = LOT.front, depth = front - back;
+    var SW = LOT.w / 2;
+    buildRow(level);
     for (var i = 0; i < LOTS; i++) {
       var cx = lotX(i), mine = i <= level, items = (lotProducts && lotProducts[i]) || [], ids = (extras.lotIds && extras.lotIds[i]) || [];
-      if (ENVM) {
-        var planes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), OZ + 0.64 * SZ), new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
-        if (mine && i > 0) planes.push(new THREE.Plane(new THREE.Vector3(1, 0, 0), -(cx - 0.85 * SX)));          // open to the lot on the left
-        if (mine && i < level) planes.push(new THREE.Plane(new THREE.Vector3(-1, 0, 0), cx + 0.85 * SX));        // and on the right
-        if (!mine) planes = [planes[1]];                       // empty lots: just the roof comes off, so they don't hide your shop
-        put(ENVM.shop, cx, OZ, [SX, LOT.h / 1.397, SZ], 0, shopGroup).traverse(function (m) {
-          if (!m.isMesh) return;
-          m.material = m.material.clone(); m.material.side = THREE.DoubleSide;
-          m.material.userData.planes = planes; cutMats.push(m.material);
-        });
-      } else {                                                // plain walls until the model loads
-        box(LOT.w - 0.1, LOT.cut, 0.2, 0xf6e7c8, cx, LOT.cut / 2, BK - 0.1, shopGroup);
-        if (i === 0 || !mine) box(0.2, LOT.cut, depth, 0xf6e7c8, cx - IN - 0.1, LOT.cut / 2, (front + back) / 2, shopGroup);
-        if (i === LOTS - 1 || i >= level) box(0.2, LOT.cut, depth, 0xf6e7c8, cx + IN + 0.1, LOT.cut / 2, (front + back) / 2, shopGroup);
-      }
       if (!mine) {                                            // shutter down, "for rent" notice
-        box(2 * IN - 0.2, 0.06, 1.0 - BK, 0xb9b4aa, cx, 0.12, (BK + 1.0) / 2, shopGroup);   // bare floor
-        box(LOT.w - 0.5, 2.2, 0.12, 0x9aa3ab, cx, 1.1, front + 0.12, shopGroup);
-        for (var r = 0.2; r < 2.2; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, front + 0.13, shopGroup);
+        box(2 * IN, 0.06, FZ - BK, 0xb9b4aa, cx, 0.12, (BK + FZ) / 2, shopGroup);   // bare floor
+        box(LOT.w - 0.5, 2.2, 0.12, 0x9aa3ab, cx, 1.1, FZ - 0.05, shopGroup);
+        for (var r = 0.2; r < 2.2; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, FZ - 0.04, shopGroup);
         var note = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), new THREE.MeshBasicMaterial({ map: noticeTexture() }));
-        note.position.set(cx, 1.4, front + 0.2); shopGroup.add(note);
+        note.position.set(cx, 1.4, FZ + 0.03); shopGroup.add(note);
         continue;
       }
       // Floor tiles, joined to the next rented lot
-      var fl = cx - IN, fr = i < level ? cx + SW + 0.1 : cx + IN, fz = (BK + 1.0) / 2, fd = 1.0 - BK;
-      if (i > 0) fl = cx - SW - 0.1;
+      var fl = cx - IN, fr = i < level ? cx + SW + WALL : cx + IN, fz = (BK + FZ) / 2, fd = FZ - BK;
+      if (i > 0) fl = cx - SW - WALL;
       box(fr - fl, 0.06, fd, 0xe9e2d4, (fl + fr) / 2, 0.13, fz, shopGroup);
       for (var fx = fl + 0.8; fx < fr - 0.2; fx += 0.8) box(0.03, 0.062, fd, 0xcfc6b4, fx, 0.13, fz, shopGroup);
       // Layout (z): back shelf against BK, islands, then the aisle (AISLE) customers walk along.
@@ -640,6 +639,55 @@ KR.scene3d = (function () {
     shopLamp.position.x = lotX(level) / 2;
     shopGroup.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     setCutaway(cutaway, true);
+  }
+
+  // The shophouse row. Rented lots are open to each other through wide arches in the party walls;
+  // an empty lot stays walled off with its shutter down. Everything above LOT.cut (roof, fascia,
+  // the kaki lima canopy) is sliced away when zoomed in, so you can see inside.
+  function buildRow(level) {
+    var cut = [new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
+    var mats = {};
+    function m(c) {
+      if (!mats[c]) { mats[c] = mat(c); mats[c].side = THREE.DoubleSide; mats[c].userData.planes = cut; cutMats.push(mats[c]); }
+      return mats[c];
+    }
+    function part(w, h, d, c, x, y, z) {
+      var o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), Array.isArray(c) ? c : m(c));
+      o.position.set(x, y, z); shopGroup.add(o); return o;
+    }
+    var SW = LOT.w / 2, x0 = -SW, x1 = lotX(LOTS - 1) + SW, len = x1 - x0, mid = (x0 + x1) / 2, H = ROW_H;
+    var depth = FZ - BZ, zc = (FZ + BZ) / 2;
+    var WALLC = 0xf1e3c2, TRIM = 0xd9c49a, ROOF = 0x8a8f94, CANOPY = 0x2f7f80;
+    part(len, H, WALL, WALLC, mid, H / 2, BZ + WALL / 2);                                   // back wall
+    part(WALL, H, depth, WALLC, x0 + WALL / 2, H / 2, zc); part(WALL, H, depth, WALLC, x1 - WALL / 2, H / 2, zc);   // end walls
+    for (var i = 0; i < LOTS - 1; i++) {                      // party walls between the lots
+      var px = lotX(i) + SW, open = i < level;
+      if (open) {                                             // wide arch: rented lots are one shop inside
+        part(2 * WALL, H, 1.2, WALLC, px, H / 2, BZ + 0.6);
+        part(2 * WALL, H, 0.5, WALLC, px, H / 2, FZ - 0.25);
+        part(2 * WALL, H - 2.5, depth, WALLC, px, 2.5 + (H - 2.5) / 2, zc);
+      } else part(2 * WALL, H, depth, WALLC, px, H / 2, zc);
+    }
+    // Front: pilasters at every lot line, a fascia (sign band) over each open shopfront, a parapet on top
+    for (var k = 0; k <= LOTS; k++) part(0.55, H + 0.5, 0.45, TRIM, x0 + k * LOT.w + (k === 0 ? 0.27 : k === LOTS ? -0.27 : 0), (H + 0.5) / 2, FZ + 0.05);
+    part(len, 0.5, 0.3, TRIM, mid, H + 0.25, FZ);                                           // front parapet
+    part(len, 0.35, 0.2, TRIM, mid, H + 0.17, BZ + 0.1); part(0.2, 0.35, depth, TRIM, x0 + 0.1, H + 0.17, zc); part(0.2, 0.35, depth, TRIM, x1 - 0.1, H + 0.17, zc);
+    part(len - 0.1, 0.12, depth - 0.1, ROOF, mid, H - 0.06, zc);                            // flat roof
+    for (var j = 0; j < LOTS; j++) {
+      var cx = lotX(j), mine = j <= level;
+      var face = mine ? new THREE.MeshBasicMaterial({ map: j === 0 ? signTexture(cfg.shopName ? cfg.shopName.toUpperCase() : 'KEDAI RUNCIT')
+        : signTexture(KR.i18n.t(j === 1 ? 'BARANG DAPUR' : 'SUDUT HOBI'), j === 1 ? '#c0453a' : '#5b2a9e') }) : m(0xc9b48a);
+      if (face.isMeshBasicMaterial) { face.userData.planes = cut; cutMats.push(face); }
+      var fm = m(mine ? (j === 0 ? 0x1f7a55 : j === 1 ? 0xc0453a : 0x5b2a9e) : 0xc9b48a);
+      var sign = part(LOT.w - 0.6, 0.62, 0.16, [fm, fm, fm, fm, face, fm], cx, 3.15, FZ + 0.06);
+      if (j === 0) shopSign = sign;
+      part(0.9, 0.5, 0.9, 0x9aa3ab, cx + 2.4, H + 0.25, BZ + 1.2);                       // water tank on the roof
+      part(0.12, 0.12, 0.12, 0x6d6a60, cx + 2.4, H + 0.56, BZ + 1.2);
+    }
+    // Covered kaki lima: a canopy over the five-foot way on posts at the kerb
+    part(len, 0.12, 2.35, CANOPY, mid, 2.75, FZ + 1.17);
+    part(len, 0.25, 0.08, CANOPY, mid, 2.65, FZ + 2.33);
+    for (var c = 0; c <= LOTS; c++) part(0.16, 2.7, 0.16, TRIM, x0 + 0.3 + c * (len - 0.6) / LOTS, 1.35, FZ + 2.25);
   }
 
   // Lot 2: a pallet of rice sacks. Lot 3: a glass case of TCG packs and a claw machine.
@@ -730,7 +778,7 @@ KR.scene3d = (function () {
   var view = { zoom: 1, x: 0, z: 0 }, ZMIN = 0.4, ZMAX = 2.4, CUT_AT = 0.8;
   function applyView() {
     view.zoom = Math.max(ZMIN, Math.min(ZMAX, view.zoom));
-    view.x = Math.max(-32, Math.min(42, view.x)); view.z = Math.max(-22, Math.min(16, view.z));
+    view.x = Math.max(-36, Math.min(42, view.x)); view.z = Math.max(-30, Math.min(16, view.z));
     camera.zoom = view.zoom;
     camera.position.set(14 + view.x, 20, 22 + view.z); camera.lookAt(1 + view.x, 0.5, 0.2 + view.z);
     camera.updateProjectionMatrix();
@@ -784,13 +832,12 @@ KR.scene3d = (function () {
     daySky = new THREE.Color(SKY[opts.weather] || SKY.cerah); dayLight = LIGHT[opts.weather] || 1.2;
     scene.background = daySky.clone(); setHour(8);
     rain.visible = opts.weather === 'hujan' || opts.weather === 'ribut';
-    shopSign.material[4].map.dispose();
-    shopSign.material[4].map = signTexture(opts.shopName.toUpperCase());
     // the "for rent" notice is in the current language
     var key = opts.lotProducts.map(function (l) { return l.join(); }).join('|') + !!opts.claw + !!opts.tcg + KR.i18n.lang();
     if (opts.lots !== builtLots || key !== builtProducts) {
       buildShop(opts.lots, opts.lotProducts, opts); builtLots = opts.lots; builtProducts = key;
     }
+    if (shopSign) { shopSign.material[4].map.dispose(); shopSign.material[4].map = signTexture(opts.shopName.toUpperCase()); }
     signFactory();
     passT = 0.5; homeT = 0;
     controls(host);
@@ -955,9 +1002,12 @@ KR.scene3d = (function () {
   function updatePeople(dt) {                               // dt in game seconds
     if ((passT -= dt) <= 0) { passer(false); passT = 1.2 + Math.random() * 2; }
     if (cfg.factoryDay && curHour >= 18 && curHour < 19.6 && (homeT -= dt) <= 0) { passer(true); homeT = 0.35 + Math.random() * 0.6; }
-    var free = queue.length ? freeSpot(queue[0].o.lot || 0) : -1;
-    if (queue.length && queue[0].state === 'queue' && free >= 0 && inside < (cfg.capacity || 2)) {
-      var p = queue.shift(); inside++;
+    // The first person who has reached the line goes in as soon as there is room (someone still
+    // walking up doesn't hold the door for everyone behind them).
+    var qi = queue.findIndex(function (q) { return q.state === 'queue'; });
+    var free = qi >= 0 ? freeSpot(queue[qi].o.lot || 0) : -1;
+    if (qi >= 0 && free >= 0 && inside < (cfg.capacity || 2)) {
+      var p = queue.splice(qi, 1)[0]; inside++;
       p.state = 'enter'; p.spot = free; spotUsed[free] = true;
       var sp = SPOTS[free];
       go(p, [DOOR, INSIDE, [INSIDE[0], AISLE], [sp[0], AISLE], [sp[0], sp[1]]], function () { p.state = 'browse'; p.face = sp[2]; p.timer = p.o.dwell * 0.6; });

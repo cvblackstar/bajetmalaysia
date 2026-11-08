@@ -56,6 +56,8 @@ KR.sim = (function () {
 
   function capacity(s) { return C.baseCapacity + sumUp(s, 'capacity'); }
   function serveCap(s) { return C.baseServe + sumUp(s, 'serve'); }
+  // Customers inside the shop at once (more lots, more room; a helper keeps the line moving).
+  function shopRoom(s) { var R = C.shopRoom; return R.base + R.perLot * level(s, 'rak') + (level(s, 'pembantu') ? R.helper : 0); }
   function closeHour(s) { return C.closeHour + sumUp(s, 'hours'); }
   // Rent starts discounted and steps up every C.rentRamp.every days (see config).
   function rentMult(day) { var R = C.rentRamp; return Math.min(1, R.start + R.step * Math.floor((day - 1) / R.every)); }
@@ -236,9 +238,15 @@ KR.sim = (function () {
       return out;
     }
     var timeline = [];
-    people.forEach(function (e, idx) {
+    // The till serves cap customers over the opening hours. People queue while it's busy; someone
+    // only walks off when the shop is full and the line outside is too long at that moment.
+    var rate = cap / hours, backlog = 0, lastH = 0, room = shopRoom(s) + C.shopRoom.line;
+    people.forEach(function (e) {
       e.tier = e.from ? 'common' : pickTier(s.rep, rnd());   // factory workers are ordinary customers
-      if (idx >= cap) { e.queue = true; timeline.push(e); return; }   // the line was too long, they walk off
+      var h = e.t * hours;
+      backlog = Math.max(0, backlog - (h - lastH) * rate); lastH = h;
+      if (backlog >= room) { e.queue = true; timeline.push(e); return; }   // full and the line too long: they walk off
+      backlog++;
       var T = C.tiers[e.tier];
       e.multi = rnd() < T.multiChance ? T.multi : 1;
       e.wants = wantsFor(e.multi, rnd() < 0.35 ? 2 : 1);
@@ -477,7 +485,7 @@ KR.sim = (function () {
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, lotsOpen: lotsOpen, lotOf: lotOf, upgradeOpen: upgradeOpen,
     tcgOn: tcgOn, tcgRelease: tcgRelease, tcgDays: tcgDays, hype: hype,
     bank: bank, bankRate: bankRate, bankNextPrice: bankNextPrice, bankFree: bankFree, deposit: deposit, withdraw: withdraw, bankUpgrade: bankUpgrade, unlockedProducts: unlockedProducts,
-    dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
+    dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, shopRoom: shopRoom, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, level: level, nextLevel: nextLevel, daysLeft: daysLeft, startDay: startDay, runDay: runDay, nextDay: nextDay,

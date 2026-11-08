@@ -280,3 +280,51 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 
 .upgrade.secret { background: #f3ecff; border-color: #cdb6f2; }
 #managerBtn.on { background: #e3f1ea; border-color: #b9dccb; }
+
+/* ---------- Polish pass ---------- */
+body { min-height: 100vh; background: radial-gradient(1200px 500px at 50% -200px, #fbf6e6, transparent) no-repeat, var(--bg); }
+.topbar { background: linear-gradient(135deg, #23875e, #17664a); box-shadow: 0 6px 18px rgba(23,102,74,.25); }
+.card, .product, .upgrade, .milestone { box-shadow: 0 1px 2px rgba(60,50,20,.05); }
+.forecast { border-left: 4px solid var(--gold); }
+
+/* Tabs: filled when active, with a count of upgrades you can afford now */
+.tabs { position: sticky; top: 0; z-index: 4; padding: 6px 0; background: var(--bg); margin-top: 6px; }
+.tab { position: relative; transition: background .15s, color .15s; }
+.tab:hover:not(.active) { border-color: #c9d9cf; color: var(--ink); }
+.tab.active { background: var(--green); color: #fff; border-color: var(--green-d); box-shadow: 0 2px 0 var(--green-d); }
+.tab[data-badge]::after { content: attr(data-badge); position: absolute; top: -6px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 99px; background: var(--red); color: #fff; font-size: 11px; line-height: 18px; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+
+/* Lot headers match the colours of the shop signs in the 3D town */
+.lot-title { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; padding: 8px 10px; border-radius: 10px; background: #e3f1ea; font-size: 14px; }
+.lot-title .lot-chip { flex: none; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 13px; background: var(--green); }
+.lot-title span:nth-child(2) { flex: 1; }
+.lot-title em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.lot-title.lot-2 { background: #f8e6e2; } .lot-title.lot-2 .lot-chip { background: var(--red); }
+.lot-title.lot-3 { background: #efe6fb; } .lot-title.lot-3 .lot-chip { background: #5b2a9e; }
+.lot-title.locked { background: #ece7da; } .lot-title.locked .lot-chip { background: #a39d8c; }
+.product { transition: border-color .15s, box-shadow .15s; }
+.product:not(.locked):hover { border-color: #b9dccb; box-shadow: 0 3px 10px rgba(31,122,85,.08); }
+.product.locked { opacity: .65; border-style: dashed; background: #faf7ee; }
+.product .lock { font-size: 11px; }
+.step { font-weight: 700; }
+.step:active:not(:disabled) { transform: translateY(1px); }
+
+/* Upgrades */
+.upgrade { transition: transform .15s, box-shadow .15s; position: relative; }
+.upgrade.buyable { border-color: #9fcfb6; }
+.upgrade.buyable:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(31,122,85,.12); }
+.upgrade.owned::after { content: '✓'; position: absolute; top: 10px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+.upgrade.locked { border-style: dashed; }
+.upgrade .short { font-size: 12px; color: var(--muted); text-align: center; }
+
+/* Bottom bar */
+.open-bar { backdrop-filter: blur(6px); background: rgba(255,253,246,.94); }
+.open-bar small { display: block; font-size: 12px; color: var(--green-d); font-weight: 600; }
+.open-bar strong { font-size: 18px; }
+@media (max-width: 520px) {
+  .tabs { overflow-x: auto; scrollbar-width: none; padding-top: 10px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; white-space: nowrap; padding: 8px 12px; }
+}

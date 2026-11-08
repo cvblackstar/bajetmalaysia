@@ -14,7 +14,10 @@ KR.config = {
   // Reputation -> share of baseTraffic: a new shop (rep 50) gets about 60%, a famous one (rep 100)
   // gets 1.5x, which is more than one person can serve, so long queues pull reputation back down.
   trafficRep: { min: 0.3, scale: 1.2, power: 2 },
-  baseServe: 35,         // customers the owner alone can serve per day
+  baseServe: 35,         // customers the owner alone can serve per day (spread over opening hours)
+  // How many customers fit inside at once (base + per extra lot + with a helper), and how long a
+  // line people will join outside. Someone only walks off when the shop is full and the line too.
+  shopRoom: { base: 5, perLot: 4, helper: 2, line: 5 },
   rent: 15,              // RM per day at full price
   // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
   // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
@@ -55,7 +58,7 @@ KR.config = {
 
   // Bank: money saved here earns a return every night on the balance in the bank.
   // rates[i] is the daily return at relationship level i; upgrades[i] is the price to reach level i+1.
-  bank: { rates: [0.05, 0.10, 0.20], upgrades: [500, 1200] },
+  bank: { rates: [0.025, 0.05, 0.10], upgrades: [500, 1200] },
 
   // Kad TCG (needs the 'tcg' upgrade in lot 3): a new set comes out every `every` days. On release
   // day collectors queue up for packs; the hype fades by `fade` a day. Weekends are card days too.
