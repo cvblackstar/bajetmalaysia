@@ -130,7 +130,7 @@ KR.scene3d = (function () {
   var IN = LOT.w / 2 - WALL, BK = BZ + WALL;
   // Everything on the shop's side of the road to the right of the row moves with the row's length.
   var RX = 3 * (LOT.w - 7);
-  var TREES = [[-6.3, -5], [4.6, -11.6], [19.5 + RX, -6.2], [3.5, 10.9], [-3.6, 11.4], [10, 11.2], [-21, -3], [16, 11]];
+  var TREES = [[-6.3, -5], [4.6, -11.6], [19.5 + RX, -6.2], [3.5, 10.3], [-3.9, 10.3], [8.2, 10.3], [-21, -3], [13.3, 10.3]];
   function tree(x, z, s) {
     s = s || 1;
     box(0.25 * s, 1.2 * s, 0.25 * s, 0x7a5233, x, 0.6 * s, z, prim.trees);
@@ -385,7 +385,7 @@ KR.scene3d = (function () {
     renderer.domElement.className = 'scene3d';
     scene = new THREE.Scene();
     // Angled top-down view: orthographic camera looking down at ~35 degrees.
-    camera = new THREE.OrthographicCamera(-10, 10, 7, -7, 0.1, 200);
+    camera = new THREE.OrthographicCamera(-10, 10, 7, -7, 0.1, 400);
     hemi = new THREE.HemisphereLight(0xffffff, 0x6f8f5a, 1.1); scene.add(hemi);
     sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(-10, 18, 8);
     sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
@@ -394,15 +394,23 @@ KR.scene3d = (function () {
     root = new THREE.Group(); scene.add(root);
 
     // Ground: grass, the main road in front of the row and a side road
-    var grass = box(160, 0.1, 160, 0x7fbf5f, 0, -0.06, 0); grass.receiveShadow = true;
-    var road = box(160, 0.06, 4.8, 0x5c5f63, 0, -0.01, 5.9); road.receiveShadow = true;
-    var side = box(4.2, 0.06, 80, 0x5c5f63, -9.5, -0.005, -36); side.receiveShadow = true;
-    for (var i = -78; i < 80; i += 2.5) if (Math.abs(i - ZX) > 2) box(1.2, 0.02, 0.15, 0xf2efe6, i, 0.03, 5.9);
+    // Roads run well past the edge of the view in every direction (E = how far).
+    var E = 200;
+    var grass = box(2 * E, 0.1, 2 * E, 0x7fbf5f, 0, -0.06, 0); grass.receiveShadow = true;
+    var road = box(2 * E, 0.06, 4.8, 0x5c5f63, 0, -0.01, 5.9); road.receiveShadow = true;
+    var side = box(4.2, 0.06, E + 4, 0x5c5f63, -9.5, -0.005, 4 - (E + 4) / 2); side.receiveShadow = true;
+    for (var i = -E + 2; i < E; i += 2.5) if (Math.abs(i - ZX) > 2 && Math.abs(i + 9.5) > 2.6) box(1.2, 0.02, 0.15, 0xf2efe6, i, 0.03, 5.9);
+    for (var sz = -12; sz > -E; sz -= 2.5) if (Math.abs(sz + 8.6) > 2.2 && Math.abs(sz + 21) > 2.2) box(0.15, 0.02, 1.2, 0xf2efe6, -9.5, 0.03, sz);
+    // Kaki lima and kerb stop at the side road's junction, so nothing sticks out over it
+    function strip(h, d, c, y, z) {
+      return [box(E - 11.6, h, d, c, (-E - 11.6) / 2, y, z), box(E + 7.4, h, d, c, (E - 7.4) / 2, y, z)];
+    }
     buildZebra();
-    var walk = box(160, 0.12, 2.2, 0xd9d0bd, 0, 0, 2.4); walk.receiveShadow = true;   // kaki lima
-    box(160, 0.14, 0.25, 0x9a9384, 0, 0.02, 3.5);          // kerb
-    box(160, 0.1, 0.5, 0x6d6a60, 0, 0.0, 8.55);            // longkang across the road
-    var walk2 = box(160, 0.12, 2.0, 0xd9d0bd, 0, 0, 9.8); walk2.receiveShadow = true;  // pavement across the road
+    var walk = strip(0.12, 2.2, 0xd9d0bd, 0, 2.4);            // kaki lima
+    walk.forEach(function (w) { w.receiveShadow = true; });
+    strip(0.14, 0.25, 0x9a9384, 0.02, 3.5);                   // kerb
+    box(2 * E, 0.1, 0.5, 0x6d6a60, 0, 0.0, 8.55);              // longkang across the road
+    var walk2 = box(2 * E, 0.12, 2.0, 0xd9d0bd, 0, 0, 9.8); walk2.receiveShadow = true;  // pavement across the road
 
     // The kedai runcit: a linked row of three shop lots. The first is yours; the other two can be
     // rented with the "Besarkan Kedai" upgrade. buildShop() builds the row for the current level.
@@ -410,9 +418,9 @@ KR.scene3d = (function () {
     // Back lanes: one behind the shops (the second row of houses faces it) and one further back
     // that the klinik, bank and flats face. Both join the side road.
     [-8.6, -21].forEach(function (z) {
-      var l = box(72, 0.06, 3.4, 0x5c5f63, 26.5, -0.008, z); l.receiveShadow = true;
-      for (var x = -6; x < 62; x += 2.5) box(1.0, 0.02, 0.12, 0xf2efe6, x, 0.03, z);
-      box(72, 0.1, 0.9, 0xd9d0bd, 26.5, 0, z - 2.15);           // pavement on the far side
+      var l = box(E + 9.5, 0.06, 3.4, 0x5c5f63, (E - 9.5) / 2, -0.008, z); l.receiveShadow = true;   // from the side road to the edge
+      for (var x = -5; x < E; x += 2.5) box(1.0, 0.02, 0.12, 0xf2efe6, x, 0.03, z);
+      box(E + 7.4, 0.1, 0.9, 0xd9d0bd, (E - 7.4) / 2, 0, z - 2.15);   // pavement on the far side, from the side road's edge
     });
     shopLamp = new THREE.PointLight(0xffd9a0, 0, 16); shopLamp.position.set(LOT.w, 3.2, -1.6); scene.add(shopLamp);
     // Kaki lima tiles in front of the row
@@ -442,7 +450,7 @@ KR.scene3d = (function () {
 
     buildTraffic();
 
-    root.traverse(function (o) { if (o.isMesh && o !== grass && o !== road && o !== side && o !== walk && o !== walk2 && o !== field) { o.castShadow = true; o.receiveShadow = true; } });
+    root.traverse(function (o) { if (o.isMesh && o !== grass && o !== road && o !== side && walk.indexOf(o) < 0 && o !== walk2 && o !== field) { o.castShadow = true; o.receiveShadow = true; } });
 
     // Rain: falling line segments, shown only in wet weather
     var n = 500, pos = new Float32Array(n * 6);
@@ -504,9 +512,30 @@ KR.scene3d = (function () {
   }
 
   var ENVM = null;
+  // The bank model comes without a texture (all one grey). Colour it by part: a slate roof,
+  // white pediment and cornice, cream walls and columns, grey steps.
+  function paintBank(o) {
+    o.traverse(function (m) {
+      if (!m.isMesh) return;
+      var g = m.geometry, pos = g.attributes.position, nrm = g.attributes.normal, n = pos.count;
+      g.computeBoundingBox();
+      var top = g.boundingBox.max.y, bot = g.boundingBox.min.y, h = top - bot, col = new Float32Array(n * 3), c = new THREE.Color();
+      for (var i = 0; i < n; i++) {
+        var y = (pos.getY(i) - bot) / h, ny = nrm ? nrm.getY(i) : 0;
+        if (ny > 0.35 && y > 0.62) c.setHex(0x3f6b8a);                    // roof
+        else if (y < 0.13) c.setHex(0xb9b4aa);                             // steps and plinth
+        else if (y > 0.55) c.setHex(0xfaf6ec);                             // pediment and cornice
+        else c.setHex(0xf1e3c2);                                           // walls and columns
+        c.toArray(col, i * 3);
+      }
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      m.material = m.material.clone(); m.material.vertexColors = true; m.material.color.setHex(0xffffff);
+    });
+    return o;
+  }
   // Shade trees along the roads and around the padang
-  var MORE_TREES = [[-38, 10.6], [-17.5, 10.6], [-11, 10.6], [-4.5, 10.9], [5, 10.6], [18, 10.6], [27, 10.6], [33, 10.6], [42, 10.6],
-    [-12.4, -3.5], [-12.4, -14], [-12.4, -27], [-12.4, -34], [-6.8, -16], [-6.8, -27], [-6.8, -34],
+  var MORE_TREES = [[-38, 10.3], [-17.5, 10.3], [-11, 10.3], [22.5, 10.3], [27.2, 10.3], [33, 10.3], [42, 10.3],
+    [-12.8, -3.5], [-12.8, -14], [-12.8, -27], [-12.8, -34], [-6.2, -27], [-6.2, -34],
     [-0.2, -11.6], [5.6, -11.6], [11.5, -11.6], [17, -11.6], [22.6, -11.6], [28.6, -11.6],
     [-23.5, -5.5], [-23.5, -12.5], [-13.2, -12.8], [-18, -13.6], [2, -24], [12, -24], [28.5, -24], [-8, -40], [-17, -22]];
   function placeEnv(M) {
@@ -525,20 +554,20 @@ KR.scene3d = (function () {
     home('house_d', 20.5 + RX, 1, 0.65, 0, 0xbfe3d6, 0xc0453a); home('house_a', 24.1 + RX, 1, 0.65, 0, 0xf3d9a4, 0x8e5bd1);
     home('house_b', 28.7 + RX, 1, 0.65, 0, 0xcfd8f2, 0x2f7fd1); home('house_c', -16, 1, 1.01, 0, 0xf6c9c9, 0x2f9e6e);
     // Second row behind the shops
-    home('house_e', -3, -13, 1.06, 0, 0xf6d6a8, 0xc0453a); home('house_a', 2.5, -13, 0.65, 0, 0xd7ecf7, 0x2f9e6e);
-    home('house_b', 8.6, -13, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -13, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
-    home('house_e', 19.6, -13, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -13, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
+    home('house_e', -3, -11.3, 1.06, 0, 0xf6d6a8, 0xc0453a); home('house_a', 2.5, -11.3, 0.65, 0, 0xd7ecf7, 0x2f9e6e);
+    home('house_b', 8.6, -11.3, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -11.3, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
+    home('house_e', 19.6, -11.3, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -11.3, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
     // Taller town buildings sit behind the houses so they never hide the shop row
     // (fronts on the pavement of the back road at z = -21)
-    put(M.hospital, -3, -23.3 - 1.97 * 2.0, 2.0, 0); put(M.bank, 7, -23.3 - 1.9 * 1.7, 1.7, 0);
+    put(M.hospital, -3, -23.3 - 1.97 * 2.0, 2.0, 0); paintBank(put(M.bank, 7, -23.3 - 1.9 * 1.7, 1.7, 0));
     put(M.flat_a, 16, -23.3 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, 24, -23.3 - 0.95 * 2.4, 2.4, 0);
     // Flats along the main road on the left, past the side road, facing the street
     put(M.flat_a, -24, 1 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, -31, 1 - 0.95 * 2.4, 2.4, 0);
     // Across the road: low houses only, facing the street
-    home('house_d', -1.5, 13.4, 0.65, 1, 0xd7ecf7, 0x2f9e6e);
-    home('house_a', -8, 13.4, 0.65, 1, 0xf3d9a4, 0xc0453a); home('house_b', -14.5, 13.4, 0.65, 1, 0xe2f0c9, 0x2f7fd1);   // the kilang is further left
-    home('house_e', 11, 13.4, 1.06, 1, 0xbfe3d6, 0x8e5bd1); home('house_a', 15.6, 13.4, 0.65, 1, 0xf6c9c9, 0xc0453a);
-    home('house_d', 20.2, 13.4, 0.65, 1, 0xf3d9a4, 0x2f7fd1); home('house_b', 24.8, 13.4, 0.65, 1, 0xcfd8f2, 0x8e5bd1);
+    home('house_d', -1.5, 11.0, 0.65, 1, 0xd7ecf7, 0x2f9e6e);
+    home('house_a', -8, 11.0, 0.65, 1, 0xf3d9a4, 0xc0453a); home('house_b', -14.5, 11.0, 0.65, 1, 0xe2f0c9, 0x2f7fd1);   // the kilang is further left
+    home('house_e', 11, 11.0, 1.06, 1, 0xbfe3d6, 0x8e5bd1); home('house_a', 15.6, 11.0, 0.65, 1, 0xf6c9c9, 0xc0453a);
+    home('house_d', 20.2, 11.0, 0.65, 1, 0xf3d9a4, 0x2f7fd1); home('house_b', 24.8, 11.0, 0.65, 1, 0xcfd8f2, 0x8e5bd1);
     prim.houses.visible = false;
 
     var kinds = ['palm_a', 'tree_a', 'palm_b', 'tree_b', 'tree_c'];
@@ -780,7 +809,9 @@ KR.scene3d = (function () {
     view.zoom = Math.max(ZMIN, Math.min(ZMAX, view.zoom));
     view.x = Math.max(-36, Math.min(42, view.x)); view.z = Math.max(-30, Math.min(16, view.z));
     camera.zoom = view.zoom;
-    camera.position.set(14 + view.x, 20, 22 + view.z); camera.lookAt(1 + view.x, 0.5, 0.2 + view.z);
+    // Same view direction as before, but the camera sits 3x further back so the near plane never
+    // slices off the ground at the bottom of the screen when zoomed right out.
+    camera.position.set(1 + view.x + 13 * 3, 0.5 + 19.5 * 3, 0.2 + view.z + 21.8 * 3); camera.lookAt(1 + view.x, 0.5, 0.2 + view.z);
     camera.updateProjectionMatrix();
     setCutaway(view.zoom >= CUT_AT);
   }
