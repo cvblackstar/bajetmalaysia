@@ -55,7 +55,7 @@ KR.scene3d = (function () {
     var c = document.createElement('canvas'); c.width = 1024; c.height = 128;
     var g = c.getContext('2d');
     g.fillStyle = bg || '#1f7a55'; g.fillRect(0, 0, c.width, c.height);
-    g.fillStyle = '#fff'; g.font = 'bold 64px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#fff'; g.font = '600 64px Fredoka, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(text, c.width / 2, c.height / 2 + 4, c.width - 40);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
@@ -779,7 +779,7 @@ KR.scene3d = (function () {
     var c = document.createElement('canvas'); c.width = 320; c.height = 100;
     var g = c.getContext('2d');
     g.fillStyle = '#fff8e6'; g.fillRect(0, 0, 320, 100); g.strokeStyle = '#c0453a'; g.lineWidth = 8; g.strokeRect(4, 4, 312, 92);
-    g.fillStyle = '#c0453a'; g.font = 'bold 40px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#c0453a'; g.font = '600 40px Fredoka, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(KR.i18n.t('UNTUK DISEWA'), 160, 52, 290);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }

@@ -1,4 +1,9 @@
+/* Fonts ship with the game (fonts/, SIL Open Font License): Nunito for text, Fredoka for headings.
+   Until they load, or if they fail, the system font is used. */
+@font-face { font-family: 'Nunito'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(fonts/nunito-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(fonts/fredoka-latin.woff2) format('woff2'); }
 :root {
+  --font-head: 'Fredoka', 'Nunito', ui-rounded, system-ui, sans-serif;
   --ink: #23312b;
   --muted: #5f6f67;
   --paper: #fffdf6;
@@ -16,7 +21,7 @@ html, body { margin: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.45 'Nunito', ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 .hidden { display: none !important; }
 .game { max-width: 760px; margin: 0 auto; padding: 12px; }
@@ -378,3 +383,9 @@ table.board tr.now { background: #eef7f1; }
 .ad-btns .btn.primary { background: #8a3fb8; box-shadow: 0 2px 0 #5f2a80; }
 .ad-on { margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; background: #f3e6fa; color: #5f2a80; font-weight: 700; font-size: 13px; }
 @media (max-width: 520px) { .ad-btns { grid-template-columns: 1fr; } }
+
+/* Headings, tabs, buttons and big numbers use Fredoka */
+h1, h2, h3, h4, .shop-title strong, .tab, .subtab, .btn, .pname, .sub-title, .lot-title, .big-num, .clock,
+.stat strong, .goal strong, .letter strong, .modal-box h2 { font-family: var(--font-head); font-weight: 600; }
+.btn.primary, .big-num, .stat strong { font-weight: 600; }
+.eyebrow, .stat span { font-family: var(--font-head); font-weight: 500; }

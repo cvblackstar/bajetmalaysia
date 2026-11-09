@@ -7,3 +7,7 @@ tauke_male.glb: casual_male dressed in Blender with a songkok, shop apron and wh
 Props (models/env/food.glb, arcade.glb, cars.glb): Kenney (www.kenney.nl) "Food Kit", "Mini Arcade" and "Car Kit 3.1", CC0 1.0 public domain.
 Food: soda-bottle, loaf, chinese, egg, popsicle, candy-bar, soda-can, bag, bottle-oil, carton-small. Arcade: claw-machine, cash-register, prizes.
 Cars: sedan, taxi, suv, truck, delivery, truck-flat, ambulance, box. Packed into one file per kit (each model a named node) with tools/pack_kenney.mjs (glTF-Transform: dedup, weld, quantize).
+
+Fonts (fonts/)
+- Nunito, Copyright 2014 The Nunito Project Authors, SIL Open Font License 1.1 (fonts/OFL-Nunito.txt)
+- Fredoka, Copyright 2016 The Fredoka Project Authors, SIL Open Font License 1.1 (fonts/OFL-Fredoka.txt)
