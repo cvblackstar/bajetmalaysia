@@ -11,3 +11,6 @@ Cars: sedan, taxi, suv, truck, delivery, truck-flat, ambulance, box. Packed into
 Fonts (fonts/)
 - Nunito, Copyright 2014 The Nunito Project Authors, SIL Open Font License 1.1 (fonts/OFL-Nunito.txt)
 - Fredoka, Copyright 2016 The Fredoka Project Authors, SIL Open Font License 1.1 (fonts/OFL-Fredoka.txt)
+
+Sticker icons (stickers/)
+- Item, upgrade and weather stickers generated with Google Gemini for this project by the project owner (Nov 2026), cut from sheets into 128px WebP.

@@ -1,5 +1,5 @@
-// Hand-drawn SVG sprites. Everything is inline, so there are no image files to load
-// and sprites stay sharp at any size. Each function returns an <svg> string.
+// Icons: cozy sticker images (stickers/*.webp) with hand-drawn SVG sprites as fallback.
+// Each function returns an HTML string (<img> or <svg>).
 window.KR = window.KR || {};
 
 KR.art = (function () {
@@ -197,14 +197,26 @@ KR.art = (function () {
       '<path d="M24 4l6 13 14 1.5-10.5 9.5 3 14L24 35l-12.5 7 3-14L4 18.5 18 17z" fill="' + (on ? '#ffc83d' : '#ddd6c3') + '" ' + OL + '/></svg>';
   }
 
+  // Cozy sticker icons (generated with Google Gemini, cut into stickers/<id>.webp).
+  // Anything without a sticker falls back to the SVG sprite above.
+  var STICKERS = ('air roti maggi telur aiskrim cokelat airtin beras minyak gula payung mainan tcg ' +
+    'ssm petisurat peti rak kipas qr papan pembantu lewat capit pengurus iklan bank stor pekerja ' +
+    'panas cerah mendung hujan ribut').split(' ');
+  function sticker(id) {
+    return STICKERS.indexOf(id) >= 0 ? '<img class="sprite sticker" src="stickers/' + id + '.webp" alt="" draggable="false">' : null;
+  }
+
   return {
-    product: function (id) { return svg(products[id] || ''); },
-    weather: weather,
+    product: function (id) { return sticker(id) || svg(products[id] || ''); },
+    weather: function (id) { return sticker(id) || weather(id); },
     upgrade: function (id) {
+      var st = sticker(id);
+      if (st) return st;
       if (id === 'pembantu') return person(7, { shirt: '#1f7a55', head: 'songkok', apron: true });
       if (id === 'pengurus') return person(21, { shirt: '#2d3a4a', head: 'hair' });
       return svg(upgrades[id] || '');
     },
+    sticker: sticker,
     person: person,
     star: star
   };

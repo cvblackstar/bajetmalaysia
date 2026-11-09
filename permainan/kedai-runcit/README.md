@@ -9,7 +9,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | `js/state.js` | New game, load, migrate and save (localStorage via `platform.js`). |
 | `js/sim.js` | Pure game rules, no DOM. `runDay()` simulates a day and returns a report + timeline. |
 | `js/i18n.js` | Bahasa Melayu / English switch. Text is written in Malay and `t()` looks up the English version. |
-| `js/art.js` | Inline SVG sprites (products, people, weather, upgrades, stars). |
+| `js/art.js` | Icons: cozy sticker images from `stickers/` (items, upgrades, weather), with inline SVG sprites as fallback (people, stars). |
 | `js/audio.js` | Web Audio sound effects (ka-ching, coin, sad) and the mute setting. |
 | `js/characters3d.js` | Chibi-style 3D people built from primitives: swappable headwear, tops, bottoms, extras and colours (base for the Reka Tauke creator). |
 | `js/models3d.js` | Rigged, animated customers from Quaternius' CC0 character pack (`models/*.glb`), used as provided. Common: casual, worker, suit, plus a tauke (casual male in songkok and apron, built by `tools/build_tauke.py` in Blender). Rare (reputation 80+): doctors. Unique (95+): kimono. Falls back to `characters3d.js` if they fail to load. |
