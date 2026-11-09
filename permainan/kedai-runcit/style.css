@@ -389,3 +389,20 @@ h1, h2, h3, h4, .shop-title strong, .tab, .subtab, .btn, .pname, .sub-title, .lo
 .stat strong, .goal strong, .letter strong, .modal-box h2 { font-family: var(--font-head); font-weight: 600; }
 .btn.primary, .big-num, .stat strong { font-weight: 600; }
 .eyebrow, .stat span { font-family: var(--font-head); font-weight: 500; }
+
+/* Weather card next to today's info */
+.today-row { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 8px; }
+.today-row > .card { margin: 0; }
+.weather { display: flex; gap: 12px; align-items: center; border-left: 4px solid var(--sky); background: linear-gradient(180deg, #f2f9fd, var(--paper)); }
+.weather .wicon { width: 60px; height: 60px; flex: none; }
+.weather h3 { margin: 0; font-size: 18px; }
+.weather p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.weather .eyebrow { color: var(--muted); font-size: 11px; }
+.weather .wsell.up { color: #19714a; font-weight: 700; }
+.weather .wsell.down { color: #a5352b; font-weight: 700; }
+@media (max-width: 620px) { .today-row { grid-template-columns: 1fr; } }
+/* Auto-restock level (part-timer) */
+.group.auto label { color: #8a5a00; font-weight: 700; }
+.group.auto.on .val { color: #8a5a00; }
+.big-num.neg { color: var(--red); }
+#noGfxModal ul { margin: 6px 0 14px; padding-left: 20px; color: var(--muted); font-size: 14px; }

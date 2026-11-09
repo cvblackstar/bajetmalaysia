@@ -19,7 +19,6 @@
       <span class="eyebrow" id="dayLabel">Hari 1 · Isnin</span>
       <strong id="shopName">Kedai Runcit Bajet</strong>
       <button class="mute" id="muteBtn" type="button">Bunyi: buka</button>
-      <button class="mute" id="gfxBtn" type="button">Grafik: 3D</button>
       <button class="mute" id="langBtn" type="button" title="Bahasa / Language">BM | EN</button>
     </div>
     <div class="stats">
@@ -33,7 +32,10 @@
 
   <!-- PLANNING PHASE -->
   <section id="plan" class="phase">
-    <div class="forecast card" id="forecast"></div>
+    <div class="today-row">
+      <div class="weather card" id="weather"></div>
+      <div class="forecast card" id="forecast"></div>
+    </div>
 
     <div class="tabs" role="tablist">
       <button class="tab active" data-tab="stok" data-i18n>Stok &amp; Harga</button>
@@ -121,9 +123,19 @@
     <button class="btn primary" id="restockClose" data-i18n>Sambung berniaga</button>
   </div></div>
   <div class="modal hidden" id="reportModal"><div class="modal-box" id="reportBox"></div></div>
+  <div class="modal hidden" id="noGfxModal"><div class="modal-box">
+    <h2 data-i18n>Peranti tidak memenuhi keperluan</h2>
+    <p data-i18n>Permainan ini perlukan grafik 3D (WebGL), tapi pelayar atau peranti ini tak dapat membukanya.</p>
+    <ul>
+      <li data-i18n>Cuba buka dengan Chrome, Edge, Firefox atau Safari versi terbaru.</li>
+      <li data-i18n>Pastikan "hardware acceleration" dihidupkan dalam tetapan pelayar.</li>
+      <li data-i18n>Kemas kini pelayar atau sistem operasi peranti.</li>
+    </ul>
+    <button class="btn primary" id="noGfxRetry" data-i18n>Cuba lagi</button>
+  </div></div>
   <div class="modal hidden" id="introModal"><div class="modal-box">
     <h2 data-i18n>Selamat datang, tauke!</h2>
-    <p data-i18n>Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 3 bulan (84 hari) untuk dapat sampai 3 bintang. Sewa murah untuk bulan pertama. Setiap pagi:</p>
+    <p data-i18n>Korang baru ambil alih kedai runcit kecil dengan modal RM200 dan pinjaman bank RM2,000. Sasaran: besarkan nilai kedai dalam 3 bulan (84 hari) untuk dapat sampai 3 bintang. Sewa murah untuk bulan pertama. Setiap pagi:</p>
     <ol>
       <li data-i18n>Tengok ramalan cuaca hari ini.</li>
       <li data-i18n>Beli stok dari pemborong. Ruang kedai terhad.</li>

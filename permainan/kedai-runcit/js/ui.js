@@ -51,10 +51,21 @@ KR.ui = (function () {
     var on = mail ? S.activeEvents(s) : [];       // without the mailbox, events stay a surprise
     var rent = S.rentToday(s), mult = S.rentMult(s.day), R = C.rentRamp;
     var until = Math.ceil(s.day / R.every) * R.every;
-    $('forecast').innerHTML =
+    // Weather gets its own card: the forecast and which items sell more (or less) in it.
+    var up = S.unlockedProducts(s).filter(function (p) { return p.weather[f.weather] >= 1.3; })
+      .sort(function (a, b) { return b.weather[f.weather] - a.weather[f.weather]; }).slice(0, 3);
+    var down = S.unlockedProducts(s).filter(function (p) { return p.weather[f.weather] <= 0.7; }).slice(0, 3);
+    $('weather').innerHTML =
       '<div class="wicon">' + A.weather(f.weather) + '</div><div>' +
-      '<h3>' + t('Ramalan: {w}', { w: t(w.name) }) + '</h3>' +
-      '<p>' + t('Kos harian {c}: sewa {r}, bil {b}. Ramalan cuaca tak selalu tepat.',
+      '<span class="eyebrow">' + t('Ramalan cuaca') + '</span>' +
+      '<h3>' + t(w.name) + '</h3>' +
+      (up.length ? '<p class="wsell up">' + t('Laku: {list}', { list: up.map(function (p) { return t(p.name); }).join(', ') }) + '</p>' : '') +
+      (down.length ? '<p class="wsell down">' + t('Kurang laku: {list}', { list: down.map(function (p) { return t(p.name); }).join(', ') }) + '</p>' : '') +
+      '<p class="wnote">' + t('Ramalan tak selalu tepat.') + '</p></div>';
+    $('forecast').innerHTML =
+      '<div>' +
+      '<h3>' + t('Hari ini') + '</h3>' +
+      '<p>' + t('Kos harian {c}: sewa {r}, bil {b}.',
         { c: rm(S.dailyCosts(s)), r: rm(rent), b: rm(S.round2(S.dailyCosts(s) - rent)) }) + '</p>' +
       '<p class="week-note">' + (S.weekOf(s.day) ? t('Harga borong berubah setiap minggu, dan semua barang naik {i}% seminggu (inflasi).', { i: Math.round(C.inflation * 100) })
         : t('Harga borong berubah setiap minggu. Semak harga sebelum beli stok.')) + '</p>' +
@@ -115,6 +126,12 @@ KR.ui = (function () {
             '<span class="val">' + rm(price) + '</span>' +
             '<button class="step" data-act="price" data-n="0.1">+</button>' +
           '</div>' +
+          (S.canAutoRestock(s) ? (function (a) {
+            return '<div class="group auto' + (a ? ' on' : '') + '"><label title="' + t('Pekerja stor isi semula sampai tahap ini pukul 6 petang') + '">' + t('Auto') + '</label>' +
+              '<button class="step" data-act="auto" data-n="-10"' + (a <= 0 ? ' disabled' : '') + '>−10</button>' +
+              '<span class="val">' + (a ? a : t('Tutup')) + '</span>' +
+              '<button class="step" data-act="auto" data-n="10">+10</button></div>';
+          })(S.autoTarget(s, p.id)) : '') +
         '</div></div>';
   }
 
@@ -288,13 +305,14 @@ KR.ui = (function () {
     }
     $('bankPanel').innerHTML =
       '<div class="card bank-card"><div class="uicon">' + A.upgrade('bank') + '</div><div>' +
-        '<h3 class="sub-title">' + t('Simpanan bank') + '</h3>' +
-        '<div class="big-num">' + rm(B.balance) + '</div>' +
+        '<h3 class="sub-title">' + t(B.balance < 0 ? 'Pinjaman permulaan' : 'Simpanan bank') + '</h3>' +
+        '<div class="big-num' + (B.balance < 0 ? ' neg' : '') + '">' + rm(B.balance) + '</div>' +
+        (B.balance < 0 ? '<p class="hint">' + t('Korang mula dengan pinjaman bank {v} tanpa faedah. Simpan duit di sini untuk bayar balik. Simpanan mula dapat pulangan bila baki lebih dari RM0.', { v: rm0(C.startLoan) }) + '</p>' : '') +
         '<p class="hint">' + t('Pulangan {p}% sehari atas baki dalam bank, dibayar setiap malam. Jumlah dapat setakat ini: {e}.', { p: +(rate * 100).toFixed(2), e: rm(B.earned || 0) }) + '</p>' +
         (B.balance ? '<p class="hint">' + t('Malam ini dijangka dapat {v}.', { v: rm(S.round2(B.balance * rate)) }) + '</p>' : '') +
       '</div></div>' +
-      '<div class="card"><h4>' + t('Simpan') + ' <small>' + t('(duit boleh simpan: {v})', { v: rm(free) }) + '</small></h4><div class="bank-btns">' + btns('in', free) + '</div>' +
-      '<h4>' + t('Keluarkan') + '</h4><div class="bank-btns">' + btns('out', B.balance) + '</div>' +
+      '<div class="card"><h4>' + t(B.balance < 0 ? 'Bayar balik / simpan' : 'Simpan') + ' <small>' + t('(duit boleh simpan: {v})', { v: rm(free) }) + '</small></h4><div class="bank-btns">' + btns('in', free) + '</div>' +
+      '<h4>' + t('Keluarkan') + '</h4><div class="bank-btns">' + btns('out', Math.max(0, B.balance)) + '</div>' +
       '<p class="hint">' + t('Duit untuk stok yang dah dipesan hari ini tak boleh disimpan. Duit dalam bank dikira dalam nilai kedai.') + '</p></div>' +
       '<div class="card"><h4>' + t('Hubungan dengan bank') + '</h4>' +
         C.bank.rates.map(function (r, i) {
@@ -356,6 +374,7 @@ KR.ui = (function () {
       row(t('Hasil jualan'), '<span class="pos">' + rm(r.revenue) + '</span>') +
       row(t('Beli stok'), '<span class="loss">' + rm(-r.stockSpend) + '</span>') +
       (r.midSpend ? row(t('Tambah stok (siang)'), '<span class="loss">' + rm(-r.midSpend) + '</span>') : '') +
+      (r.autoSpend ? row(t('Pekerja stor isi semula ({n} unit)', { n: Object.keys(r.autoUnits || {}).reduce(function (a, k) { return a + r.autoUnits[k]; }, 0) }), '<span class="loss">' + rm(-r.autoSpend) + '</span>') : '') +
       row(t('Sewa dan bil'), '<span class="loss">' + rm(-r.bills) + '</span>') +
       (r.claw ? row(t('Mesin capit ({n} kali main)', { n: r.claw.plays }), '<span class="pos">' + rm(r.claw.net) + '</span>') : '') +
       (r.tips ? row(t('Tip daripada pelanggan'), '<span class="pos">' + rm(r.tips) + '</span>') : '') +

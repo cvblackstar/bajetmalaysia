@@ -6,6 +6,9 @@ KR.config = {
   version: 1,
   saveKey: 'kedaiRuncit.save.v1',
   startCash: 200,
+  // Start-up loan: the bank starts at -RM2,000 and that money is in the till on day 1.
+  // Deposits pay it off; savings only earn once the balance is above zero. No interest on the loan.
+  startLoan: 2000,
   startRep: 50,
   baseCapacity: 150,     // max units of stock in the shop
   baseTraffic: 30,       // customers on a normal weekday, scaled by reputation (see trafficRep)
@@ -171,6 +174,12 @@ KR.config = {
       desc: 'Senang bayar, pelanggan sanggup bayar 6% lebih.', willing: 0.06 },
     { id: 'papan',    name: 'Papan Tanda LED', icon: '💡', price: 450, upkeep: 2,
       desc: 'Lebih ramai nampak kedai korang, +20% pelanggan.', traffic: 0.2 },
+    // Small warehouse next to the shop (+100 stock space), then a part-timer who works from it:
+    // from 6 petang he tops each item up to the auto-restock level the player set, at the normal wholesale price.
+    { id: 'stor',     name: 'Stor Kecil',     icon: '📦', price: 50, upkeep: 10, capacity: 100,
+      desc: 'Stor kecil sebelah kedai. +100 ruang stok.' },
+    { id: 'pekerja',  name: 'Pekerja Stor (Separuh Masa)', icon: '🛒', price: 150, upkeep: 17.5, needs: 'stor', autoRestock: true,
+      desc: 'Masuk kerja pukul 6 petang. Isi semula rak dari stor ikut tahap Auto yang korang tetapkan, pada harga borong biasa.' },
     { id: 'pembantu', name: 'Pembantu Kedai', icon: '🧑‍🍳', price: 300, upkeep: 35,
       desc: 'Layan +30 pelanggan sehari.', serve: 30 },
     { id: 'lewat',    name: 'Buka Sampai 12 Malam', icon: '🌙', price: 350, upkeep: 8,

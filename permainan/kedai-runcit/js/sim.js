@@ -140,11 +140,11 @@ KR.sim = (function () {
   function deposit(s, amt) {
     amt = round2(Math.min(amt, bankFree(s)));
     if (amt <= 0) return 0;
-    s.cash = round2(s.cash - amt); bank(s).balance = round2(bank(s).balance + amt);
+    s.cash = round2(s.cash - amt); bank(s).balance = round2(bank(s).balance + amt);   // pays the loan off first
     return amt;
   }
   function withdraw(s, amt) {
-    amt = round2(Math.min(amt, bank(s).balance));
+    amt = round2(Math.min(amt, Math.max(0, bank(s).balance)));         // can't borrow more
     if (amt <= 0) return 0;
     bank(s).balance = round2(bank(s).balance - amt); s.cash = round2(s.cash + amt);
     return amt;
@@ -360,7 +360,8 @@ KR.sim = (function () {
 
     s.today = {
       weather: weather, visitors: visitors, timeline: timeline, next: 0,
-      served: 0, queueLost: 0, collectors: collectors, tcgRelease: tcgOn(s) && tcgRelease(s), revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: ev.rep, rating: rating(s), tips: 0, stockSpend: stockSpend, midSpend: 0,
+      served: 0, queueLost: 0, collectors: collectors, tcgRelease: tcgOn(s) && tcgRelease(s), revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: ev.rep, rating: rating(s), tips: 0,
+      autoAt: canAutoRestock(s) ? at(18) : null, autoSpend: 0, stockSpend: stockSpend, midSpend: 0,
       perProduct: perProduct
     };
     return s.today;
@@ -368,7 +369,9 @@ KR.sim = (function () {
 
   // Serve the next customer in the timeline; returns their entry with bought/complaint filled in.
   function serveNext(s) {
-    var d = s.today, e = d.timeline[d.next++];
+    var d = s.today, e0 = d.timeline[d.next];
+    if (e0 && d.autoAt != null && e0.t >= d.autoAt) autoRestock(s);   // 6 petang: the part-timer restocks first
+    var e = d.timeline[d.next++];
     if (!d.tiers) { d.tiers = { common: 0, rare: 0, unique: 0 }; d.multiBuys = 0; }   // a day started before tiers existed
     if (!e) return null;
     e.bought = [];
@@ -458,9 +461,28 @@ KR.sim = (function () {
     return true;
   }
 
+  // ---------- Auto-restock (part-timer) ----------
+  // At 6 petang the part-timer tops every item up to its auto level from the warehouse, at today's
+  // wholesale price (no daytime markup), as far as cash and shelf space allow.
+  function canAutoRestock(s) { return !!sumUp(s, 'autoRestock'); }
+  function autoTarget(s, id) { return (s.autoTarget && s.autoTarget[id]) || 0; }
+  function setAutoTarget(s, id, n) { s.autoTarget = s.autoTarget || {}; s.autoTarget[id] = Math.max(0, Math.min(capacity(s), n)); }
+  function autoRestock(s) {
+    var d = s.today; if (!d || d.autoDone) return null;
+    d.autoDone = true; d.autoSpend = d.autoSpend || 0; d.autoUnits = {};
+    if (!canAutoRestock(s)) return null;
+    unlockedProducts(s).forEach(function (p) {
+      var need = autoTarget(s, p.id) - s.stock[p.id], cost = buyCost(s, p), n = 0;
+      while (n < need && s.cash >= cost && totalUnits(s.stock) < capacity(s)) { s.cash = round2(s.cash - cost); addStock(s, p.id, 1); n++; }
+      if (n) { d.autoUnits[p.id] = n; d.autoSpend = round2(d.autoSpend + n * cost); }
+    });
+    return d.autoUnits;
+  }
+
   function closeDay(s) {
     var d = s.today;
     while (d.next < d.timeline.length) serveNext(s);
+    if (d.autoAt != null) autoRestock(s);
 
     var perishMult = ownedLevels(s).reduce(function (m, l) { return m * (l.perishMult || 1); }, 1);
     var spoiled = {}, spoiledValue = 0;
@@ -484,13 +506,13 @@ KR.sim = (function () {
       s.cash = round2(s.cash + claw.net);
     }
     // Bank: tonight's return on the savings balance (added to the balance, so it compounds).
-    var B = bank(s), interest = round2(B.balance * bankRate(s));
+    var B = bank(s), interest = round2(Math.max(0, B.balance) * bankRate(s));   // the loan has no interest
     B.balance = round2(B.balance + interest); B.earned = round2((B.earned || 0) + interest);
 
     var repBefore = s.rep;
     s.rep = Math.round(clamp(s.rep + clamp(d.repDelta, -8, 8), 0, 100));
     var tips = d.tips || 0;
-    var profit = round2(d.revenue - d.stockSpend - d.midSpend - bills + (claw ? claw.net : 0) + tips);
+    var profit = round2(d.revenue - d.stockSpend - d.midSpend - (d.autoSpend || 0) - bills + (claw ? claw.net : 0) + tips);
     s.stats.tips = round2((s.stats.tips || 0) + tips);
 
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
@@ -516,7 +538,7 @@ KR.sim = (function () {
       revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
       spoiled: spoiled, spoiledValue: round2(spoiledValue), claw: claw, collectors: d.collectors || 0, tcgRelease: !!d.tcgRelease,
       bankInterest: interest, bankRate: bankRate(s), bankBalance: B.balance,
-      perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash, tips: tips, adBonus: adBonus(s)
+      perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash, tips: tips, adBonus: adBonus(s), autoSpend: d.autoSpend || 0, autoUnits: d.autoUnits || {}
     };
     report.milestones = checkMilestones(s, report);
     report.cash = s.cash;
@@ -571,10 +593,11 @@ KR.sim = (function () {
   // Broke: no cash to restock and nothing left on the shelves.
   function isBankrupt(s) {
     var cheapest = Math.min.apply(null, unlockedProducts(s).map(function (p) { return buyCost(s, p); }));
-    return totalUnits(s.stock) === 0 && s.cash + bank(s).balance < cheapest;
+    return totalUnits(s.stock) === 0 && s.cash + Math.max(0, bank(s).balance) < cheapest;
   }
 
   return {
+    canAutoRestock: canAutoRestock, autoTarget: autoTarget, setAutoTarget: setAutoTarget, autoRestock: autoRestock,
     weekOf: weekOf, monthOf: monthOf, weekInMonth: weekInMonth, inflation: inflation, marketMult: marketMult, refPrice: refPrice,
     adOn: adOn, adBonus: adBonus, rating: rating, buyAd: buyAd,
     activeEvents: activeEvents, pastEvents: pastEvents, effects: effects, unreadMail: unreadMail, readMail: readMail, upkeepToday: upkeepToday,

@@ -1,18 +1,15 @@
-// Optional 3D street scene (three.js). Loaded in the background after the page starts.
-// If WebGL or the module can't load, or the player picks 2D, the SVG scene is used instead.
+// 3D street scene (three.js). Loaded in the background after the page starts.
+// The game needs it: if WebGL or the module can't load, main.js shows a "device not supported" notice.
 window.KR = window.KR || {};
 
 KR.scene3d = (function () {
   var THREE = null, ready = false, failed = false;
   var renderer, scene, camera, hemi, sun, rain, root, shopSign, shopLamp, shelfGroup, lights = [];
   var people = [], running = false, raf = 0;
-  var PREF = 'kedaiRuncit.graphics';
 
   var SKY = { panas: 0xffd98a, cerah: 0x9fd6f2, mendung: 0xbcc6cf, hujan: 0x8596a5, ribut: 0x56636f };
   var LIGHT = { panas: 1.5, cerah: 1.3, mendung: 0.8, hujan: 0.6, ribut: 0.4 };
 
-  function wanted() { return KR.platform.storage.load(PREF) !== '2d'; }
-  function setWanted(on) { KR.platform.storage.save(PREF, on ? '3d' : '2d'); }
 
   function hasWebGL() {
     try { var c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -20,7 +17,7 @@ KR.scene3d = (function () {
   }
 
   function load() {
-    if (ready || failed || !wanted()) return Promise.resolve(ready);
+    if (ready || failed) return Promise.resolve(ready);
     if (!hasWebGL()) { failed = true; return Promise.resolve(false); }
     return import('../vendor/three.module.min.js').then(function (mod) {
       THREE = mod; KR.chars.init(THREE); build(); ready = true;
@@ -870,6 +867,7 @@ KR.scene3d = (function () {
     }
     if (shopSign) { shopSign.material[4].map.dispose(); shopSign.material[4].map = signTexture(opts.shopName.toUpperCase()); }
     signFactory();
+    buildStor(!!opts.stor);
     passT = 0.5; homeT = 0;
     controls(host);
     resize(host);
@@ -899,6 +897,7 @@ KR.scene3d = (function () {
   function dispose(g) { root.remove(g); (g.userData.mixer ? KR.models : KR.chars).dispose(g); }
 
   function clear() {
+    clearPartTimer();
     people.forEach(function (p) { dispose(p.g); if (p.bubble) p.bubble.remove(); });
     people = []; queue = []; inside = 0; loiter = 0; spotUsed = SPOTS.map(function () { return false; });
   }
@@ -1068,6 +1067,58 @@ KR.scene3d = (function () {
     });
   }
 
+  // ---------- Stor Kecil and the part-timer ----------
+  // The warehouse fills the gap between the side road and the first lot, its shutter on the kaki lima.
+  // From 6 petang the part-timer carries boxes from it into the shop, puts them on a shelf, and goes back.
+  var WX = -5.85, WDOOR = [WX, 0.95], storGroup = null, pt = null, ptBox = null;
+  function buildStor(on) {
+    if (!!storGroup === on) return;
+    if (storGroup) { root.remove(storGroup); storGroup = null; return; }
+    var g = storGroup = new THREE.Group(); root.add(g);
+    var body = box(2.7, 2.4, 4.6, 0xe4dccb, WX, 1.2, -1.7, g); body.castShadow = body.receiveShadow = true;
+    box(3.0, 0.18, 4.9, 0x4f6b7a, WX, 2.48, -1.7, g).castShadow = true;                // roof
+    box(1.9, 1.95, 0.06, 0x9aa3ab, WX, 0.98, 0.62, g);                                    // roller shutter (half open)
+    for (var i = 0; i < 6; i++) box(1.9, 0.03, 0.08, 0x7d868e, WX, 0.5 + i * 0.28, 0.64, g);
+    box(1.5, 0.75, 0.07, 0x3a2f28, WX, 0.38, 0.63, g);                                    // the open part
+    var sign = box(2.3, 0.3, 0.06, 0x2f7f80, WX, 2.2, 0.64, g);
+    var face = new THREE.MeshBasicMaterial({ map: signTexture(KR.i18n.t('STOR'), '#2f7f80') });
+    sign.material = [mat(0x2f7f80), mat(0x2f7f80), mat(0x2f7f80), mat(0x2f7f80), face, mat(0x2f7f80)];
+    [[-6.9, 0.25, 1.0, 0.5], [-6.85, 0.7, 1.0, 0.4], [-6.35, 0.2, 1.1, 0.4]].forEach(function (b) {   // cardboard boxes outside
+      box(b[3], b[3], b[3], 0xc8955a, b[0], b[1], b[2], g).castShadow = true;
+    });
+  }
+  function clearPartTimer() {
+    if (pt) { dispose(pt.g); pt = null; }
+    if (ptBox) { root.remove(ptBox); ptBox = null; }
+  }
+  function partTimerTrip() {
+    var sp = SPOTS[Math.floor(Math.random() * SPOTS.length)] || [INSIDE[0], AISLE];
+    var inPath = [[WX, 2.1], DOOR, INSIDE, [INSIDE[0], AISLE], [sp[0], AISLE], [sp[0], sp[1]]];
+    ptBox.visible = true;
+    go(pt, inPath, function () {
+      pt.pause = 1.6;                                      // puts the stock on the shelf
+      pt.after = function () {
+        ptBox.visible = false;
+        go(pt, [[sp[0], AISLE], [INSIDE[0], AISLE], INSIDE, DOOR, [WX, 2.1], WDOOR], function () { pt.pause = 1.2; pt.after = partTimerTrip; });
+      };
+    });
+  }
+  function updatePartTimer(dt) {
+    if (!cfg.partTimer || curHour < 18 || !KR.models.isReady()) return;
+    if (!pt) {
+      pt = { g: KR.models.make(29, 'common'), path: [], walking: false, pause: 0 };
+      pt.g.position.set(WDOOR[0], 0.1, WDOOR[1] - 0.6); root.add(pt.g);
+      ptBox = box(0.34, 0.26, 0.3, 0xc8955a, 0, 0, 0); ptBox.castShadow = true;
+      partTimerTrip();
+    }
+    if (pt.pause > 0) { if ((pt.pause -= dt) <= 0 && pt.after) { var f = pt.after; pt.after = null; f(); } }
+    else step(pt, dt * WALK_SPEED);
+    KR.models.animate(pt.g, pt.walking, dt);
+    var r = pt.g.rotation.y;                               // the box sits in front of him, at chest height
+    ptBox.position.set(pt.g.position.x + Math.sin(r) * 0.3, 0.95, pt.g.position.z + Math.cos(r) * 0.3);
+    ptBox.rotation.y = r;
+  }
+
   // The tauke (and the pembantu once hired) stand behind the counter, left of the door, facing right.
   function updateStaff(dt) {
     var want = cfg.staff || 1;
@@ -1092,6 +1143,7 @@ KR.scene3d = (function () {
     resizeIfNeeded();
     updatePeople(dt * ts);
     updateStaff(dt * ts);
+    updatePartTimer(dt * ts);
     people.forEach(function (p) {
       var g = p.g;
       var moving = p.walking && !p.wait;
@@ -1123,8 +1175,8 @@ KR.scene3d = (function () {
 
   return {
     load: load, start: start, stop: stop, spawn: spawn, setHour: setHour, delivery: delivery,
-    isReady: function () { return ready && wanted(); },
-    wanted: wanted, setWanted: setWanted, failed: function () { return failed; },
+    isReady: function () { return ready; },
+    failed: function () { return failed; },
     _debug: function () { return { THREE: THREE, root: root, camera: camera, people: people, cars: cars, spots: SPOTS, queue: queue }; }
   };
 })();

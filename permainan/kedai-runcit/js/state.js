@@ -11,7 +11,7 @@ KR.state = (function () {
       version: C.version,
       shopName: 'Kedai Runcit Bajet',
       day: 1,
-      cash: C.startCash,
+      cash: C.startCash + (C.startLoan || 0),
       rep: C.startRep,
       stock: stock,
       prices: prices,
@@ -26,7 +26,8 @@ KR.state = (function () {
       lastReport: null,
       batches: {},
       regulars: {},        // regulars' hearts (see sim.regulars)
-      bank: { balance: 0, level: 0, earned: 0 },   // savings (see sim bank)
+      bank: { balance: -(C.startLoan || 0), level: 0, earned: 0 },   // savings (see sim bank); starts with the loan
+      autoTarget: {},      // auto-restock level per product (needs the part-timer); 0 or missing = off
       lastOrder: null,     // yesterday's morning order, for "repeat order"
       lastDemand: null,    // yesterday's sold / ran out / too pricey per product         // dated stock for products that expire
       today: null,         // a day in progress (see sim.openDay)
@@ -49,7 +50,7 @@ KR.state = (function () {
     s.stats = Object.assign(fresh().stats, saved.stats || {});
     s.stats.tiers = Object.assign(fresh().stats.tiers, (saved.stats && saved.stats.tiers) || {});
     s.milestones = Object.assign({}, saved.milestones || {});
-    s.bank = Object.assign(fresh().bank, saved.bank || {});
+    s.bank = Object.assign({ balance: 0, level: 0, earned: 0 }, saved.bank || {});   // old saves: no loan
     s.version = C.version;
     return s;
   }

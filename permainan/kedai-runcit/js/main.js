@@ -47,7 +47,9 @@
     if (!b) return;
     var id = b.closest('.product').dataset.id, n = parseFloat(b.dataset.n);
     SFX.click();
-    if (b.dataset.act === 'order') {
+    if (b.dataset.act === 'auto') {
+      S.setAutoTarget(state, id, S.autoTarget(state, id) + n);
+    } else if (b.dataset.act === 'order') {
       if (n < 0) state.order[id] = Math.max(0, state.order[id] + n);
       else for (var i = 0; i < n && S.canOrder(state, id, 1); i++) state.order[id]++;
     } else {
@@ -128,6 +130,9 @@
   $('openBtn').addEventListener('click', function () { openShop(false); });
   function openShop(auto) {
     clearTimeout(managerTimer);
+    if (!S3.isReady()) {                    // 3D still loading (or not supported): wait for it first
+      return S3.load().then(function (ok) { if (ok) openShop(auto); else showNoGfx(); });
+    }
     if (!auto && S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
       if (!window.confirm(t('Tiada stok langsung. Buka kedai juga?'))) return;
     }
@@ -164,7 +169,8 @@
       lots: S.level(state, 'rak'),                               // shop lots rented next door
       capacity: S.shopRoom(state),                               // customers inside at once (same rule as the sim)
       timeScale: function () { return day && !day.paused ? day.speed : 0; },
-      factoryDay: !!today.factoryDay, closeHour: S.closeHour(state)
+      factoryDay: !!today.factoryDay, closeHour: S.closeHour(state),
+      stor: !!S.level(state, 'stor'), partTimer: today.autoAt != null       // warehouse next door; part-timer from 6 petang
     });
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
@@ -214,7 +220,7 @@
       entry.bought.forEach(function (id) { day.sales += state.prices[id]; });
       $('liveCust').textContent = day.customers;
       $('liveSales').textContent = UI.rm(day.sales);
-      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
+      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend - (state.today.autoSpend || 0));
       var counts = {};
       entry.bought.forEach(function (id) { counts[id] = (counts[id] || 0) + 1; });
       return { bad: false, tier: entry.tier, html: Object.keys(counts).map(function (id) {
@@ -379,16 +385,15 @@
   $('muteBtn').addEventListener('click', function () { SFX.setMuted(!SFX.isMuted()); renderMute(); SFX.click(); });
   renderMute();
 
-  function renderGfx() {
-    var on = S3.wanted() && !S3.failed();
-    $('gfxBtn').textContent = t(on ? 'Grafik: 3D' : 'Grafik: 2D');
-    $('gfxBtn').disabled = S3.failed();
+  // The game needs 3D (WebGL). On a device or browser that can't run it, say so and don't start.
+  function showNoGfx() {
+    clearTimeout(managerTimer);
+    $('introModal').classList.add('hidden');
+    $('noGfxModal').classList.remove('hidden');
+    $('openBtn').disabled = true;
   }
-  $('gfxBtn').addEventListener('click', function () {
-    S3.setWanted(!S3.wanted()); renderGfx(); S3.load().then(renderGfx);
-  });
-  renderGfx();
-  S3.load().then(renderGfx);
+  $('noGfxRetry').addEventListener('click', function () { window.location.reload(); });
+  S3.load().then(function (ok) { if (!ok) showNoGfx(); });
 
   // Language: Bahasa Melayu / English
   function renderLang() {
@@ -398,7 +403,7 @@
   $('introLang').addEventListener('click', function () { $('langBtn').click(); });
   $('langBtn').addEventListener('click', function () {
     I18N.set(I18N.lang() === 'en' ? 'ms' : 'en'); SFX.click();
-    renderLang(); renderMute(); renderGfx(); renderManager();
+    renderLang(); renderMute(); renderManager();
     UI.plan(state);
     if (!$('reportModal').classList.contains('hidden')) {        // re-show whatever the modal was showing
       if ($('nextBtn') && state.lastReport) UI.report(state.lastReport, state);
@@ -407,7 +412,7 @@
     }
     if (!$('restockModal').classList.contains('hidden')) renderRestock();
   });
-  I18N.apply(); renderLang(); // three.js loads in the background; 2D is used until it's ready
+  I18N.apply(); renderLang(); // three.js loads in the background
 
   // ---------- Boot ----------
   // A day left half-played (page closed mid-day): serve the rest of it and show the report.
@@ -421,5 +426,5 @@
     if (S.seasonOver(state)) endSeason();
     else { showPlan(); if (S.isBankrupt(state)) UI.bankrupt(state); }
   }
-  if (!state.seenIntro) $('introModal').classList.remove('hidden');
+  if (!state.seenIntro && !S3.failed()) $('introModal').classList.remove('hidden');
 })();
