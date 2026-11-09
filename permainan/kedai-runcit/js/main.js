@@ -47,12 +47,14 @@
     if (!b) return;
     var id = b.closest('.product').dataset.id, n = parseFloat(b.dataset.n);
     SFX.click();
-    if (b.dataset.act === 'order') {
+    if (b.dataset.act === 'auto') {
+      S.setAutoTarget(state, id, S.autoTarget(state, id) + n);
+    } else if (b.dataset.act === 'order') {
       if (n < 0) state.order[id] = Math.max(0, state.order[id] + n);
       else for (var i = 0; i < n && S.canOrder(state, id, 1); i++) state.order[id]++;
     } else {
       var p = S.product(id);
-      state.prices[id] = Math.min(p.ref * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
+      state.prices[id] = Math.min(S.refPrice(state, p) * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
     }
     UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
@@ -70,6 +72,11 @@
     }
   });
 
+  $('adPanel').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-ad]');
+    if (b && S.buyAd(state, +b.dataset.ad)) { SFX.kaching(); save(); UI.plan(state); }
+  });
+
   $('bankPanel').addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b || b.disabled) return;
@@ -79,17 +86,31 @@
     if ((kind === 'in' ? S.deposit(state, n) : S.withdraw(state, n)) > 0) { SFX.coin(); save(); UI.plan(state); }
   });
 
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x.dataset.tab === name); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.add('hidden'); });
+    $('tab-' + name).classList.remove('hidden');
+    var tb = document.querySelector('.tab[data-tab="' + name + '"]');
+    if (tb && tb.parentNode.scrollWidth > tb.parentNode.clientWidth) tb.parentNode.scrollLeft = tb.offsetLeft - 12;   // phones: keep the tab in view
+    if (name === 'syarikat' && S.unreadMail(state)) { S.readMail(state); save(); setTimeout(function () { UI.company(state); }, 1500); }   // let "Baru" show for a moment
+  }
   document.querySelectorAll('.tab').forEach(function (t) {
-    t.addEventListener('click', function () {
-      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x === t); });
-      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.add('hidden'); });
-      $('tab-' + t.dataset.tab).classList.remove('hidden');
-    });
+    t.addEventListener('click', function () { showTab(t.dataset.tab); });
+  });
+  $('forecast').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { SFX.click(); UI.setMailView('aktif'); UI.company(state); showTab(b.dataset.goto); }
+  });
+  $('mailbox').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-mail]');
+    if (b) { SFX.click(); UI.setMailView(b.dataset.mail); UI.company(state); }
   });
 
+  // Only a company registered with SSM can change its name.
   $('nameInput').addEventListener('change', function () {
+    if (!S.level(state, 'ssm')) return;
     state.shopName = this.value.trim().slice(0, 28) || 'Kedai Runcit Bajet';
-    save(); UI.header(state);
+    save(); UI.header(state); UI.company(state);
   });
 
   $('resetBtn').addEventListener('click', function () {
@@ -102,12 +123,16 @@
     state.seenIntro = true;
     S.startDay(state); save();
     $('reportModal').classList.add('hidden');
+    showTab('stok');
     showPlan();
   }
 
   $('openBtn').addEventListener('click', function () { openShop(false); });
   function openShop(auto) {
     clearTimeout(managerTimer);
+    if (!S3.isReady()) {                    // 3D still loading (or not supported): wait for it first
+      return S3.load().then(function (ok) { if (ok) openShop(auto); else showNoGfx(); });
+    }
     if (!auto && S.totalUnits(state.stock) + S.totalUnits(state.order) === 0) {
       if (!window.confirm(t('Tiada stok langsung. Buka kedai juga?'))) return;
     }
@@ -136,12 +161,16 @@
       lotProducts: C.lots.map(function (l, i) {                  // what each lot's shelves show
         return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return A.product(p.id); });
       }),
+      lotIds: C.lots.map(function (l, i) {                       // the same, as product ids (for the 3D goods)
+        return S.unlockedProducts(state).filter(function (p) { return S.lotOf(p) === i + 1; }).map(function (p) { return p.id; });
+      }),
       claw: !!S.level(state, 'capit'), tcg: !!S.level(state, 'tcg'),
       staff: state.upgrades.pembantu ? 2 : 1,
       lots: S.level(state, 'rak'),                               // shop lots rented next door
-      capacity: 5 + 3 * S.level(state, 'rak') + (state.upgrades.pembantu ? 2 : 0),   // customers inside at once
+      capacity: S.shopRoom(state),                               // customers inside at once (same rule as the sim)
       timeScale: function () { return day && !day.paused ? day.speed : 0; },
-      factoryDay: !!today.factoryDay, closeHour: S.closeHour(state)
+      factoryDay: !!today.factoryDay, closeHour: S.closeHour(state),
+      stor: !!S.level(state, 'stor'), partTimer: today.autoAt != null       // warehouse next door; part-timer from 6 petang
     });
     $('liveCust').textContent = '0';
     $('liveSales').textContent = 'RM0.00';
@@ -191,7 +220,7 @@
       entry.bought.forEach(function (id) { day.sales += state.prices[id]; });
       $('liveCust').textContent = day.customers;
       $('liveSales').textContent = UI.rm(day.sales);
-      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
+      $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend - (state.today.autoSpend || 0));
       var counts = {};
       entry.bought.forEach(function (id) { counts[id] = (counts[id] || 0) + 1; });
       return { bad: false, tier: entry.tier, html: Object.keys(counts).map(function (id) {
@@ -206,7 +235,7 @@
 
   function spawn3d(entry) {
     S3.spawn({
-      seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
+      seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: S.rating(state), tier: entry.tier,
       from: entry.from, back: entry.back, regular: !!entry.regular,
       across: !entry.from && Math.random() < 0.3,                // some live across the road and use the zebra crossing
       lot: entry.wants && entry.wants.length ? S.lotOf(S.product(entry.wants[0].id)) - 1 : 0,   // browse in the lot that sells it
@@ -260,10 +289,10 @@
   function renderRestock() {
     $('restockList').innerHTML = S.unlockedProducts(state).map(function (p) {
       return '<div class="restock-row" data-id="' + p.id + '"><span class="ricon">' + A.product(p.id) + '</span>' +
-        '<span class="rname">' + t(p.name) + '<small>' + t('Stok: {n} | {c} seunit', { n: state.stock[p.id], c: UI.rm(S.restockCost(p.id, 1)) }) + '</small></span>' +
+        '<span class="rname">' + t(p.name) + '<small>' + t('Stok: {n} | {c} seunit', { n: state.stock[p.id], c: UI.rm(S.restockCost(state, p.id, 1)) }) + '</small></span>' +
         [5, 10].map(function (n) {
           return '<button class="btn small" data-n="' + n + '"' + (S.canRestock(state, p.id, n) ? '' : ' disabled') + '>+' + n +
-            ' (' + UI.rm(S.restockCost(p.id, n)) + ')</button>';
+            ' (' + UI.rm(S.restockCost(state, p.id, n)) + ')</button>';
         }).join('') + '</div>';
     }).join('');
     $('restockCash').textContent = UI.rm(state.cash);
@@ -280,6 +309,7 @@
     var id = b.closest('.restock-row').dataset.id;
     if (S.restock(state, id, +b.dataset.n)) {
       SFX.coin(); save(); renderRestock();
+      if (day && day.use3d) S3.delivery();                       // a delivery lorry pulls up outside
       $('cash').textContent = UI.rm(day0Cash + day.sales - state.today.midSpend);
     }
   });
@@ -332,7 +362,10 @@
   function endSeason() {
     var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
     if (isNew) { best = { value: value, stars: S.starsFor(value), day: state.day - 1 }; KR.state.saveBest(best); }
-    P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    if (S.level(state, 'ssm')) {          // registered companies go on the Company Performance Leaderboard
+      KR.state.addToBoard({ name: state.shopName, value: value, stars: S.starsFor(value), date: new Date().toISOString().slice(0, 10) });
+      P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    }
     P.sdk.happytime();
     SFX.kaching();
     showPlanQuiet();
@@ -352,16 +385,15 @@
   $('muteBtn').addEventListener('click', function () { SFX.setMuted(!SFX.isMuted()); renderMute(); SFX.click(); });
   renderMute();
 
-  function renderGfx() {
-    var on = S3.wanted() && !S3.failed();
-    $('gfxBtn').textContent = t(on ? 'Grafik: 3D' : 'Grafik: 2D');
-    $('gfxBtn').disabled = S3.failed();
+  // The game needs 3D (WebGL). On a device or browser that can't run it, say so and don't start.
+  function showNoGfx() {
+    clearTimeout(managerTimer);
+    $('introModal').classList.add('hidden');
+    $('noGfxModal').classList.remove('hidden');
+    $('openBtn').disabled = true;
   }
-  $('gfxBtn').addEventListener('click', function () {
-    S3.setWanted(!S3.wanted()); renderGfx(); S3.load().then(renderGfx);
-  });
-  renderGfx();
-  S3.load().then(renderGfx);
+  $('noGfxRetry').addEventListener('click', function () { window.location.reload(); });
+  S3.load().then(function (ok) { if (!ok) showNoGfx(); });
 
   // Language: Bahasa Melayu / English
   function renderLang() {
@@ -371,7 +403,7 @@
   $('introLang').addEventListener('click', function () { $('langBtn').click(); });
   $('langBtn').addEventListener('click', function () {
     I18N.set(I18N.lang() === 'en' ? 'ms' : 'en'); SFX.click();
-    renderLang(); renderMute(); renderGfx(); renderManager();
+    renderLang(); renderMute(); renderManager();
     UI.plan(state);
     if (!$('reportModal').classList.contains('hidden')) {        // re-show whatever the modal was showing
       if ($('nextBtn') && state.lastReport) UI.report(state.lastReport, state);
@@ -380,7 +412,7 @@
     }
     if (!$('restockModal').classList.contains('hidden')) renderRestock();
   });
-  I18N.apply(); renderLang(); // three.js loads in the background; 2D is used until it's ready
+  I18N.apply(); renderLang(); // three.js loads in the background
 
   // ---------- Boot ----------
   // A day left half-played (page closed mid-day): serve the rest of it and show the report.
@@ -394,5 +426,5 @@
     if (S.seasonOver(state)) endSeason();
     else { showPlan(); if (S.isBankrupt(state)) UI.bankrupt(state); }
   }
-  if (!state.seenIntro) $('introModal').classList.remove('hidden');
+  if (!state.seenIntro && !S3.failed()) $('introModal').classList.remove('hidden');
 })();

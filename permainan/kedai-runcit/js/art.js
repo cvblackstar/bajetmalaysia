@@ -1,5 +1,5 @@
-// Hand-drawn SVG sprites. Everything is inline, so there are no image files to load
-// and sprites stay sharp at any size. Each function returns an <svg> string.
+// Icons: cozy sticker images (stickers/*.webp) with hand-drawn SVG sprites as fallback.
+// Each function returns an HTML string (<img> or <svg>).
 window.KR = window.KR || {};
 
 KR.art = (function () {
@@ -142,6 +142,23 @@ KR.art = (function () {
       '<rect x="5" y="36" width="38" height="6" rx="1" fill="#cfd8f2" ' + OL + '/>' +
       '<circle cx="24" cy="29" r="5" fill="#ffd23f" ' + OL + '/><path d="M24 26.5v5" stroke="#3a2a1f" stroke-width="1.4"/>'
   };
+  // SSM certificate and the company mailbox
+  upgrades.ssm =
+    '<rect x="7" y="6" width="34" height="36" rx="2" fill="#fffdf6" ' + OL + '/>' +
+    '<path d="M13 13h22M13 18h22M13 23h14" stroke="#9c7445" stroke-width="1.8" stroke-linecap="round"/>' +
+    '<circle cx="32" cy="33" r="6" fill="#c0453a" ' + OL + '/><path d="M29 38l-2 7 5-3 5 3-2-7" fill="#c0453a" ' + OL + '/>' +
+    '<path d="M30 33l1.5 1.5 3-3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>';
+  upgrades.petisurat =
+    '<path d="M22 30v16" stroke="#6d4a2a" stroke-width="4" stroke-linecap="round"/>' +
+    '<path d="M8 30V18a9 9 0 0 1 9-9h16a9 9 0 0 1 9 9v12z" fill="#2f7f80" ' + OL + '/>' +
+    '<path d="M8 18a9 9 0 0 1 18 0v12" fill="#256566" ' + OL + '/>' +
+    '<rect x="11" y="17" width="12" height="8" rx="1" fill="#fffdf6" ' + OL + '/><path d="M11 17l6 4.5 6-4.5" fill="none" ' + OL + '/>' +
+    '<path d="M36 22V8h7v5h-7" fill="#c0453a" ' + OL + '/>';
+  upgrades.iklan =
+    '<path d="M6 20h8l18-10v28L14 28H6z" fill="#e86f9a" ' + OL + '/>' +
+    '<path d="M10 28l3 12h6l-3-12" fill="#c0453a" ' + OL + '/>' +
+    '<path d="M37 16c3 2 4 5 4 8s-1 6-4 8" fill="none" stroke="#3a2a1f" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<path d="M36 21c1 1 1.5 2 1.5 3s-.5 2-1.5 3" fill="none" stroke="#3a2a1f" stroke-width="2.2" stroke-linecap="round"/>';
   upgrades.tcg = products.tcg;
 
   // People: a seeded mix of skin tones, clothes and headwear.
@@ -180,14 +197,26 @@ KR.art = (function () {
       '<path d="M24 4l6 13 14 1.5-10.5 9.5 3 14L24 35l-12.5 7 3-14L4 18.5 18 17z" fill="' + (on ? '#ffc83d' : '#ddd6c3') + '" ' + OL + '/></svg>';
   }
 
+  // Cozy sticker icons (generated with Google Gemini, cut into stickers/<id>.webp).
+  // Anything without a sticker falls back to the SVG sprite above.
+  var STICKERS = ('air roti maggi telur aiskrim cokelat airtin beras minyak gula payung mainan tcg ' +
+    'ssm petisurat peti rak kipas qr papan pembantu lewat capit pengurus iklan bank stor pekerja ' +
+    'panas cerah mendung hujan ribut').split(' ');
+  function sticker(id) {
+    return STICKERS.indexOf(id) >= 0 ? '<img class="sprite sticker" src="stickers/' + id + '.webp" alt="" draggable="false">' : null;
+  }
+
   return {
-    product: function (id) { return svg(products[id] || ''); },
-    weather: weather,
+    product: function (id) { return sticker(id) || svg(products[id] || ''); },
+    weather: function (id) { return sticker(id) || weather(id); },
     upgrade: function (id) {
+      var st = sticker(id);
+      if (st) return st;
       if (id === 'pembantu') return person(7, { shirt: '#1f7a55', head: 'songkok', apron: true });
       if (id === 'pengurus') return person(21, { shirt: '#2d3a4a', head: 'hair' });
       return svg(upgrades[id] || '');
     },
+    sticker: sticker,
     person: person,
     star: star
   };

@@ -52,15 +52,55 @@ KR.sim = (function () {
   function unlockedProducts(s) { return C.products.filter(function (p) { return isUnlocked(s, p); }); }
 
   function weekday(day) { return (day - 1) % 7; }
+  // Calendar: week 0 is days 1-7. Month and week-of-month are counted from 1.
+  function weekOf(day) { return Math.floor((day - 1) / C.weekDays); }
+  function monthOf(day) { return Math.floor(weekOf(day) / C.monthWeeks) + 1; }
+  function weekInMonth(day) { return weekOf(day) % C.monthWeeks + 1; }
+
+  // ---------- Prices: weekly market moves and inflation ----------
+  // Everything gets C.inflation dearer each week (wholesale and the price customers think is fair).
+  function inflation(s) { return Math.pow(1 + C.inflation, weekOf(s.day)); }
+  // Each week every item's wholesale cost moves by a random %: usually small, sometimes up to +-50%.
+  function rollMarket(s) {
+    var w = weekOf(s.day), M = C.market;
+    if (s.market && s.market.week === w) return;
+    var mult = {};
+    C.products.forEach(function (p) {
+      var ch = rnd() < M.bigChance ? (rnd() < 0.5 ? -1 : 1) * (M.big[0] + rnd() * (M.big[1] - M.big[0]))
+                                   : (rnd() * 2 - 1) * M.small;
+      mult[p.id] = 1 + Math.round(ch * 20) / 20;                     // in 5% steps
+    });
+    s.market = { week: w, mult: mult };
+  }
+  function marketMult(s, id) { return (s.market && s.market.week === weekOf(s.day) && s.market.mult[id]) || 1; }
+  function refPrice(s, p) { return round2(p.ref * inflation(s)); }
+  function baseCost(s, p) { return p.cost * inflation(s); }        // before this week's market move
+
+  // ---------- Rating and advertising ----------
+  // Reputation (s.rep) stays 0-100. An advert adds a bonus for a week, so the rating can reach C.repMax.
+  function adOn(s) { return s.ad && s.ad.until >= s.day ? s.ad : null; }
+  function adBonus(s) { var a = adOn(s); return a ? C.ads[a.tier].bonus : 0; }
+  function rating(s) { return Math.min(C.repMax, s.rep + adBonus(s)); }
+  function buyAd(s, tier) {
+    var ad = C.ads[tier];
+    if (!ad || adOn(s) || s.cash < ad.price) return false;
+    s.cash = round2(s.cash - ad.price);
+    s.ad = { tier: tier, from: s.day, until: s.day + ad.days - 1 };
+    s.stats.adSpend = round2((s.stats.adSpend || 0) + ad.price);
+    return true;
+  }
   function dayName(day) { return C.dayNames[weekday(day)]; }
 
   function capacity(s) { return C.baseCapacity + sumUp(s, 'capacity'); }
   function serveCap(s) { return C.baseServe + sumUp(s, 'serve'); }
+  // Customers inside the shop at once (more lots, more room; a helper keeps the line moving).
+  function shopRoom(s) { var R = C.shopRoom; return R.base + R.perLot * level(s, 'rak') + (level(s, 'pembantu') ? R.helper : 0); }
   function closeHour(s) { return C.closeHour + sumUp(s, 'hours'); }
   // Rent starts discounted and steps up every C.rentRamp.every days (see config).
   function rentMult(day) { var R = C.rentRamp; return Math.min(1, R.start + R.step * Math.floor((day - 1) / R.every)); }
   function rentToday(s) { return round2((C.rent + sumUp(s, 'rent')) * rentMult(s.day)); }
-  function dailyCosts(s) { return round2(rentToday(s) + sumUp(s, 'upkeep')); }
+  function upkeepToday(s) { return round2(sumUp(s, 'upkeep') * effects(s).bills); }
+  function dailyCosts(s) { return round2(rentToday(s) + upkeepToday(s)); }
 
   // Which kind of customer walks in, given today's reputation.
   function pickTier(rep, r) {
@@ -100,11 +140,11 @@ KR.sim = (function () {
   function deposit(s, amt) {
     amt = round2(Math.min(amt, bankFree(s)));
     if (amt <= 0) return 0;
-    s.cash = round2(s.cash - amt); bank(s).balance = round2(bank(s).balance + amt);
+    s.cash = round2(s.cash - amt); bank(s).balance = round2(bank(s).balance + amt);   // pays the loan off first
     return amt;
   }
   function withdraw(s, amt) {
-    amt = round2(Math.min(amt, bank(s).balance));
+    amt = round2(Math.min(amt, Math.max(0, bank(s).balance)));         // can't borrow more
     if (amt <= 0) return 0;
     bank(s).balance = round2(bank(s).balance - amt); s.cash = round2(s.cash + amt);
     return amt;
@@ -116,20 +156,61 @@ KR.sim = (function () {
     return true;
   }
 
-  function event(s) { return s.forecast && s.forecast.event ? C.events[s.forecast.event] : null; }
+  // ---------- Events ----------
+  // s.events lists every event so far as { id, from, to, seen } (days, inclusive). One-day events
+  // have from === to; week-long ones run 7 days. New ones are rolled each morning (see startDay).
+  function eventLog(s) {
+    s.events = s.events || [];
+    if (s.forecast && s.forecast.event && !s.events.some(function (e) { return e.from === s.day; })) {   // older saves
+      s.events.push({ id: s.forecast.event, from: s.day, to: s.day });
+    }
+    return s.events;
+  }
+  function activeEvents(s) { return eventLog(s).filter(function (e) { return e.from <= s.day && s.day <= e.to && C.events[e.id]; }); }
+  function pastEvents(s) { return eventLog(s).filter(function (e) { return e.to < s.day && C.events[e.id]; }).reverse(); }
+  // All of today's events rolled into one set of effects.
+  function effects(s) {
+    var out = { traffic: 1, willing: 1, costMult: 1, bills: 1, rep: 0, cost: {}, boost: {} };
+    activeEvents(s).forEach(function (e) {
+      var ev = C.events[e.id];
+      ['traffic', 'willing', 'costMult', 'bills'].forEach(function (k) { if (ev[k]) out[k] *= ev[k]; });
+      out.rep += ev.rep || 0;
+      ['cost', 'boost'].forEach(function (k) { Object.keys(ev[k] || {}).forEach(function (id) { out[k][id] = (out[k][id] || 1) * ev[k][id]; }); });
+    });
+    return out;
+  }
+  function eventFits(s, id) { var ev = C.events[id]; return !ev.lot || ev.lot <= lotsOpen(s); }
+  function rollEvents(s) {
+    var log = eventLog(s), day = s.day;
+    if (s.rolledDay === day || log.some(function (e) { return e.from === day; })) return;   // already rolled today
+    s.rolledDay = day;
+    function add(id) { log.push({ id: id, from: day, to: day + (C.events[id].days || 1) - 1 }); }
+    function pick(list) {
+      list = list.filter(function (id) { return eventFits(s, id); });
+      return list.length ? pickWeighted(list, function (id) { return C.events[id].weight || 1; }) : null;
+    }
+    if (day % C.paydayEvery === C.paydayOn) add('gaji');
+    else if (day > 2 && rnd() < C.eventChance) { var one = pick(C.randomEvents); if (one) add(one); }
+    var weekOn = activeEvents(s).some(function (e) { return e.to > e.from; });
+    if (day > 4 && !weekOn && rnd() < C.weekEventChance) {
+      var lastWeek = log.filter(function (e) { return e.to > e.from; }).pop();       // not the same one twice in a row
+      var wk = pick(C.weekEvents.filter(function (id) { return !lastWeek || id !== lastWeek.id; }));
+      if (wk) add(wk);
+    }
+    if (log.length > 60) log.splice(0, log.length - 60);
+  }
+  // Letters in the Peti Surat the player hasn't opened yet.
+  function unreadMail(s) { return level(s, 'petisurat') ? activeEvents(s).filter(function (e) { return !e.seen; }).length : 0; }
+  function readMail(s) { activeEvents(s).forEach(function (e) { e.seen = true; }); }
 
-  // Wholesale price today (promo events make stock cheaper).
+  // Wholesale price today (some events make stock cheaper or dearer).
   function buyCost(s, p) {
-    var ev = event(s);
-    return round2(p.cost * (ev && ev.costMult ? ev.costMult : 1));
+    var ef = effects(s);
+    return round2(p.cost * inflation(s) * marketMult(s, p.id) * ef.costMult * (ef.cost[p.id] || 1));
   }
 
-  function makeForecast(day) {
-    var w = pickWeighted(C.weatherOrder, function (id) { return C.weathers[id].chance; });
-    var ev = null;
-    if (day % C.paydayEvery === C.paydayOn) ev = 'gaji';
-    else if (day > 2 && rnd() < C.eventChance) ev = C.randomEvents[Math.floor(rnd() * C.randomEvents.length)];
-    return { weather: w, event: ev };
+  function makeForecast() {
+    return { weather: pickWeighted(C.weatherOrder, function (id) { return C.weathers[id].chance; }) };
   }
 
   function actualWeather(forecastId) {
@@ -157,7 +238,12 @@ KR.sim = (function () {
     return C.upgrades.every(function (u) { return u.hidden || level(s, u.id) >= u.levels.length; });
   }
   // Hidden upgrades (the store manager) only appear once everything else is bought.
-  function upgradeVisible(s, u) { return !u.hidden || allUpgradesOwned(s) || !!level(s, u.id); }
+  // Some only show once another is bought (the mailbox needs SSM first).
+  function upgradeVisible(s, u) {
+    if (level(s, u.id)) return true;
+    if (u.needs && !level(s, u.needs)) return false;
+    return !u.hidden || allUpgradesOwned(s);
+  }
 
   // Store manager's morning order: yesterday's sales plus what ran out, +10%, minus stock on hand.
   function autoOrder(s) {
@@ -180,7 +266,9 @@ KR.sim = (function () {
 
   // Start a new day (called on first load and after each report).
   function startDay(s) {
-    if (!s.forecast) s.forecast = makeForecast(s.day);
+    if (!s.forecast) s.forecast = makeForecast();
+    rollMarket(s);
+    rollEvents(s);
     C.products.forEach(function (p) { s.order[p.id] = 0; });
   }
 
@@ -191,7 +279,7 @@ KR.sim = (function () {
   // Everything lives in s.today, so a half-played day survives a reload.
   function openDay(s) {
     var weather = actualWeather(s.forecast.weather);
-    var ev = event(s) || {};
+    var ev = effects(s);
     var W = C.weathers[weather];
 
     var stockSpend = orderCost(s);
@@ -201,9 +289,9 @@ KR.sim = (function () {
 
     var R = C.trafficRep;
     var traffic = C.baseTraffic * C.dayTraffic[weekday(s.day)] * W.traffic *
-      (R.min + R.scale * Math.pow(s.rep / 100, R.power)) * (1 + sumUp(s, 'traffic')) * (ev.traffic || 1);
+      (R.min + R.scale * Math.pow(rating(s) / 100, R.power)) * (1 + sumUp(s, 'traffic')) * ev.traffic;
     var visitors = Math.max(0, Math.round(traffic * (0.9 + rnd() * 0.2)));
-    var willingMult = (1 + sumUp(s, 'willing')) * (ev.willing || 1);
+    var willingMult = (1 + sumUp(s, 'willing')) * ev.willing;
     var cap = serveCap(s);
     var available = unlockedProducts(s);
 
@@ -227,18 +315,24 @@ KR.sim = (function () {
       for (var k = 0; k < n; k++) {
         var p = pickWeighted(available, function (x) {
           var tcgMult = x.id === 'tcg' ? (1 + 2 * hype(s)) * (weekday(s.day) >= 5 ? C.tcg.weekend : 1) : 1;
-          return x.demand * x.weather[weather] * ((ev.boost && ev.boost[x.id]) || 1) * tcgMult;
+          return x.demand * x.weather[weather] * (ev.boost[x.id] || 1) * tcgMult;
         });
-        var w = p.ref * (0.8 + rnd() * 0.6) * willingMult;
+        var w = refPrice(s, p) * (0.8 + rnd() * 0.6) * willingMult;
         if (p.id === 'tcg') w *= 1 + C.tcg.willing * hype(s);      // hyped sets: collectors pay more
         out.push({ id: p.id, qty: multi * C.buyQty, willing: w });
       }
       return out;
     }
     var timeline = [];
-    people.forEach(function (e, idx) {
-      e.tier = e.from ? 'common' : pickTier(s.rep, rnd());   // factory workers are ordinary customers
-      if (idx >= cap) { e.queue = true; timeline.push(e); return; }   // the line was too long, they walk off
+    // The till serves cap customers over the opening hours. People queue while it's busy; someone
+    // only walks off when the shop is full and the line outside is too long at that moment.
+    var rate = cap / hours, backlog = 0, lastH = 0, room = shopRoom(s) + C.shopRoom.line;
+    people.forEach(function (e) {
+      e.tier = e.from ? 'common' : pickTier(rating(s), rnd());   // factory workers are ordinary customers
+      var h = e.t * hours;
+      backlog = Math.max(0, backlog - (h - lastH) * rate); lastH = h;
+      if (backlog >= room) { e.queue = true; timeline.push(e); return; }   // full and the line too long: they walk off
+      backlog++;
       var T = C.tiers[e.tier];
       e.multi = rnd() < T.multiChance ? T.multi : 1;
       e.wants = wantsFor(e.multi, rnd() < 0.35 ? 2 : 1);
@@ -249,7 +343,7 @@ KR.sim = (function () {
       var st = s.regulars[r.id];
       if (st.away || !isUnlocked(s, product(r.item)) || rnd() > C.regularRules.visitChance) return;
       timeline.push({ t: at(r.hour + rnd() * 1.5), tier: 'common', regular: r.id, multi: 1,
-        wants: [{ id: r.item, qty: (rnd() < 0.3 ? 2 : 1) * C.buyQty, willing: product(r.item).ref * 1.3 * willingMult }] });
+        wants: [{ id: r.item, qty: (rnd() < 0.3 ? 2 : 1) * C.buyQty, willing: refPrice(s, product(r.item)) * 1.3 * willingMult }] });
     });
     // Card collectors: they line up for booster packs when a new TCG set is out (fewer as the hype fades).
     var collectors = 0;
@@ -258,7 +352,7 @@ KR.sim = (function () {
       var tcg = product('tcg');
       for (var c = 0; c < collectors; c++) {
         timeline.push({ t: rnd() * 0.999, tier: 'common', collector: true, multi: 1,
-          wants: [{ id: 'tcg', qty: 1 + Math.floor(rnd() * 3), willing: tcg.ref * (1.1 + rnd() * 0.4) * (1 + C.tcg.willing * hype(s)) * willingMult }] });
+          wants: [{ id: 'tcg', qty: 1 + Math.floor(rnd() * 3), willing: refPrice(s, tcg) * (1.1 + rnd() * 0.4) * (1 + C.tcg.willing * hype(s)) * willingMult }] });
       }
     }
     timeline.sort(function (x, y) { return x.t - y.t; });
@@ -266,7 +360,8 @@ KR.sim = (function () {
 
     s.today = {
       weather: weather, visitors: visitors, timeline: timeline, next: 0,
-      served: 0, queueLost: 0, collectors: collectors, tcgRelease: tcgOn(s) && tcgRelease(s), revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: 0, stockSpend: stockSpend, midSpend: 0,
+      served: 0, queueLost: 0, collectors: collectors, tcgRelease: tcgOn(s) && tcgRelease(s), revenue: 0, tiers: { common: 0, rare: 0, unique: 0 }, multiBuys: 0, regulars: [], factoryDay: factoryDay, rent: rentToday(s), repDelta: ev.rep, rating: rating(s), tips: 0,
+      autoAt: canAutoRestock(s) ? at(18) : null, autoSpend: 0, stockSpend: stockSpend, midSpend: 0,
       perProduct: perProduct
     };
     return s.today;
@@ -274,7 +369,9 @@ KR.sim = (function () {
 
   // Serve the next customer in the timeline; returns their entry with bought/complaint filled in.
   function serveNext(s) {
-    var d = s.today, e = d.timeline[d.next++];
+    var d = s.today, e0 = d.timeline[d.next];
+    if (e0 && d.autoAt != null && e0.t >= d.autoAt) autoRestock(s);   // 6 petang: the part-timer restocks first
+    var e = d.timeline[d.next++];
     if (!d.tiers) { d.tiers = { common: 0, rare: 0, unique: 0 }; d.multiBuys = 0; }   // a day started before tiers existed
     if (!e) return null;
     e.bought = [];
@@ -296,9 +393,15 @@ KR.sim = (function () {
         for (var k = 0; k < q; k++) { takeStock(s, w.id); e.bought.push(w.id); }
         st.sold += q; st.revenue = round2(st.revenue + price * q);
         d.revenue = round2(d.revenue + price * q); s.cash = round2(s.cash + price * q);
-        d.repDelta += price <= product(w.id).ref ? 0.25 : 0.08;
+        d.repDelta += price <= refPrice(s, product(w.id)) ? 0.25 : 0.08;
       }
     });
+    // Above 100 rating, rare and unique customers sometimes tip part of what they spent.
+    if (e.bought.length && e.tier !== 'common' && d.rating > 100 && rnd() * 100 < d.rating - 100) {
+      var spent = e.bought.reduce(function (t, id) { return t + s.prices[id]; }, 0);
+      e.tip = round2(spent * C.tips.share);
+      d.tips = round2((d.tips || 0) + e.tip); s.cash = round2(s.cash + e.tip);
+    }
     e.complaint = e.bought.length ? null : complaint;
     if (e.regular) regularVisit(s, d, e);
     if (e.multi > 1 && e.bought.length > e.wants.length * C.buyQty) d.multiBuys++;
@@ -312,7 +415,7 @@ KR.sim = (function () {
   function regulars(s) {
     s.regulars = s.regulars || {};
     return C.regulars.filter(function (r) {
-      if (!s.regulars[r.id] && s.rep >= r.rep) s.regulars[r.id] = { hearts: C.regularRules.startHearts, away: 0, visits: 0 };
+      if (!s.regulars[r.id] && rating(s) >= r.rep) s.regulars[r.id] = { hearts: C.regularRules.startHearts, away: 0, visits: 0 };
       return !!s.regulars[r.id];
     });
   }
@@ -346,21 +449,40 @@ KR.sim = (function () {
   }
 
   // Mid-day restock: wholesale price plus a markup, paid now, on the shelf straight away.
-  function restockCost(id, qty) { return round2(product(id).cost * (1 + C.midRestockMarkup) * qty); }
+  function restockCost(s, id, qty) { return round2(buyCost(s, product(id)) * (1 + C.midRestockMarkup) * qty); }
   function canRestock(s, id, qty) {
-    return s.cash >= restockCost(id, qty) && totalUnits(s.stock) + qty <= capacity(s) && isUnlocked(s, product(id));
+    return s.cash >= restockCost(s, id, qty) && totalUnits(s.stock) + qty <= capacity(s) && isUnlocked(s, product(id));
   }
   function restock(s, id, qty) {
     if (!s.today || !canRestock(s, id, qty)) return false;
-    var cost = restockCost(id, qty);
+    var cost = restockCost(s, id, qty);
     s.cash = round2(s.cash - cost); addStock(s, id, qty);
     s.today.midSpend = round2(s.today.midSpend + cost);
     return true;
   }
 
+  // ---------- Auto-restock (part-timer) ----------
+  // At 6 petang the part-timer tops every item up to its auto level from the warehouse, at today's
+  // wholesale price (no daytime markup), as far as cash and shelf space allow.
+  function canAutoRestock(s) { return !!sumUp(s, 'autoRestock'); }
+  function autoTarget(s, id) { return (s.autoTarget && s.autoTarget[id]) || 0; }
+  function setAutoTarget(s, id, n) { s.autoTarget = s.autoTarget || {}; s.autoTarget[id] = Math.max(0, Math.min(capacity(s), n)); }
+  function autoRestock(s) {
+    var d = s.today; if (!d || d.autoDone) return null;
+    d.autoDone = true; d.autoSpend = d.autoSpend || 0; d.autoUnits = {};
+    if (!canAutoRestock(s)) return null;
+    unlockedProducts(s).forEach(function (p) {
+      var need = autoTarget(s, p.id) - s.stock[p.id], cost = buyCost(s, p), n = 0;
+      while (n < need && s.cash >= cost && totalUnits(s.stock) < capacity(s)) { s.cash = round2(s.cash - cost); addStock(s, p.id, 1); n++; }
+      if (n) { d.autoUnits[p.id] = n; d.autoSpend = round2(d.autoSpend + n * cost); }
+    });
+    return d.autoUnits;
+  }
+
   function closeDay(s) {
     var d = s.today;
     while (d.next < d.timeline.length) serveNext(s);
+    if (d.autoAt != null) autoRestock(s);
 
     var perishMult = ownedLevels(s).reduce(function (m, l) { return m * (l.perishMult || 1); }, 1);
     var spoiled = {}, spoiledValue = 0;
@@ -370,7 +492,7 @@ KR.sim = (function () {
         batches(s, p.id).filter(function (b) { return s.day - b.day >= p.expiry - 1; }).forEach(function (b) { lost += b.qty; });
         s.batches[p.id] = s.batches[p.id].filter(function (b) { return s.day - b.day < p.expiry - 1; });
       }
-      if (lost > 0) { spoiled[p.id] = lost; s.stock[p.id] -= lost; spoiledValue += lost * p.cost; }
+      if (lost > 0) { spoiled[p.id] = lost; s.stock[p.id] -= lost; spoiledValue += lost * baseCost(s, p); }
     });
     var bills = dailyCosts(s);
     s.cash = round2(s.cash - bills);
@@ -384,12 +506,14 @@ KR.sim = (function () {
       s.cash = round2(s.cash + claw.net);
     }
     // Bank: tonight's return on the savings balance (added to the balance, so it compounds).
-    var B = bank(s), interest = round2(B.balance * bankRate(s));
+    var B = bank(s), interest = round2(Math.max(0, B.balance) * bankRate(s));   // the loan has no interest
     B.balance = round2(B.balance + interest); B.earned = round2((B.earned || 0) + interest);
 
     var repBefore = s.rep;
     s.rep = Math.round(clamp(s.rep + clamp(d.repDelta, -8, 8), 0, 100));
-    var profit = round2(d.revenue - d.stockSpend - d.midSpend - bills + (claw ? claw.net : 0));
+    var tips = d.tips || 0;
+    var profit = round2(d.revenue - d.stockSpend - d.midSpend - (d.autoSpend || 0) - bills + (claw ? claw.net : 0) + tips);
+    s.stats.tips = round2((s.stats.tips || 0) + tips);
 
     s.stats.totalProfit = round2(s.stats.totalProfit + profit);
     s.stats.bestDay = Math.max(s.stats.bestDay, profit);
@@ -409,12 +533,12 @@ KR.sim = (function () {
 
     var report = {
       day: s.day, dayName: dayName(s.day),
-      forecast: s.forecast.weather, weather: d.weather, event: s.forecast.event,
+      forecast: s.forecast.weather, weather: d.weather, events: activeEvents(s).map(function (e) { return e.id; }),
       visitors: d.visitors, served: d.served, regulars: d.regulars || [], factoryDay: d.factoryDay, queueLost: d.queueLost, tiers: d.tiers, multiBuys: d.multiBuys,
       revenue: d.revenue, stockSpend: d.stockSpend, midSpend: d.midSpend, bills: bills, profit: profit,
       spoiled: spoiled, spoiledValue: round2(spoiledValue), claw: claw, collectors: d.collectors || 0, tcgRelease: !!d.tcgRelease,
       bankInterest: interest, bankRate: bankRate(s), bankBalance: B.balance,
-      perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash
+      perProduct: d.perProduct, repBefore: repBefore, repAfter: s.rep, cash: s.cash, tips: tips, adBonus: adBonus(s), autoSpend: d.autoSpend || 0, autoUnits: d.autoUnits || {}
     };
     report.milestones = checkMilestones(s, report);
     report.cash = s.cash;
@@ -429,7 +553,7 @@ KR.sim = (function () {
 
   // Shop value = cash + unsold stock at wholesale cost + upgrades at what they cost.
   function shopValue(s) {
-    var stock = C.products.reduce(function (t, p) { return t + s.stock[p.id] * p.cost; }, 0);
+    var stock = C.products.reduce(function (t, p) { return t + s.stock[p.id] * baseCost(s, p); }, 0);
     var ups = ownedLevels(s).reduce(function (t, l) { return t + l.price; }, 0);
     return round2(s.cash + stock + ups + bank(s).balance);
   }
@@ -469,15 +593,19 @@ KR.sim = (function () {
   // Broke: no cash to restock and nothing left on the shelves.
   function isBankrupt(s) {
     var cheapest = Math.min.apply(null, unlockedProducts(s).map(function (p) { return buyCost(s, p); }));
-    return totalUnits(s.stock) === 0 && s.cash + bank(s).balance < cheapest;
+    return totalUnits(s.stock) === 0 && s.cash + Math.max(0, bank(s).balance) < cheapest;
   }
 
   return {
+    canAutoRestock: canAutoRestock, autoTarget: autoTarget, setAutoTarget: setAutoTarget, autoRestock: autoRestock,
+    weekOf: weekOf, monthOf: monthOf, weekInMonth: weekInMonth, inflation: inflation, marketMult: marketMult, refPrice: refPrice,
+    adOn: adOn, adBonus: adBonus, rating: rating, buyAd: buyAd,
+    activeEvents: activeEvents, pastEvents: pastEvents, effects: effects, unreadMail: unreadMail, readMail: readMail, upkeepToday: upkeepToday,
     allUpgradesOwned: allUpgradesOwned, upgradeVisible: upgradeVisible, autoOrder: autoOrder, canExpand: canExpand,
     product: product, upgrade: upgrade, isUnlocked: isUnlocked, lotsOpen: lotsOpen, lotOf: lotOf, upgradeOpen: upgradeOpen,
     tcgOn: tcgOn, tcgRelease: tcgRelease, tcgDays: tcgDays, hype: hype,
     bank: bank, bankRate: bankRate, bankNextPrice: bankNextPrice, bankFree: bankFree, deposit: deposit, withdraw: withdraw, bankUpgrade: bankUpgrade, unlockedProducts: unlockedProducts,
-    dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
+    dayName: dayName, weekday: weekday, regulars: regulars, regular: regular, repeatOrder: repeatOrder, rentMult: rentMult, rentToday: rentToday, pickTier: pickTier, capacity: capacity, serveCap: serveCap, shopRoom: shopRoom, closeHour: closeHour, openDay: openDay, serveNext: serveNext, closeDay: closeDay,
     restock: restock, restockCost: restockCost, canRestock: canRestock, dailyCosts: dailyCosts,
     totalUnits: totalUnits, buyCost: buyCost, orderCost: orderCost, canOrder: canOrder,
     buyUpgrade: buyUpgrade, level: level, nextLevel: nextLevel, daysLeft: daysLeft, startDay: startDay, runDay: runDay, nextDay: nextDay,

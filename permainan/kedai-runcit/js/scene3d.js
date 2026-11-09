@@ -1,18 +1,15 @@
-// Optional 3D street scene (three.js). Loaded in the background after the page starts.
-// If WebGL or the module can't load, or the player picks 2D, the SVG scene is used instead.
+// 3D street scene (three.js). Loaded in the background after the page starts.
+// The game needs it: if WebGL or the module can't load, main.js shows a "device not supported" notice.
 window.KR = window.KR || {};
 
 KR.scene3d = (function () {
   var THREE = null, ready = false, failed = false;
   var renderer, scene, camera, hemi, sun, rain, root, shopSign, shopLamp, shelfGroup, lights = [];
   var people = [], running = false, raf = 0;
-  var PREF = 'kedaiRuncit.graphics';
 
   var SKY = { panas: 0xffd98a, cerah: 0x9fd6f2, mendung: 0xbcc6cf, hujan: 0x8596a5, ribut: 0x56636f };
   var LIGHT = { panas: 1.5, cerah: 1.3, mendung: 0.8, hujan: 0.6, ribut: 0.4 };
 
-  function wanted() { return KR.platform.storage.load(PREF) !== '2d'; }
-  function setWanted(on) { KR.platform.storage.save(PREF, on ? '3d' : '2d'); }
 
   function hasWebGL() {
     try { var c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -20,7 +17,7 @@ KR.scene3d = (function () {
   }
 
   function load() {
-    if (ready || failed || !wanted()) return Promise.resolve(ready);
+    if (ready || failed) return Promise.resolve(ready);
     if (!hasWebGL()) { failed = true; return Promise.resolve(false); }
     return import('../vendor/three.module.min.js').then(function (mod) {
       THREE = mod; KR.chars.init(THREE); build(); ready = true;
@@ -51,11 +48,11 @@ KR.scene3d = (function () {
     return tex;
   }
 
-  function signTexture(text) {
+  function signTexture(text, bg) {
     var c = document.createElement('canvas'); c.width = 1024; c.height = 128;
     var g = c.getContext('2d');
-    g.fillStyle = '#1f7a55'; g.fillRect(0, 0, c.width, c.height);
-    g.fillStyle = '#fff'; g.font = 'bold 64px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = bg || '#1f7a55'; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#fff'; g.font = '600 64px Fredoka, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(text, c.width / 2, c.height / 2 + 4, c.width - 40);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
@@ -71,7 +68,7 @@ KR.scene3d = (function () {
   var prim = {};
   // The kilang across the road (built from boxes; the building pack has no factory).
   // FGATE is where its workers come out.
-  var FAC = { x: -12, z: 16.8, w: 11, d: 8 }, FGATE = [-12, 12.6], factorySign = null, factoryLang = '';
+  var FAC = { x: -26, z: 16.8, w: 11, d: 8 }, FGATE = [-26, 12.6], factorySign = null, factoryLang = '', factoryLorry = null;
   function buildFactory() {
     var g = new THREE.Group(); root.add(g);
     var front = FAC.z - FAC.d / 2, x0 = FAC.x - FAC.w / 2;
@@ -95,7 +92,7 @@ KR.scene3d = (function () {
     for (var bx = x0 + 1.1; bx < x1 - 0.6; bx += 1.6) box(1.1, 0.7, 0.06, 0x9fd3ea, bx, 2.1, back + 0.02, g);   // windows the camera sees
     for (var bz = front + 1.2; bz < back - 0.6; bz += 1.6) box(0.06, 0.7, 1.1, 0x9fd3ea, x1 + 0.02, 2.1, bz, g);
     box(0.06, 2.2, 2.6, 0x6f7a82, x1 + 0.03, 1.1, back - 1.6, g);                                    // loading bay door
-    var lorry = new THREE.Group(); g.add(lorry);                                                    // a lorry at the loading bay
+    var lorry = factoryLorry = new THREE.Group(); g.add(lorry);                                     // a lorry at the loading bay (Kenney's flatbed replaces it once loaded)
     box(1.4, 1.5, 3.2, 0xeeeeee, 0, 1.0, 0, lorry); box(1.4, 1.1, 1.1, 0x2f7fd1, 0, 0.8, -2.2, lorry);
     box(1.3, 0.45, 0.06, 0xcfe9f3, 0, 1.05, -2.76, lorry);
     lorry.position.set(x1 + 1.6, 0, back - 1.4);
@@ -124,11 +121,13 @@ KR.scene3d = (function () {
   // The shop model has thick double walls, so the room inside is smaller than the lot:
   // IN = inner side wall (from the lot's centre), BK = inner back wall. Shelves and the spots where
   // customers stand are laid out from these, so nobody stands inside a wall.
-  var SX = LOT.w / 2.48, SZ = (LOT.front - LOT.back) / 1.8, OZ = LOT.front - 0.72 * SZ;
-  var IN = 1.03 * SX, BK = OZ - 0.73 * SZ;
+  // The three lots are one linked row of shophouses (kedai deret) built here: shared party walls,
+  // one roof and a covered kaki lima. FZ = shop front, BZ = outside of the back wall.
+  var FZ = 1.0, BZ = -6.0, WALL = 0.25, ROW_H = 3.5;
+  var IN = LOT.w / 2 - WALL, BK = BZ + WALL;
   // Everything on the shop's side of the road to the right of the row moves with the row's length.
   var RX = 3 * (LOT.w - 7);
-  var TREES = [[-6.3, -5], [4.6, -9.6], [19.5 + RX, -6.5], [3.5, 10.9], [-3.6, 11.4], [10, 11.2], [-21, -3], [16, 11]];
+  var TREES = [[-6.3, -5], [4.6, -11.6], [19.5 + RX, -6.2], [3.5, 10.3], [-3.9, 10.3], [8.2, 10.3], [-21, -3], [13.3, 10.3]];
   function tree(x, z, s) {
     s = s || 1;
     box(0.25 * s, 1.2 * s, 0.25 * s, 0x7a5233, x, 0.6 * s, z, prim.trees);
@@ -238,7 +237,7 @@ KR.scene3d = (function () {
     if (!dt) return;
     var busy = crossingBusy();
     cars.forEach(function (c) {
-      var d = c.lane.dir, x = c.g.position.x, front = x + d * c.len / 2, target = CAR_MAX;
+      var d = c.lane.dir, x = c.g.position.x, front = x + d * c.len / 2, target = c.vmax || CAR_MAX;
       var toStop = (ZX - d * 2.4 - front) * d;                // distance from the bumper to the stop line
       if (busy && toStop > -0.3 && toStop < 9) target = Math.max(0, Math.min(target, toStop * 0.9));
       cars.forEach(function (o) {                             // keep a gap to the car in front
@@ -246,14 +245,132 @@ KR.scene3d = (function () {
         var gap = ((o.g.position.x - d * o.len / 2) - front) * d;
         if (gap > 0 && gap < 6) target = Math.min(target, Math.max(0, (gap - 0.9) * 1.2));
       });
+      if (c.stopAt != null) target = Math.min(target, deliveryTarget(c));
       c.v += Math.max(-9 * dt, Math.min(3 * dt, target - c.v));
       c.g.position.x += d * c.v * dt;
-      c.wheels.forEach(function (w) { w.rotation.z -= c.v * dt / 0.27; });
+      c.wheels.forEach(function (w) { if (c.kenney) w.rotation.x += c.v * dt / 0.3; else w.rotation.z -= c.v * dt / 0.27; });
+      if (c.g.position.x * d > ROAD_END && c.oneWay) { c.gone = true; return; }
       if (c.g.position.x * d > ROAD_END) {                    // round again, well behind the last car in this lane
         var last = cars.reduce(function (m, o) { return o.lane === c.lane && o !== c ? Math.min(m, o.g.position.x * d) : m; }, ROAD_END);
         c.g.position.x = d * Math.min(-ROAD_END, last - 6 - Math.random() * 10);
       }
     });
+    cars.forEach(function (o) { if (o.gone) root.remove(o.g); });
+    cars = cars.filter(function (o) { return !o.gone; });
+    if (van && van.gone) van = null;
+    updateDelivery(dt);
+  }
+
+  // ---------- Kenney props (CC0): goods on the shelves, arcade machines, cars ----------
+  // models/env/food.glb, arcade.glb and cars.glb are packed by tools/pack_kenney.mjs; each model is a
+  // node named after its file. Until they load (or if they can't) the sprites and box versions stay.
+  var KM = null, kdims = {};
+  function loadKenney(loader) {
+    return Promise.all(['food', 'arcade', 'cars'].map(function (n) { return loader.loadAsync('models/env/' + n + '.glb'); }))
+      .then(function (list) {
+        KM = {};
+        list.forEach(function (g) { g.scene.updateMatrixWorld(true); g.scene.children.forEach(function (c) { KM[c.name] = c; }); });
+        KR.models.setBag(KM.bag);
+        if (cfg.lots != null) buildShop(cfg.lots, cfg.lotProducts, cfg);
+        kenneyTown();
+      }).catch(function (e) { KM = null; if (window.console) console.warn('Kenney props not loaded, keeping simple ones', e); });
+  }
+  // Size of a Kenney model: 'y' = height, else its longest side.
+  function kdim(name, dim) {
+    var b = kdims[name] = kdims[name] || new THREE.Box3().setFromObject(KM[name]).getSize(new THREE.Vector3());
+    return dim === 'y' ? b.y : Math.max(b.x, b.y, b.z);
+  }
+  function kput(name, x, y, z, size, rotY, parent, dim) {
+    var o = put(KM[name], x, z, size / kdim(name, dim), rotY, parent || shopGroup);
+    o.position.y = y; return o;
+  }
+
+  // Goods on the shelves: model, size (longest side), how many per slot, and a flat colour for
+  // models that need a different look (a clear-blue bottle for mineral water).
+  var GOODS = {
+    air:     { m: 'soda-bottle', s: 0.4, n: 3, col: 0x8fd0f5 },
+    roti:    { m: 'loaf', s: 0.46, n: 1 },
+    maggi:   { m: 'chinese', s: 0.3, n: 2 },
+    telur:   { m: 'egg', s: 0.15, n: 3 },
+    aiskrim: { m: 'popsicle', s: 0.3, n: 3 },
+    cokelat: { m: 'candy-bar', s: 0.3, n: 2 },
+    airtin:  { m: 'soda-can', s: 0.24, n: 2 },
+    beras:   { m: 'bag', s: 0.44, n: 1 },
+    minyak:  { m: 'bottle-oil', s: 0.4, n: 3 },
+    gula:    { m: 'carton-small', s: 0.26, n: 2 }
+  };
+  var goodsMat = {};
+  function goods(id, t, y, d, rot) {
+    var G = GOODS[id], w = 0.44, n = G.n;
+    for (var q = 0; q < n; q++) {
+      var off = (q - (n - 1) / 2) * (w / n), dz = (q % 2) * 0.04;
+      var o = rot ? kput(G.m, d + dz, y, t + off, G.s, rot) : kput(G.m, t + off, y, d + dz, G.s, rot);
+      o.rotation.y = rot + (q - (n - 1) / 2) * 0.15;
+      if (G.col) {
+        goodsMat[id] = goodsMat[id] || new THREE.MeshStandardMaterial({ color: G.col, roughness: 0.2, transparent: true, opacity: 0.85 });
+        o.traverse(function (m) { if (m.isMesh) m.material = goodsMat[id]; });
+      }
+    }
+  }
+
+  // Cars from Kenney's Car Kit join the code-built ones; a flatbed lorry at the kilang and an
+  // ambulance parked at the klinik with its lights flashing.
+  var ambLights = [];
+  function kenneyCar(name, s) {
+    var g = new THREE.Group(), body = put(KM[name], 0, 0, s, Math.PI / 2, g), wheels = [];
+    body.traverse(function (o) { if (/^wheel/.test(o.name)) wheels.push(o); });
+    return { g: g, wheels: wheels, len: kdim(name) * s, v: 0, kenney: true };
+  }
+  function kenneyTown() {
+    ['sedan', 'taxi', 'suv', 'truck'].forEach(function (n, i) {
+      var c = kenneyCar(n, 0.92), ln = LANES[i % 2];
+      c.lane = ln; c.g.rotation.y = ln.dir > 0 ? 0 : Math.PI;
+      var last = cars.reduce(function (m, o) { return o.lane === ln ? Math.min(m, o.g.position.x * ln.dir) : m; }, -ROAD_END);
+      c.g.position.set(ln.dir * (last - 7 - Math.random() * 4), 0.02, ln.z);
+      c.v = CAR_MAX; root.add(c.g); cars.push(c);
+    });
+    if (factoryLorry) {
+      factoryLorry.visible = false;
+      put(KM['truck-flat'], factoryLorry.position.x, factoryLorry.position.z, 1.0, Math.PI);
+    }
+    put(KM.ambulance, -3.5, -22.0, 0.95, Math.PI / 2);      // parked outside the klinik
+    [0xff3b30, 0x2f7fd1].forEach(function (c, j) {
+      var m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), new THREE.MeshBasicMaterial({ color: c }));
+      m.position.set(-3.5 + 1.1, 1.74, -22.0 + (j ? 0.3 : -0.3)); root.add(m); ambLights.push(m);
+    });
+  }
+
+  // Mid-day restock: a delivery lorry pulls up in front of the shop, drops boxes on the kaki lima
+  // and drives off; the boxes are taken inside a little later.
+  var van = null, boxes = [], VAN_STOP = 2.6;
+  function delivery() {
+    if (!ready) return;
+    if (van && van.stopAt != null) return;                  // one already on its way
+    var c = KM ? kenneyCar('delivery', 0.92) : makeCar('van', 0xffffff), ln = LANES[0];
+    c.lane = ln; c.oneWay = true; c.stopAt = VAN_STOP; c.unload = 0;
+    var x = -19;                                             // just off screen, behind any car close by
+    cars.forEach(function (o) { if (o.lane === ln && Math.abs(o.g.position.x - x) < 5) x = Math.min(x, o.g.position.x - 6); });
+    c.g.position.set(x, 0.02, ln.z); c.v = c.vmax = 6.5;
+    root.add(c.g); cars.push(c); van = c;
+  }
+  function deliveryTarget(c) {
+    var toStop = (c.stopAt - c.g.position.x) * c.lane.dir;
+    return toStop <= 0.05 ? 0 : Math.max(0.6, toStop * 1.1);
+  }
+  var boxT = 0;
+  function updateDelivery(dt) {
+    ambLights.forEach(function (m, j) { m.visible = Math.floor(performance.now() / 350) % 2 === j; });
+    if (van && van.stopAt != null && van.stopAt - van.g.position.x < 0.3 && van.v < 0.05) {
+      van.unload += dt;
+      var want = Math.min(3, Math.floor(van.unload / 1.0));
+      while (boxes.length < want) {
+        var k = boxes.length, bx = KM ? kput('box', 1.5 + (k % 2) * 0.42, 0.13 + (k > 1 ? 0.3 : 0), 2.1, 0.3, k * 0.4, root)
+          : box(0.3, 0.3, 0.3, 0xc8935a, 1.5 + (k % 2) * 0.42, 0.28 + (k > 1 ? 0.3 : 0), 2.1);
+        boxes.push(bx);
+      }
+      if (van.unload > 4) { van.stopAt = null; boxT = 4; }
+    }
+    if (boxT > 0 && (boxT -= dt) <= 0) { boxes.forEach(function (b) { root.remove(b); }); boxes = []; }
   }
 
   function build() {
@@ -265,7 +382,7 @@ KR.scene3d = (function () {
     renderer.domElement.className = 'scene3d';
     scene = new THREE.Scene();
     // Angled top-down view: orthographic camera looking down at ~35 degrees.
-    camera = new THREE.OrthographicCamera(-10, 10, 7, -7, 0.1, 200);
+    camera = new THREE.OrthographicCamera(-10, 10, 7, -7, 0.1, 400);
     hemi = new THREE.HemisphereLight(0xffffff, 0x6f8f5a, 1.1); scene.add(hemi);
     sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(-10, 18, 8);
     sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
@@ -274,23 +391,34 @@ KR.scene3d = (function () {
     root = new THREE.Group(); scene.add(root);
 
     // Ground: grass, the main road in front of the row and a side road
-    var grass = box(160, 0.1, 160, 0x7fbf5f, 0, -0.06, 0); grass.receiveShadow = true;
-    var road = box(160, 0.06, 4.8, 0x5c5f63, 0, -0.01, 5.9); road.receiveShadow = true;
-    var side = box(4.2, 0.06, 80, 0x5c5f63, -9.5, -0.005, -36); side.receiveShadow = true;
-    for (var i = -78; i < 80; i += 2.5) if (Math.abs(i - ZX) > 2) box(1.2, 0.02, 0.15, 0xf2efe6, i, 0.03, 5.9);
+    // Roads run well past the edge of the view in every direction (E = how far).
+    var E = 200;
+    var grass = box(2 * E, 0.1, 2 * E, 0x7fbf5f, 0, -0.06, 0); grass.receiveShadow = true;
+    var road = box(2 * E, 0.06, 4.8, 0x5c5f63, 0, -0.01, 5.9); road.receiveShadow = true;
+    var side = box(4.2, 0.06, E + 4, 0x5c5f63, -9.5, -0.005, 4 - (E + 4) / 2); side.receiveShadow = true;
+    for (var i = -E + 2; i < E; i += 2.5) if (Math.abs(i - ZX) > 2 && Math.abs(i + 9.5) > 2.6) box(1.2, 0.02, 0.15, 0xf2efe6, i, 0.03, 5.9);
+    for (var sz = -12; sz > -E; sz -= 2.5) if (Math.abs(sz + 8.6) > 2.2 && Math.abs(sz + 21) > 2.2) box(0.15, 0.02, 1.2, 0xf2efe6, -9.5, 0.03, sz);
+    // Kaki lima and kerb stop at the side road's junction, so nothing sticks out over it
+    function strip(h, d, c, y, z) {
+      return [box(E - 11.6, h, d, c, (-E - 11.6) / 2, y, z), box(E + 7.4, h, d, c, (E - 7.4) / 2, y, z)];
+    }
     buildZebra();
-    var walk = box(160, 0.12, 2.2, 0xd9d0bd, 0, 0, 2.4); walk.receiveShadow = true;   // kaki lima
-    box(160, 0.14, 0.25, 0x9a9384, 0, 0.02, 3.5);          // kerb
-    box(160, 0.1, 0.5, 0x6d6a60, 0, 0.0, 8.55);            // longkang across the road
-    var walk2 = box(160, 0.12, 2.0, 0xd9d0bd, 0, 0, 9.8); walk2.receiveShadow = true;  // pavement across the road
+    var walk = strip(0.12, 2.2, 0xd9d0bd, 0, 2.4);            // kaki lima
+    walk.forEach(function (w) { w.receiveShadow = true; });
+    strip(0.14, 0.25, 0x9a9384, 0.02, 3.5);                   // kerb
+    box(2 * E, 0.1, 0.5, 0x6d6a60, 0, 0.0, 8.55);              // longkang across the road
+    var walk2 = box(2 * E, 0.12, 2.0, 0xd9d0bd, 0, 0, 9.8); walk2.receiveShadow = true;  // pavement across the road
 
-    // The kedai runcit: a row of three shop lots. The first is yours; the other two can be
-    // rented with the "Besarkan Kedai" upgrade. buildShop() fills them in for the current level.
+    // The kedai runcit: a linked row of three shop lots. The first is yours; the other two can be
+    // rented with the "Besarkan Kedai" upgrade. buildShop() builds the row for the current level.
     var SW = LOT.w / 2;
-    [-SW - 2.85, -SW - 0.85].forEach(function (x) { box(0.12, 2.6, 0.12, 0x3b3f44, x, 1.3, 1.75); });   // signboard posts
-    var sign = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.75, 0.12),
-      [mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), mat(0x1f7a55), new THREE.MeshBasicMaterial({ map: signTexture('KEDAI RUNCIT') }), mat(0x1f7a55)]);
-    sign.position.set(-SW - 1.85, 2.45, 1.8); root.add(sign); shopSign = sign;
+    // Back lanes: one behind the shops (the second row of houses faces it) and one further back
+    // that the klinik, bank and flats face. Both join the side road.
+    [-8.6, -21].forEach(function (z) {
+      var l = box(E + 9.5, 0.06, 3.4, 0x5c5f63, (E - 9.5) / 2, -0.008, z); l.receiveShadow = true;   // from the side road to the edge
+      for (var x = -5; x < E; x += 2.5) box(1.0, 0.02, 0.12, 0xf2efe6, x, 0.03, z);
+      box(E + 7.4, 0.1, 0.9, 0xd9d0bd, (E - 7.4) / 2, 0, z - 2.15);   // pavement on the far side, from the side road's edge
+    });
     shopLamp = new THREE.PointLight(0xffd9a0, 0, 16); shopLamp.position.set(LOT.w, 3.2, -1.6); scene.add(shopLamp);
     // Kaki lima tiles in front of the row
     var rowW = LOT.w * LOTS, rowX = (LOTS - 1) * LOT.w / 2;
@@ -319,7 +447,7 @@ KR.scene3d = (function () {
 
     buildTraffic();
 
-    root.traverse(function (o) { if (o.isMesh && o !== grass && o !== road && o !== side && o !== walk && o !== walk2 && o !== field) { o.castShadow = true; o.receiveShadow = true; } });
+    root.traverse(function (o) { if (o.isMesh && o !== grass && o !== road && o !== side && walk.indexOf(o) < 0 && o !== walk2 && o !== field) { o.castShadow = true; o.receiveShadow = true; } });
 
     // Rain: falling line segments, shown only in wet weather
     var n = 500, pos = new Float32Array(n * 6);
@@ -335,11 +463,12 @@ KR.scene3d = (function () {
   // ---------- Scenery models ----------
   // Quaternius CC0 "Buildings pack" and "Ultimate Nature Pack" (models/env). Until they load,
   // or if they can't, the simple box versions built above stay.
-  var ENV = ['shop', 'house_a', 'house_b', 'house_c', 'house_d', 'house_e', 'flat_a', 'flat_b', 'bank', 'hospital', 'tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b',
+  var ENV = ['house_a', 'house_b', 'house_c', 'house_d', 'house_e', 'flat_a', 'flat_b', 'bank', 'hospital', 'tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b',
              'bush', 'bush_berry', 'flowers', 'plant'];
   function loadEnv() {
     import('../vendor/GLTFLoader.js').then(function (m) {
       var loader = new m.GLTFLoader();
+      loadKenney(loader);
       return Promise.all(ENV.map(function (n) {
         return loader.loadAsync('models/env/' + n + '.glb').then(function (g) { return [n, g.scene]; });
       }));
@@ -380,6 +509,32 @@ KR.scene3d = (function () {
   }
 
   var ENVM = null;
+  // The bank model comes without a texture (all one grey). Colour it by part: a slate roof,
+  // white pediment and cornice, cream walls and columns, grey steps.
+  function paintBank(o) {
+    o.traverse(function (m) {
+      if (!m.isMesh) return;
+      var g = m.geometry, pos = g.attributes.position, nrm = g.attributes.normal, n = pos.count;
+      g.computeBoundingBox();
+      var top = g.boundingBox.max.y, bot = g.boundingBox.min.y, h = top - bot, col = new Float32Array(n * 3), c = new THREE.Color();
+      for (var i = 0; i < n; i++) {
+        var y = (pos.getY(i) - bot) / h, ny = nrm ? nrm.getY(i) : 0;
+        if (ny > 0.35 && y > 0.62) c.setHex(0x3f6b8a);                    // roof
+        else if (y < 0.13) c.setHex(0xb9b4aa);                             // steps and plinth
+        else if (y > 0.55) c.setHex(0xfaf6ec);                             // pediment and cornice
+        else c.setHex(0xf1e3c2);                                           // walls and columns
+        c.toArray(col, i * 3);
+      }
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      m.material = m.material.clone(); m.material.vertexColors = true; m.material.color.setHex(0xffffff);
+    });
+    return o;
+  }
+  // Shade trees along the roads and around the padang
+  var MORE_TREES = [[-38, 10.3], [-17.5, 10.3], [-11, 10.3], [22.5, 10.3], [27.2, 10.3], [33, 10.3], [42, 10.3],
+    [-12.8, -3.5], [-12.8, -14], [-12.8, -27], [-12.8, -34], [-6.2, -27], [-6.2, -34],
+    [-0.2, -11.6], [5.6, -11.6], [11.5, -11.6], [17, -11.6], [22.6, -11.6], [28.6, -11.6],
+    [-23.5, -5.5], [-23.5, -12.5], [-13.2, -12.8], [-18, -13.6], [2, -24], [12, -24], [28.5, -24], [-8, -40], [-17, -22]];
   function placeEnv(M) {
     ['tree_a', 'tree_b', 'tree_c', 'palm_a', 'palm_b', 'bush', 'bush_berry', 'flowers', 'plant'].forEach(function (n) {
       M[n].traverse(function (m) { if (m.isMesh) m.material.color.multiplyScalar(1.9); });   // the pack's greens are very dark
@@ -396,21 +551,24 @@ KR.scene3d = (function () {
     home('house_d', 20.5 + RX, 1, 0.65, 0, 0xbfe3d6, 0xc0453a); home('house_a', 24.1 + RX, 1, 0.65, 0, 0xf3d9a4, 0x8e5bd1);
     home('house_b', 28.7 + RX, 1, 0.65, 0, 0xcfd8f2, 0x2f7fd1); home('house_c', -16, 1, 1.01, 0, 0xf6c9c9, 0x2f9e6e);
     // Second row behind the shops
-    home('house_e', -3, -13, 1.06, 0, 0xf6d6a8, 0xc0453a); home('house_a', 2.5, -13, 0.65, 0, 0xd7ecf7, 0x2f9e6e);
-    home('house_b', 8.6, -13, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -13, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
-    home('house_e', 19.6, -13, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -13, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
+    home('house_e', -3, -11.3, 1.06, 0, 0xf6d6a8, 0xc0453a); home('house_a', 2.5, -11.3, 0.65, 0, 0xd7ecf7, 0x2f9e6e);
+    home('house_b', 8.6, -11.3, 0.65, 0, 0xf6c9c9, 0x8e5bd1); home('house_d', 14.4, -11.3, 0.65, 0, 0xe2f0c9, 0x2f7fd1);
+    home('house_e', 19.6, -11.3, 1.06, 0, 0xcfd8f2, 0xc0453a); home('house_c', 25.5, -11.3, 1.01, 0, 0xf3d9a4, 0x2f9e6e);
     // Taller town buildings sit behind the houses so they never hide the shop row
-    put(M.hospital, -3, -21, 2.0, 0); put(M.bank, 7, -20, 1.7, 0);
-    put(M.flat_a, 16, -21, 2.4, 0); put(M.flat_b, 24, -21, 2.4, 0);
-    put(M.flat_a, -30, -8, 2.4, Math.PI / 2); put(M.flat_b, -30, 1, 2.4, Math.PI / 2);
+    // (fronts on the pavement of the back road at z = -21)
+    put(M.hospital, -3, -23.3 - 1.97 * 2.0, 2.0, 0); paintBank(put(M.bank, 7, -23.3 - 1.9 * 1.7, 1.7, 0));
+    put(M.flat_a, 16, -23.3 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, 24, -23.3 - 0.95 * 2.4, 2.4, 0);
+    // Flats along the main road on the left, past the side road, facing the street
+    put(M.flat_a, -24, 1 - 1.2 * 2.4, 2.4, 0); put(M.flat_b, -31, 1 - 0.95 * 2.4, 2.4, 0);
     // Across the road: low houses only, facing the street
-    home('house_d', -1.5, 13.4, 0.65, 1, 0xd7ecf7, 0x2f9e6e);              // the kilang takes the plots further left
-    home('house_e', 11, 13.4, 1.06, 1, 0xbfe3d6, 0x8e5bd1); home('house_a', 15.6, 13.4, 0.65, 1, 0xf6c9c9, 0xc0453a);
-    home('house_d', 20.2, 13.4, 0.65, 1, 0xf3d9a4, 0x2f7fd1); home('house_b', 24.8, 13.4, 0.65, 1, 0xcfd8f2, 0x8e5bd1);
+    home('house_d', -1.5, 11.0, 0.65, 1, 0xd7ecf7, 0x2f9e6e);
+    home('house_a', -8, 11.0, 0.65, 1, 0xf3d9a4, 0xc0453a); home('house_b', -14.5, 11.0, 0.65, 1, 0xe2f0c9, 0x2f7fd1);   // the kilang is further left
+    home('house_e', 11, 11.0, 1.06, 1, 0xbfe3d6, 0x8e5bd1); home('house_a', 15.6, 11.0, 0.65, 1, 0xf6c9c9, 0xc0453a);
+    home('house_d', 20.2, 11.0, 0.65, 1, 0xf3d9a4, 0x2f7fd1); home('house_b', 24.8, 11.0, 0.65, 1, 0xcfd8f2, 0x8e5bd1);
     prim.houses.visible = false;
 
     var kinds = ['palm_a', 'tree_a', 'palm_b', 'tree_b', 'tree_c'];
-    TREES.concat([[-25, -15], [-25, 0], [34 + RX, -2], [36, 12], [-26, 14], [11.5, -27], [-14, -17], [20, -27], [-0.5, 20], [13.5, 21]])
+    TREES.concat([[-25, -15], [34 + RX, -2], [36, 12], [-36, 14], [11.5, -27], [-14, -17], [20, -27], [-0.5, 20], [13.5, 21]], MORE_TREES)
       .forEach(function (p, j) {
         var k = kinds[j % kinds.length];
         put(M[k], p[0], p[1], k.indexOf('palm') === 0 ? 1.1 : 1.35, j * 1.3);
@@ -433,9 +591,12 @@ KR.scene3d = (function () {
   var shopGroup = null, cutMats = [], cutaway = true, AISLE = -1.4;   // SPOTS: [x, z, facing, lot]
   var SPOTS = [], spotUsed = [], PAY = [];
 
+  // A shelf unit; the boards stick out 0.3 at the front so goods can stand on them.
   function shelf(w, h, d, x, z, rot) {
-    var g = box(w, h, d, 0x9c7445, x, h / 2, z, shopGroup); g.rotation.y = rot || 0;
-    for (var k = 1; k < 4; k++) box(w + 0.02, 0.04, d + 0.02, 0xc79a62, x, h * k / 4, z, shopGroup).rotation.y = rot || 0;
+    rot = rot || 0;
+    var g = box(w, h, d, 0x9c7445, x, h / 2, z, shopGroup); g.rotation.y = rot;
+    var ox = Math.sin(rot) * 0.15, oz = Math.cos(rot) * 0.15;
+    for (var k = 1; k < 4; k++) box(w + 0.02, 0.04, d + 0.3, 0xc79a62, x + ox, h * k / 4, z + oz, shopGroup).rotation.y = rot;
     return g;
   }
 
@@ -446,35 +607,21 @@ KR.scene3d = (function () {
     if (shopGroup) root.remove(shopGroup);
     shopGroup = new THREE.Group(); root.add(shopGroup);
     cutMats = []; SPOTS = []; PAY = [];
-    var SW = LOT.w / 2, back = LOT.back, front = LOT.front, depth = front - back;
+    var SW = LOT.w / 2;
+    buildRow(level);
     for (var i = 0; i < LOTS; i++) {
-      var cx = lotX(i), mine = i <= level, items = (lotProducts && lotProducts[i]) || [];
-      if (ENVM) {
-        var planes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), OZ + 0.64 * SZ), new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
-        if (mine && i > 0) planes.push(new THREE.Plane(new THREE.Vector3(1, 0, 0), -(cx - 0.85 * SX)));          // open to the lot on the left
-        if (mine && i < level) planes.push(new THREE.Plane(new THREE.Vector3(-1, 0, 0), cx + 0.85 * SX));        // and on the right
-        if (!mine) planes = [planes[1]];                       // empty lots: just the roof comes off, so they don't hide your shop
-        put(ENVM.shop, cx, OZ, [SX, LOT.h / 1.397, SZ], 0, shopGroup).traverse(function (m) {
-          if (!m.isMesh) return;
-          m.material = m.material.clone(); m.material.side = THREE.DoubleSide;
-          m.material.userData.planes = planes; cutMats.push(m.material);
-        });
-      } else {                                                // plain walls until the model loads
-        box(LOT.w - 0.1, LOT.cut, 0.2, 0xf6e7c8, cx, LOT.cut / 2, BK - 0.1, shopGroup);
-        if (i === 0 || !mine) box(0.2, LOT.cut, depth, 0xf6e7c8, cx - IN - 0.1, LOT.cut / 2, (front + back) / 2, shopGroup);
-        if (i === LOTS - 1 || i >= level) box(0.2, LOT.cut, depth, 0xf6e7c8, cx + IN + 0.1, LOT.cut / 2, (front + back) / 2, shopGroup);
-      }
+      var cx = lotX(i), mine = i <= level, items = (lotProducts && lotProducts[i]) || [], ids = (extras.lotIds && extras.lotIds[i]) || [];
       if (!mine) {                                            // shutter down, "for rent" notice
-        box(2 * IN - 0.2, 0.06, 1.0 - BK, 0xb9b4aa, cx, 0.12, (BK + 1.0) / 2, shopGroup);   // bare floor
-        box(LOT.w - 0.5, 2.2, 0.12, 0x9aa3ab, cx, 1.1, front + 0.12, shopGroup);
-        for (var r = 0.2; r < 2.2; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, front + 0.13, shopGroup);
+        box(2 * IN, 0.06, FZ - BK, 0xb9b4aa, cx, 0.12, (BK + FZ) / 2, shopGroup);   // bare floor
+        box(LOT.w - 0.5, 2.2, 0.12, 0x9aa3ab, cx, 1.1, FZ - 0.05, shopGroup);
+        for (var r = 0.2; r < 2.2; r += 0.25) box(LOT.w - 0.48, 0.03, 0.13, 0x7d868e, cx, r, FZ - 0.04, shopGroup);
         var note = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), new THREE.MeshBasicMaterial({ map: noticeTexture() }));
-        note.position.set(cx, 1.4, front + 0.2); shopGroup.add(note);
+        note.position.set(cx, 1.4, FZ + 0.03); shopGroup.add(note);
         continue;
       }
       // Floor tiles, joined to the next rented lot
-      var fl = cx - IN, fr = i < level ? cx + SW + 0.1 : cx + IN, fz = (BK + 1.0) / 2, fd = 1.0 - BK;
-      if (i > 0) fl = cx - SW - 0.1;
+      var fl = cx - IN, fr = i < level ? cx + SW + WALL : cx + IN, fz = (BK + FZ) / 2, fd = FZ - BK;
+      if (i > 0) fl = cx - SW - WALL;
       box(fr - fl, 0.06, fd, 0xe9e2d4, (fl + fr) / 2, 0.13, fz, shopGroup);
       for (var fx = fl + 0.8; fx < fr - 0.2; fx += 0.8) box(0.03, 0.062, fd, 0xcfc6b4, fx, 0.13, fz, shopGroup);
       // Layout (z): back shelf against BK, islands, then the aisle (AISLE) customers walk along.
@@ -489,26 +636,28 @@ KR.scene3d = (function () {
         // Counter on the left of the door, the tauke behind it facing right (towards the door)
         box(0.7, 1.05, 1.3, 0x8a6a3f, cx - 1.0, 0.53, -0.15, shopGroup);
         box(0.72, 0.06, 1.32, 0xc79a62, cx - 1.0, 1.07, -0.15, shopGroup);
-        box(0.45, 0.3, 0.4, 0x3b3f44, cx - 1.1, 1.25, -0.45, shopGroup);                    // till
+        if (KM) kput('cash-register', cx - 1.0, 1.1, -0.15, 0.95, Math.PI / 2);              // till on the counter, facing the customers
+        else box(0.45, 0.3, 0.4, 0x3b3f44, cx - 1.1, 1.25, -0.45, shopGroup);
         box(1.2, 0.85, 0.7, 0xf4f7fb, cx + 2.3, 0.43, 0.2, shopGroup);                      // peti ais krim, right of the door
         box(1.22, 0.1, 0.72, 0x2f7fd1, cx + 2.3, 0.9, 0.2, shopGroup);
         SPOTS.push([cx - 1.7, spotZ, Math.PI, 0], [cx + 0.6, spotZ, Math.PI, 0], [cx + IN - 0.55, BK + 1.3, Math.PI, 0],
                    [cx - IN + 1.2, -2.6, -Math.PI / 2, 0], [cx - 0.5, isZ, Math.PI, 0], [cx + 1.7, isZ, Math.PI, 0]);
         PAY.push([cx - 0.25, 0.25, -Math.PI / 2], [cx - 0.25, -0.4, -Math.PI / 2]);        // at the counter, facing the tauke
-        shelfItems(items, cx - IN + 0.4, cx + 1.7, bz + 0.27, 3, 0.5, 0);
-        shelfItems(items, -3.4, -1.8, cx - IN + 0.57, 3, 0.45, Math.PI / 2);
-        shelfItems(items, cx - 1.0, cx, isl + 0.37, 1, 0.85, 0);
-        shelfItems(items, cx + 1.2, cx + 2.2, isl + 0.37, 1, 0.85, 0);
+        shelfItems(items, ids, cx - IN + 0.4, cx + 1.7, bz + 0.27, [0.5, 1.1, 1.7], [0.545, 1.07, 1.595], 0);
+        shelfItems(items, ids, -3.4, -1.8, cx - IN + 0.57, [0.45, 1.05, 1.65], [0.495, 0.97, 1.445], Math.PI / 2);
+        shelfItems(items, ids, cx - 1.0, cx, isl + 0.37, [0.85], [1.2], 0);
+        shelfItems(items, ids, cx + 1.2, cx + 2.2, isl + 0.37, [0.85], [1.2], 0);
       } else {
         var w = 2 * IN - 0.6;
         shelf(w, 2.1, 0.5, cx, bz);
         SPOTS.push([cx - 2.6, spotZ, Math.PI, i], [cx, spotZ, Math.PI, i], [cx + 2.6, spotZ, Math.PI, i],
                    [cx - 1.3, isZ, Math.PI, i], [cx + 1.3, isZ, Math.PI, i]);
-        shelfItems(items, cx - w / 2 + 0.3, cx + w / 2 - 0.3, bz + 0.27, 3, 0.5, 0);
+        shelfItems(items, ids, cx - w / 2 + 0.3, cx + w / 2 - 0.3, bz + 0.27, [0.5, 1.1, 1.7], [0.545, 1.07, 1.595], 0);
         if (i === 2 && extras.tcg) tcgCase(cx - 1.3, isl);                               // glass case of booster packs
-        else { shelf(1.4, 1.2, 0.7, cx - 1.3, isl); shelfItems(items, cx - 1.8, cx - 0.8, isl + 0.37, 1, 0.85, 0); }
+        else { shelf(1.4, 1.2, 0.7, cx - 1.3, isl); shelfItems(items, ids, cx - 1.8, cx - 0.8, isl + 0.37, [0.85], [1.2], 0); }
         if (i === 1) sacks(cx + 1.3, isl);                                                // rice sacks on a pallet
-        else { shelf(1.4, 1.2, 0.7, cx + 1.3, isl); shelfItems(items, cx + 0.8, cx + 1.8, isl + 0.37, 1, 0.85, 0); }
+        else if (i === 2 && KM) kput('prizes', cx + 1.3, 0.13, isl, 1.35, 0, null, 'x');     // a rack of prize toys
+        else { shelf(1.4, 1.2, 0.7, cx + 1.3, isl); shelfItems(items, ids, cx + 0.8, cx + 1.8, isl + 0.37, [0.85], [1.2], 0); }
         if (i === 2 && extras.claw) { clawMachine(cx + 2.6, 0.0); SPOTS.push([cx + 2.6, -0.95, 0, i]); }
       }
     }
@@ -516,6 +665,55 @@ KR.scene3d = (function () {
     shopLamp.position.x = lotX(level) / 2;
     shopGroup.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     setCutaway(cutaway, true);
+  }
+
+  // The shophouse row. Rented lots are open to each other through wide arches in the party walls;
+  // an empty lot stays walled off with its shutter down. Everything above LOT.cut (roof, fascia,
+  // the kaki lima canopy) is sliced away when zoomed in, so you can see inside.
+  function buildRow(level) {
+    var cut = [new THREE.Plane(new THREE.Vector3(0, -1, 0), LOT.cut)];
+    var mats = {};
+    function m(c) {
+      if (!mats[c]) { mats[c] = mat(c); mats[c].side = THREE.DoubleSide; mats[c].userData.planes = cut; cutMats.push(mats[c]); }
+      return mats[c];
+    }
+    function part(w, h, d, c, x, y, z) {
+      var o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), Array.isArray(c) ? c : m(c));
+      o.position.set(x, y, z); shopGroup.add(o); return o;
+    }
+    var SW = LOT.w / 2, x0 = -SW, x1 = lotX(LOTS - 1) + SW, len = x1 - x0, mid = (x0 + x1) / 2, H = ROW_H;
+    var depth = FZ - BZ, zc = (FZ + BZ) / 2;
+    var WALLC = 0xf1e3c2, TRIM = 0xd9c49a, ROOF = 0x8a8f94, CANOPY = 0x2f7f80;
+    part(len, H, WALL, WALLC, mid, H / 2, BZ + WALL / 2);                                   // back wall
+    part(WALL, H, depth, WALLC, x0 + WALL / 2, H / 2, zc); part(WALL, H, depth, WALLC, x1 - WALL / 2, H / 2, zc);   // end walls
+    for (var i = 0; i < LOTS - 1; i++) {                      // party walls between the lots
+      var px = lotX(i) + SW, open = i < level;
+      if (open) {                                             // wide arch: rented lots are one shop inside
+        part(2 * WALL, H, 1.2, WALLC, px, H / 2, BZ + 0.6);
+        part(2 * WALL, H, 0.5, WALLC, px, H / 2, FZ - 0.25);
+        part(2 * WALL, H - 2.5, depth, WALLC, px, 2.5 + (H - 2.5) / 2, zc);
+      } else part(2 * WALL, H, depth, WALLC, px, H / 2, zc);
+    }
+    // Front: pilasters at every lot line, a fascia (sign band) over each open shopfront, a parapet on top
+    for (var k = 0; k <= LOTS; k++) part(0.55, H + 0.5, 0.45, TRIM, x0 + k * LOT.w + (k === 0 ? 0.27 : k === LOTS ? -0.27 : 0), (H + 0.5) / 2, FZ + 0.05);
+    part(len, 0.5, 0.3, TRIM, mid, H + 0.25, FZ);                                           // front parapet
+    part(len, 0.35, 0.2, TRIM, mid, H + 0.17, BZ + 0.1); part(0.2, 0.35, depth, TRIM, x0 + 0.1, H + 0.17, zc); part(0.2, 0.35, depth, TRIM, x1 - 0.1, H + 0.17, zc);
+    part(len - 0.1, 0.12, depth - 0.1, ROOF, mid, H - 0.06, zc);                            // flat roof
+    for (var j = 0; j < LOTS; j++) {
+      var cx = lotX(j), mine = j <= level;
+      var face = mine ? new THREE.MeshBasicMaterial({ map: j === 0 ? signTexture(cfg.shopName ? cfg.shopName.toUpperCase() : 'KEDAI RUNCIT')
+        : signTexture(KR.i18n.t(j === 1 ? 'BARANG DAPUR' : 'SUDUT HOBI'), j === 1 ? '#c0453a' : '#5b2a9e') }) : m(0xc9b48a);
+      if (face.isMeshBasicMaterial) { face.userData.planes = cut; cutMats.push(face); }
+      var fm = m(mine ? (j === 0 ? 0x1f7a55 : j === 1 ? 0xc0453a : 0x5b2a9e) : 0xc9b48a);
+      var sign = part(LOT.w - 0.6, 0.62, 0.16, [fm, fm, fm, fm, face, fm], cx, 3.15, FZ + 0.06);
+      if (j === 0) shopSign = sign;
+      part(0.9, 0.5, 0.9, 0x9aa3ab, cx + 2.4, H + 0.25, BZ + 1.2);                       // water tank on the roof
+      part(0.12, 0.12, 0.12, 0x6d6a60, cx + 2.4, H + 0.56, BZ + 1.2);
+    }
+    // Covered kaki lima: a canopy over the five-foot way on posts at the kerb
+    part(len, 0.12, 2.35, CANOPY, mid, 2.75, FZ + 1.17);
+    part(len, 0.25, 0.08, CANOPY, mid, 2.65, FZ + 2.33);
+    for (var c = 0; c <= LOTS; c++) part(0.16, 2.7, 0.16, TRIM, x0 + 0.3 + c * (len - 0.6) / LOTS, 1.35, FZ + 2.25);
   }
 
   // Lot 2: a pallet of rice sacks. Lot 3: a glass case of TCG packs and a claw machine.
@@ -540,6 +738,7 @@ KR.scene3d = (function () {
     box(0.6, 0.12, 0.06, 0xffd23f, x, 1.55, z - 0.27, shopGroup);
   }
   function clawMachine(x, z) {
+    if (KM) return kput('claw-machine', x, 0.13, z, 1.55, Math.PI, null, 'y');   // Kenney's, joystick facing inside
     box(0.9, 1.0, 0.9, 0xe86f9a, x, 0.5, z, shopGroup);
     var glass = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.8, 0.86), mat(0xcfe9f3, { transparent: true, opacity: 0.35, roughness: 0.1 }));
     glass.position.set(x, 1.42, z); shopGroup.add(glass);
@@ -552,15 +751,19 @@ KR.scene3d = (function () {
     box(0.05, 0.14, 0.05, 0xd6332b, x - 0.1, 1.14, z - 0.52, shopGroup);
   }
 
-  // Product sprites along a shelf face, from a to b (x, or z when rot is a quarter turn).
-  function shelfItems(products, a, b, at, rows, y0, rot) {
+  // Goods along a shelf, from a to b (x, or z when rot is a quarter turn). at = the shelf's front face.
+  // Products with a Kenney model (GOODS) stand on the boards (heights gy); the rest are sprites on
+  // the face (heights sy).
+  function shelfItems(products, ids, a, b, at, sy, gy, rot) {
     if (!products || !products.length) return;
     var n = Math.max(1, Math.floor((b - a) / 0.55)), k = 0;
     itemGeo = itemGeo || new THREE.PlaneGeometry(0.45, 0.45);
-    for (var r = 0; r < rows; r++) for (var c = 0; c <= n; c++) {
-      var m = new THREE.Mesh(itemGeo, itemMat(products[k++ % products.length]));
-      var t = a + (b - a) * c / n;
-      if (rot) m.position.set(at, y0 + r * 0.6, t); else m.position.set(t, y0 + r * 0.6, at);
+    for (var r = 0; r < sy.length; r++) for (var c = 0; c <= n; c++) {
+      var j = k++ % products.length, t = a + (b - a) * c / n;
+      if (KM && GOODS[ids[j]]) { goods(ids[j], t, gy[r], gy[r] > 1.1 && sy.length === 1 ? at - 0.25 : at + 0.12, rot); continue; }   // island tops, else the board's lip
+      var m = new THREE.Mesh(itemGeo, itemMat(products[j]));
+      var f = at + (sy.length > 1 ? 0.3 : 0);                // in front of the boards' lip
+      if (rot) m.position.set(f, sy[r], t); else m.position.set(t, sy[r], f);
       m.rotation.y = rot; shopGroup.add(m);
     }
   }
@@ -573,7 +776,7 @@ KR.scene3d = (function () {
     var c = document.createElement('canvas'); c.width = 320; c.height = 100;
     var g = c.getContext('2d');
     g.fillStyle = '#fff8e6'; g.fillRect(0, 0, 320, 100); g.strokeStyle = '#c0453a'; g.lineWidth = 8; g.strokeRect(4, 4, 312, 92);
-    g.fillStyle = '#c0453a'; g.font = 'bold 40px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#c0453a'; g.font = '600 40px Fredoka, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(KR.i18n.t('UNTUK DISEWA'), 160, 52, 290);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
@@ -601,9 +804,11 @@ KR.scene3d = (function () {
   var view = { zoom: 1, x: 0, z: 0 }, ZMIN = 0.4, ZMAX = 2.4, CUT_AT = 0.8;
   function applyView() {
     view.zoom = Math.max(ZMIN, Math.min(ZMAX, view.zoom));
-    view.x = Math.max(-32, Math.min(42, view.x)); view.z = Math.max(-22, Math.min(16, view.z));
+    view.x = Math.max(-36, Math.min(42, view.x)); view.z = Math.max(-30, Math.min(16, view.z));
     camera.zoom = view.zoom;
-    camera.position.set(14 + view.x, 20, 22 + view.z); camera.lookAt(1 + view.x, 0.5, 0.2 + view.z);
+    // Same view direction as before, but the camera sits 3x further back so the near plane never
+    // slices off the ground at the bottom of the screen when zoomed right out.
+    camera.position.set(1 + view.x + 13 * 3, 0.5 + 19.5 * 3, 0.2 + view.z + 21.8 * 3); camera.lookAt(1 + view.x, 0.5, 0.2 + view.z);
     camera.updateProjectionMatrix();
     setCutaway(view.zoom >= CUT_AT);
   }
@@ -655,14 +860,14 @@ KR.scene3d = (function () {
     daySky = new THREE.Color(SKY[opts.weather] || SKY.cerah); dayLight = LIGHT[opts.weather] || 1.2;
     scene.background = daySky.clone(); setHour(8);
     rain.visible = opts.weather === 'hujan' || opts.weather === 'ribut';
-    shopSign.material[4].map.dispose();
-    shopSign.material[4].map = signTexture(opts.shopName.toUpperCase());
     // the "for rent" notice is in the current language
     var key = opts.lotProducts.map(function (l) { return l.join(); }).join('|') + !!opts.claw + !!opts.tcg + KR.i18n.lang();
     if (opts.lots !== builtLots || key !== builtProducts) {
       buildShop(opts.lots, opts.lotProducts, opts); builtLots = opts.lots; builtProducts = key;
     }
+    if (shopSign) { shopSign.material[4].map.dispose(); shopSign.material[4].map = signTexture(opts.shopName.toUpperCase()); }
     signFactory();
+    buildStor(!!opts.stor);
     passT = 0.5; homeT = 0;
     controls(host);
     resize(host);
@@ -692,6 +897,7 @@ KR.scene3d = (function () {
   function dispose(g) { root.remove(g); (g.userData.mixer ? KR.models : KR.chars).dispose(g); }
 
   function clear() {
+    clearPartTimer();
     people.forEach(function (p) { dispose(p.g); if (p.bubble) p.bubble.remove(); });
     people = []; queue = []; inside = 0; loiter = 0; spotUsed = SPOTS.map(function () { return false; });
   }
@@ -826,9 +1032,12 @@ KR.scene3d = (function () {
   function updatePeople(dt) {                               // dt in game seconds
     if ((passT -= dt) <= 0) { passer(false); passT = 1.2 + Math.random() * 2; }
     if (cfg.factoryDay && curHour >= 18 && curHour < 19.6 && (homeT -= dt) <= 0) { passer(true); homeT = 0.35 + Math.random() * 0.6; }
-    var free = queue.length ? freeSpot(queue[0].o.lot || 0) : -1;
-    if (queue.length && queue[0].state === 'queue' && free >= 0 && inside < (cfg.capacity || 2)) {
-      var p = queue.shift(); inside++;
+    // The first person who has reached the line goes in as soon as there is room (someone still
+    // walking up doesn't hold the door for everyone behind them).
+    var qi = queue.findIndex(function (q) { return q.state === 'queue'; });
+    var free = qi >= 0 ? freeSpot(queue[qi].o.lot || 0) : -1;
+    if (qi >= 0 && free >= 0 && inside < (cfg.capacity || 2)) {
+      var p = queue.splice(qi, 1)[0]; inside++;
       p.state = 'enter'; p.spot = free; spotUsed[free] = true;
       var sp = SPOTS[free];
       go(p, [DOOR, INSIDE, [INSIDE[0], AISLE], [sp[0], AISLE], [sp[0], sp[1]]], function () { p.state = 'browse'; p.face = sp[2]; p.timer = p.o.dwell * 0.6; });
@@ -858,6 +1067,58 @@ KR.scene3d = (function () {
     });
   }
 
+  // ---------- Stor Kecil and the part-timer ----------
+  // The warehouse fills the gap between the side road and the first lot, its shutter on the kaki lima.
+  // From 6 petang the part-timer carries boxes from it into the shop, puts them on a shelf, and goes back.
+  var WX = -5.85, WDOOR = [WX, 0.95], storGroup = null, pt = null, ptBox = null;
+  function buildStor(on) {
+    if (!!storGroup === on) return;
+    if (storGroup) { root.remove(storGroup); storGroup = null; return; }
+    var g = storGroup = new THREE.Group(); root.add(g);
+    var body = box(2.7, 2.4, 4.6, 0xe4dccb, WX, 1.2, -1.7, g); body.castShadow = body.receiveShadow = true;
+    box(3.0, 0.18, 4.9, 0x4f6b7a, WX, 2.48, -1.7, g).castShadow = true;                // roof
+    box(1.9, 1.95, 0.06, 0x9aa3ab, WX, 0.98, 0.62, g);                                    // roller shutter (half open)
+    for (var i = 0; i < 6; i++) box(1.9, 0.03, 0.08, 0x7d868e, WX, 0.5 + i * 0.28, 0.64, g);
+    box(1.5, 0.75, 0.07, 0x3a2f28, WX, 0.38, 0.63, g);                                    // the open part
+    var sign = box(2.3, 0.3, 0.06, 0x2f7f80, WX, 2.2, 0.64, g);
+    var face = new THREE.MeshBasicMaterial({ map: signTexture(KR.i18n.t('STOR'), '#2f7f80') });
+    sign.material = [mat(0x2f7f80), mat(0x2f7f80), mat(0x2f7f80), mat(0x2f7f80), face, mat(0x2f7f80)];
+    [[-6.9, 0.25, 1.0, 0.5], [-6.85, 0.7, 1.0, 0.4], [-6.35, 0.2, 1.1, 0.4]].forEach(function (b) {   // cardboard boxes outside
+      box(b[3], b[3], b[3], 0xc8955a, b[0], b[1], b[2], g).castShadow = true;
+    });
+  }
+  function clearPartTimer() {
+    if (pt) { dispose(pt.g); pt = null; }
+    if (ptBox) { root.remove(ptBox); ptBox = null; }
+  }
+  function partTimerTrip() {
+    var sp = SPOTS[Math.floor(Math.random() * SPOTS.length)] || [INSIDE[0], AISLE];
+    var inPath = [[WX, 2.1], DOOR, INSIDE, [INSIDE[0], AISLE], [sp[0], AISLE], [sp[0], sp[1]]];
+    ptBox.visible = true;
+    go(pt, inPath, function () {
+      pt.pause = 1.6;                                      // puts the stock on the shelf
+      pt.after = function () {
+        ptBox.visible = false;
+        go(pt, [[sp[0], AISLE], [INSIDE[0], AISLE], INSIDE, DOOR, [WX, 2.1], WDOOR], function () { pt.pause = 1.2; pt.after = partTimerTrip; });
+      };
+    });
+  }
+  function updatePartTimer(dt) {
+    if (!cfg.partTimer || curHour < 18 || !KR.models.isReady()) return;
+    if (!pt) {
+      pt = { g: KR.models.make(29, 'common'), path: [], walking: false, pause: 0 };
+      pt.g.position.set(WDOOR[0], 0.1, WDOOR[1] - 0.6); root.add(pt.g);
+      ptBox = box(0.34, 0.26, 0.3, 0xc8955a, 0, 0, 0); ptBox.castShadow = true;
+      partTimerTrip();
+    }
+    if (pt.pause > 0) { if ((pt.pause -= dt) <= 0 && pt.after) { var f = pt.after; pt.after = null; f(); } }
+    else step(pt, dt * WALK_SPEED);
+    KR.models.animate(pt.g, pt.walking, dt);
+    var r = pt.g.rotation.y;                               // the box sits in front of him, at chest height
+    ptBox.position.set(pt.g.position.x + Math.sin(r) * 0.3, 0.95, pt.g.position.z + Math.cos(r) * 0.3);
+    ptBox.rotation.y = r;
+  }
+
   // The tauke (and the pembantu once hired) stand behind the counter, left of the door, facing right.
   function updateStaff(dt) {
     var want = cfg.staff || 1;
@@ -882,6 +1143,7 @@ KR.scene3d = (function () {
     resizeIfNeeded();
     updatePeople(dt * ts);
     updateStaff(dt * ts);
+    updatePartTimer(dt * ts);
     people.forEach(function (p) {
       var g = p.g;
       var moving = p.walking && !p.wait;
@@ -912,9 +1174,9 @@ KR.scene3d = (function () {
   }
 
   return {
-    load: load, start: start, stop: stop, spawn: spawn, setHour: setHour,
-    isReady: function () { return ready && wanted(); },
-    wanted: wanted, setWanted: setWanted, failed: function () { return failed; },
+    load: load, start: start, stop: stop, spawn: spawn, setHour: setHour, delivery: delivery,
+    isReady: function () { return ready; },
+    failed: function () { return failed; },
     _debug: function () { return { THREE: THREE, root: root, camera: camera, people: people, cars: cars, spots: SPOTS, queue: queue }; }
   };
 })();

@@ -11,7 +11,7 @@ KR.state = (function () {
       version: C.version,
       shopName: 'Kedai Runcit Bajet',
       day: 1,
-      cash: C.startCash,
+      cash: C.startCash + (C.startLoan || 0),
       rep: C.startRep,
       stock: stock,
       prices: prices,
@@ -26,12 +26,15 @@ KR.state = (function () {
       lastReport: null,
       batches: {},
       regulars: {},        // regulars' hearts (see sim.regulars)
-      bank: { balance: 0, level: 0, earned: 0 },   // savings (see sim bank)
+      bank: { balance: -(C.startLoan || 0), level: 0, earned: 0 },   // savings (see sim bank); starts with the loan
+      autoTarget: {},      // auto-restock level per product (needs the part-timer); 0 or missing = off
       lastOrder: null,     // yesterday's morning order, for "repeat order"
       lastDemand: null,    // yesterday's sold / ran out / too pricey per product         // dated stock for products that expire
       today: null,         // a day in progress (see sim.openDay)
       managerOn: true,     // the store manager runs the day (once hired)
       celebrated: false,   // the RM7,500 celebration has been shown
+      events: [],          // events so far: { id, from, to, seen } (see sim events)
+      rolledDay: 0,        // the day today's events were rolled (so a reload doesn't roll again)
       seenIntro: false
     };
   }
@@ -47,7 +50,7 @@ KR.state = (function () {
     s.stats = Object.assign(fresh().stats, saved.stats || {});
     s.stats.tiers = Object.assign(fresh().stats.tiers, (saved.stats && saved.stats.tiers) || {});
     s.milestones = Object.assign({}, saved.milestones || {});
-    s.bank = Object.assign(fresh().bank, saved.bank || {});
+    s.bank = Object.assign({ balance: 0, level: 0, earned: 0 }, saved.bank || {});   // old saves: no loan
     s.version = C.version;
     return s;
   }
@@ -60,5 +63,14 @@ KR.state = (function () {
   function loadBest() { return KR.platform.storage.load(C.bestKey) || { value: 0, stars: 0 }; }
   function saveBest(b) { return KR.platform.storage.save(C.bestKey, b); }
 
-  return { fresh: fresh, load: load, save: save, reset: reset, loadBest: loadBest, saveBest: saveBest };
+  // Company Performance Leaderboard (this browser for now): one entry per finished season,
+  // { name, value, stars, date }, best first. Later the same entries go online (platform.leaderboard).
+  function loadBoard() { var b = KR.platform.storage.load(C.boardKey); return Array.isArray(b) ? b : []; }
+  function addToBoard(entry) {
+    var b = loadBoard().concat([entry]).sort(function (x, y) { return y.value - x.value; }).slice(0, 20);
+    KR.platform.storage.save(C.boardKey, b);
+    return b;
+  }
+
+  return { fresh: fresh, load: load, save: save, reset: reset, loadBest: loadBest, saveBest: saveBest, loadBoard: loadBoard, addToBoard: addToBoard };
 })();

@@ -15,12 +15,14 @@ KR.ui = (function () {
   function dayName(d) { return t(S.dayName(d)); }
 
   function header(s) {
-    $('dayLabel').textContent = t('Hari {d} · {name}', { d: s.day, name: dayName(s.day) });
-    $('shopName').textContent = s.shopName;
+    $('dayLabel').textContent = t('Bulan {m} · Minggu {w} · Hari {d} · {name}', { m: S.monthOf(s.day), w: S.weekInMonth(s.day), d: s.day, name: dayName(s.day) });
+    $('shopName').innerHTML = esc(s.shopName) + (S.level(s, 'ssm') ? ' <span class="ssm-badge" title="' + t('Berdaftar dengan SSM') + '">SSM</span>' : '');
     $('cash').textContent = rm(s.cash);
     $('cash').classList.toggle('neg', s.cash < 0);
-    $('rep').textContent = s.rep;
-    $('repBar').style.width = s.rep + '%';
+    var rating = S.rating(s), bonus = S.adBonus(s);
+    $('rep').innerHTML = rating + (bonus ? ' <small class="ad-plus">' + t('+{n} iklan', { n: bonus }) + '</small>' : '');
+    $('repBar').style.width = Math.min(100, rating) + '%';
+    $('repBar').classList.toggle('boost', !!bonus);
     var used = S.totalUnits(s.stock) + S.totalUnits(s.order);
     $('cap').textContent = used + '/' + S.capacity(s);
     goal(s);
@@ -45,16 +47,31 @@ KR.ui = (function () {
   }
 
   function forecast(s) {
-    var f = s.forecast, w = C.weathers[f.weather], ev = f.event ? C.events[f.event] : null;
+    var f = s.forecast, w = C.weathers[f.weather], mail = !!S.level(s, 'petisurat');
+    var on = mail ? S.activeEvents(s) : [];       // without the mailbox, events stay a surprise
     var rent = S.rentToday(s), mult = S.rentMult(s.day), R = C.rentRamp;
     var until = Math.ceil(s.day / R.every) * R.every;
-    $('forecast').innerHTML =
+    // Weather gets its own card: the forecast and which items sell more (or less) in it.
+    var up = S.unlockedProducts(s).filter(function (p) { return p.weather[f.weather] >= 1.3; })
+      .sort(function (a, b) { return b.weather[f.weather] - a.weather[f.weather]; }).slice(0, 3);
+    var down = S.unlockedProducts(s).filter(function (p) { return p.weather[f.weather] <= 0.7; }).slice(0, 3);
+    $('weather').innerHTML =
       '<div class="wicon">' + A.weather(f.weather) + '</div><div>' +
-      '<h3>' + t('Ramalan: {w}', { w: t(w.name) }) + '</h3>' +
-      '<p>' + t('Kos harian {c}: sewa {r}, bil {b}. Ramalan cuaca tak selalu tepat.',
+      '<span class="eyebrow">' + t('Ramalan cuaca') + '</span>' +
+      '<h3>' + t(w.name) + '</h3>' +
+      (up.length ? '<p class="wsell up">' + t('Laku: {list}', { list: up.map(function (p) { return t(p.name); }).join(', ') }) + '</p>' : '') +
+      (down.length ? '<p class="wsell down">' + t('Kurang laku: {list}', { list: down.map(function (p) { return t(p.name); }).join(', ') }) + '</p>' : '') +
+      '<p class="wnote">' + t('Ramalan tak selalu tepat.') + '</p></div>';
+    $('forecast').innerHTML =
+      '<div>' +
+      '<h3>' + t('Hari ini') + '</h3>' +
+      '<p>' + t('Kos harian {c}: sewa {r}, bil {b}.',
         { c: rm(S.dailyCosts(s)), r: rm(rent), b: rm(S.round2(S.dailyCosts(s) - rent)) }) + '</p>' +
+      '<p class="week-note">' + (S.weekOf(s.day) ? t('Harga borong berubah setiap minggu, dan semua barang naik {i}% seminggu (inflasi).', { i: Math.round(C.inflation * 100) })
+        : t('Harga borong berubah setiap minggu. Semak harga sebelum beli stok.')) + '</p>' +
       (mult < 1 ? '<p class="rent-note">' + t('Sewa diskaun: bayar {p}% sampai hari {d}.', { p: Math.round(mult * 100), d: until }) + '</p>' : '') +
-      (ev ? '<span class="event-tag">' + esc(t(ev.name)) + '</span> <p>' + esc(t(ev.desc)) + '</p>' : '') +
+      (on.length ? '<p class="mail-line">' + on.map(function (e) { return '<span class="event-tag' + (e.to > e.from ? ' week' : '') + '">' + esc(t(C.events[e.id].name)) + '</span>'; }).join(' ') +
+        ' <button class="link" data-goto="syarikat">' + t('Baca di Peti Surat') + '</button></p>' : '') +
       (S.tcgOn(s) ? (S.tcgRelease(s) ? '<span class="event-tag tcg">' + t('Set TCG baru keluar hari ini!') + '</span> <p>' + t('Peminat kad akan datang beratur. Pastikan stok pek booster cukup.') + '</p>'
         : '<p class="rent-note">' + t('Set TCG baru seterusnya dalam {n} hari.', { n: C.tcg.every - S.tcgDays(s) }) + '</p>') : '') +
       '</div>';
@@ -66,10 +83,15 @@ KR.ui = (function () {
     var open = S.lotsOpen(s);
     $('products').innerHTML = C.lots.map(function (lot, i) {
       var list = C.products.filter(function (p) { return S.lotOf(p) === i + 1; });
-      return '<h3 class="lot-title' + (i + 1 > open ? ' locked' : '') + '">' + t(lot.name) +
-        (i + 1 > open ? ' <small>' + t(LOT_NEED[i]) + '</small>' : '') + '</h3>' + list.map(productRow.bind(null, s)).join('');
+      list = list.filter(function (p) { return S.isUnlocked(s, p); }).concat(list.filter(function (p) { return !S.isUnlocked(s, p); }));   // locked ones last
+      var on = list.filter(function (p) { return S.isUnlocked(s, p); }).length;
+      return '<h3 class="lot-title lot-' + (i + 1) + (i + 1 > open ? ' locked' : '') + '"><span class="lot-chip">' + (i + 1) + '</span><span>' + t(lot.name) +
+        (i + 1 > open ? ' <small>' + t(LOT_NEED[i]) + '</small>' : '') + '</span><em>' + (i + 1 > open ? t('Belum dibuka') : t('{a}/{b} dijual', { a: on, b: list.length })) + '</em></h3>' +
+        list.map(productRow.bind(null, s)).join('');
     }).join('');
     $('orderCost').textContent = rm(S.orderCost(s));
+    var ordered = S.totalUnits(s.order);
+    $('orderUnits').textContent = ordered ? t('{n} unit dipesan', { n: ordered }) : '';
     var last = s.lastOrder ? S.totalUnits(s.lastOrder) : 0;
     $('repeatBtn').classList.toggle('hidden', !last);
     $('repeatBtn').textContent = t('Ulang order semalam ({n} unit)', { n: last });
@@ -78,14 +100,16 @@ KR.ui = (function () {
       if (!S.isUnlocked(s, p)) {
         var need = S.lotOf(p) > S.lotsOpen(s) ? t('Perlu lot {n}', { n: S.lotOf(p) }) : t('Perlu {u}', { u: t(S.upgrade(p.requires).name) });
         return '<div class="product locked"><div class="picon">' + A.product(p.id) + '</div>' +
-          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta">' + need + '</div></div><div></div></div>';
+          '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta"><span class="lock">🔒</span> ' + need + '</div></div><div></div></div>';
       }
-      var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
+      var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost), mk = S.marketMult(s, p.id);
+      var chip = Math.abs(mk - 1) > 0.001 ? ' <span class="mkt ' + (mk > 1 ? 'up' : 'down') + (Math.abs(mk - 1) >= C.market.big[0] - 0.001 ? ' big' : '') + '">' +
+        (mk > 1 ? '▲' : '▼') + Math.round(Math.abs(mk - 1) * 100) + '% ' + t('minggu ini') + '</span>' : '';
       var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id), dem = s.lastDemand && s.lastDemand[p.id];
       return '<div class="product" data-id="' + p.id + '">' +
         '<div class="picon">' + A.product(p.id) + '</div>' +
         '<div><div class="pname">' + t(p.name) + '</div>' +
-        '<div class="pmeta">' + t('Borong {c} · Harga biasa {r}', { c: rm(cost), r: rm(p.ref) }) + (p.perish >= 0.2 ? t(' · cepat rosak') : '') +
+        '<div class="pmeta">' + t('Borong {c} · Harga biasa {r}', { c: rm(cost), r: rm(S.refPrice(s, p)) }) + chip + (p.perish >= 0.2 ? t(' · cepat rosak') : '') +
           (p.expiry ? t(' · tahan {n} hari', { n: p.expiry }) + (left != null ? t(' (stok lama luput dalam {n} hari)', { n: left }) : '') : '') + '</div>' +
           (dem ? '<div class="demand">' + t('Semalam') + ': <b>' + t('laku {n}', { n: dem.sold }) + '</b>' +
             (dem.out ? ' · <b class="out">' + t('habis {n}', { n: dem.out }) + '</b>' : '') +
@@ -102,23 +126,53 @@ KR.ui = (function () {
             '<span class="val">' + rm(price) + '</span>' +
             '<button class="step" data-act="price" data-n="0.1">+</button>' +
           '</div>' +
+          (S.canAutoRestock(s) ? (function (a) {
+            return '<div class="group auto' + (a ? ' on' : '') + '"><label title="' + t('Pekerja stor isi semula sampai tahap ini pukul 6 petang') + '">' + t('Auto') + '</label>' +
+              '<button class="step" data-act="auto" data-n="-10"' + (a <= 0 ? ' disabled' : '') + '>−10</button>' +
+              '<span class="val">' + (a ? a : t('Tutup')) + '</span>' +
+              '<button class="step" data-act="auto" data-n="10">+10</button></div>';
+          })(S.autoTarget(s, p.id)) : '') +
         '</div></div>';
   }
 
+  // Advertisement: pay once for a week of extra rating (the only way above 100).
+  function ads(s) {
+    var on = S.adOn(s);
+    $('adPanel').innerHTML = '<div class="ad-head"><div class="uicon">' + A.upgrade('iklan') + '</div><div><h4>' + t('Iklan Kedai') + '</h4>' +
+      '<p>' + t('Bayar sekali, reputasi naik selama seminggu. Hanya iklan boleh bawa reputasi melebihi 100 (sampai {m}).', { m: C.repMax }) + '</p></div></div>' +
+      (on ? '<p class="ad-on">' + t('{a} sedang berjalan: +{b} reputasi, tamat hari {d} (tinggal {n} hari).',
+          { a: t(C.ads[on.tier].name), b: C.ads[on.tier].bonus, d: on.until, n: on.until - s.day + 1 }) + '</p>'
+        : '<div class="ad-btns">' + C.ads.map(function (a, i) {
+          return '<button class="btn' + (s.cash >= a.price ? ' primary' : '') + '" data-ad="' + i + '"' + (s.cash < a.price ? ' disabled' : '') + '><strong>' + t(a.name) + '</strong>' +
+            '<small>' + t('+{b} reputasi, {n} hari', { b: a.bonus, n: a.days }) + ' · ' + rm0(a.price) + '</small></button>';
+        }).join('') + '</div>');
+  }
+
   function upgrades(s) {
-    $('upgrades').innerHTML = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); }).map(function (u) {
+    ads(s);
+    // Not bought yet first (ones you can buy now before ones that need a lot), owned ones last.
+    function rank(u) { return !S.nextLevel(s, u.id) ? 2 : S.upgradeOpen(s, u) ? 0 : 1; }
+    var list = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); });
+    list = list.map(function (u, i) { return [u, i]; }).sort(function (a, b) { return rank(a[0]) - rank(b[0]) || a[1] - b[1]; }).map(function (x) { return x[0]; });
+    $('upgrades').innerHTML = list.map(function (u) {
       var lvl = S.level(s, u.id), next = S.nextLevel(s, u.id), info = next || u.levels[u.levels.length - 1];
       var steps = u.levels.length > 1 ? ' <small>' + t(' (Tahap {l}/{n})', { l: lvl, n: u.levels.length }) + '</small>' : '';
-      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (u.hidden ? ' secret' : '') + '">' +
+      var buyable = next && S.upgradeOpen(s, u) && s.cash >= next.price;
+      return '<div class="upgrade' + (next ? '' : ' owned') + (S.upgradeOpen(s, u) ? '' : ' locked') + (buyable ? ' buyable' : '') + (u.hidden ? ' secret' : '') + '">' +
         '<div class="uicon">' + A.upgrade(u.id) + '</div><h4>' + t(u.name) + steps + '</h4><p>' + t(info.desc) +
         (info.upkeep ? t(' Kos {c}/hari.', { c: 'RM' + info.upkeep }) : '') +
         (info.rent ? t(' Sewa {c}/hari.', { c: 'RM' + info.rent }) : '') + '</p>' +
         (!next ? '<strong class="pos">' + t('Sudah ada') + '</strong>'
               : !S.upgradeOpen(s, u) ? '<strong class="muted">' + t('Perlu lot {n}', { n: S.lotOf(u) }) + '</strong>'
               : '<button class="btn primary" data-up="' + u.id + '"' + (s.cash < next.price ? ' disabled' : '') + '>' +
-                t(lvl ? 'Naik tahap {p}' : 'Beli {p}', { p: rm0(next.price) }) + '</button>') +
+                t(lvl ? 'Naik tahap {p}' : 'Beli {p}', { p: rm0(next.price) }) + '</button>' +
+                (s.cash < next.price ? '<span class="short">' + t('Perlu {v} lagi', { v: rm0(next.price - s.cash) }) + '</span>' : '')) +
         '</div>';
     }).join('');
+    // How many upgrades the player can afford right now, as a badge on the tab
+    var canBuy = list.filter(function (u) { var n = S.nextLevel(s, u.id); return n && S.upgradeOpen(s, u) && s.cash >= n.price; }).length;
+    var tab = document.querySelector('.tab[data-tab="upgrade"]');
+    if (tab) { if (canBuy) tab.setAttribute('data-badge', canBuy); else tab.removeAttribute('data-badge'); }
   }
 
   function records(s) {
@@ -127,7 +181,8 @@ KR.ui = (function () {
       '<table><tr><td>' + t('Hari dibuka') + '</td><td>' + (s.day - 1) + '</td></tr>' +
       '<tr><td>' + t('Untung keseluruhan') + '</td><td>' + rm(s.stats.totalProfit) + '</td></tr>' +
       '<tr><td>' + t('Hari paling untung') + '</td><td>' + rm(s.stats.bestDay) + '</td></tr>' +
-      '<tr><td>' + t('Pelanggan dilayan') + '</td><td>' + s.stats.customers + '</td></tr></table>' +
+      '<tr><td>' + t('Pelanggan dilayan') + '</td><td>' + s.stats.customers + '</td></tr>' +
+      (s.stats.tips ? '<tr><td>' + t('Jumlah tip') + '</td><td>' + rm(s.stats.tips) + '</td></tr>' : '') + '</table>' +
       (h.length ? '<p class="hint">' + t('Untung 14 hari terakhir') + '</p><div class="spark">' + h.map(function (v) {
         return '<i class="' + (v < 0 ? 'loss' : '') + '" style="height:' + Math.max(4, Math.abs(v) / max * 100) + '%" title="' + rm(v) + '"></i>';
       }).join('') + '</div>' : '');
@@ -137,7 +192,62 @@ KR.ui = (function () {
       return '<div class="milestone' + (s.milestones[m.id] ? ' done' : '') + '"><strong>' + t(m.name) + '</strong>' +
         '<span>' + t(m.desc) + t(' Ganjaran {v}.', { v: rm0(m.reward) }) + '</span></div>';
     }).join('');
-    $('nameInput').value = s.shopName;
+    $('nameHint').textContent = S.level(s, 'ssm') ? t('Tukar nama syarikat di tab Syarikat.') : t('Daftar SSM (Naik Taraf) untuk tukar nama syarikat.');
+  }
+
+  // ---------- Syarikat tab (after SSM): Peti Surat, leaderboard and company name ----------
+  var mailView = 'aktif';
+  function setMailView(v) { mailView = v; }
+  function daysText(s, e) {
+    if (e.from === e.to) return e.to < s.day ? t('Hari {d}', { d: e.from }) : t('Hari ini sahaja');
+    if (e.to < s.day) return t('Hari {a} hingga {b}', { a: e.from, b: e.to });
+    var left = e.to - s.day + 1;
+    return t('Hari {a} hingga {b} · tinggal {n} hari', { a: e.from, b: e.to, n: left });
+  }
+  function letter(s, e, past) {
+    var ev = C.events[e.id];
+    return '<div class="letter' + (past ? ' past' : '') + (e.to > e.from ? ' week' : '') + (!past && !e.seen ? ' new' : '') + '">' +
+      '<div class="lhead"><span class="from">' + t('Daripada: {f}', { f: t(ev.from || 'Pemberitahuan') }) + '</span><span class="when">' + daysText(s, e) + '</span></div>' +
+      '<strong>' + esc(t(ev.name)) + (!past && !e.seen ? ' <em class="new-tag">' + t('Baru') + '</em>' : '') + '</strong>' +
+      '<p>' + esc(t(ev.desc)) + '</p></div>';
+  }
+  function mailbox(s) {
+    if (!S.level(s, 'petisurat')) {
+      $('mailbox').innerHTML = '<div class="card mail-locked"><div class="uicon">' + A.upgrade('petisurat') + '</div><div><h3 class="sub-title">' + t('Peti Surat Syarikat') + '</h3>' +
+        '<p class="hint">' + t('Belum ada peti surat. Beli Peti Surat Syarikat di Naik Taraf untuk tahu acara apa sedang berlaku.') + '</p></div></div>';
+      return;
+    }
+    var act = S.activeEvents(s), past = S.pastEvents(s);
+    var list = mailView === 'aktif' ? act : past;
+    $('mailbox').innerHTML = '<div class="card mail"><h3 class="sub-title">' + t('Peti Surat Syarikat') + '</h3>' +
+      '<div class="subtabs"><button class="subtab' + (mailView === 'aktif' ? ' active' : '') + '" data-mail="aktif">' + t('Sedang berlaku ({n})', { n: act.length }) + '</button>' +
+      '<button class="subtab' + (mailView === 'tamat' ? ' active' : '') + '" data-mail="tamat">' + t('Sudah tamat ({n})', { n: past.length }) + '</button></div>' +
+      (list.length ? list.map(function (e) { return letter(s, e, mailView !== 'aktif'); }).join('')
+        : '<p class="hint">' + t(mailView === 'aktif' ? 'Tiada acara hari ini. Hari biasa di taman.' : 'Belum ada acara yang tamat.') + '</p>') +
+      '</div>';
+  }
+  function board(s) {
+    var rows = KR.state.loadBoard().map(function (b) { return { name: b.name, value: b.value, stars: b.stars, note: t('Musim tamat') }; });
+    var inSeason = !s.seasonDone && s.day <= C.seasonDays, value = S.shopValue(s);
+    if (inSeason) rows.push({ name: s.shopName, value: value, stars: S.starsFor(value), note: t('Musim ini, hari {d}', { d: s.day }), now: true });
+    rows.sort(function (a, b) { return b.value - a.value; });
+    $('board').innerHTML = '<h3 class="sub-title">' + t('Papan Prestasi Syarikat') + '</h3>' +
+      '<p class="hint">' + t('Markah = nilai kedai pada hari ke-{n}. Buat masa ini papan ini tunjuk musim yang dimainkan di peranti ini. Nanti ia akan tunjuk markah {n} hari semua pemain.', { n: C.seasonDays }) + '</p>' +
+      (rows.length ? '<table class="board">' + rows.map(function (r, i) {
+        return '<tr class="' + (r.now ? 'now' : '') + '"><td class="rank">' + (i + 1) + '</td><td><strong>' + esc(r.name) + '</strong><small>' + r.note + '</small></td>' +
+          '<td class="stars">' + starsHtml(r.stars) + '</td><td class="val">' + rm0(r.value) + '</td></tr>';
+      }).join('') + '</table>' : '<p class="hint">' + t('Habiskan musim {n} hari untuk masuk papan.', { n: C.seasonDays }) + '</p>');
+  }
+  function company(s) {
+    var reg = !!S.level(s, 'ssm'), tab = document.querySelector('.tab[data-tab="syarikat"]');
+    if (tab) {
+      tab.classList.toggle('hidden', !reg);
+      var n = S.unreadMail(s);
+      if (n) tab.setAttribute('data-badge', n); else tab.removeAttribute('data-badge');
+    }
+    if (!reg) return;
+    mailbox(s); board(s);
+    if (document.activeElement !== $('nameInput')) $('nameInput').value = s.shopName;
   }
 
   // Customer statistics: how many served, split by common / rare / unique.
@@ -195,13 +305,14 @@ KR.ui = (function () {
     }
     $('bankPanel').innerHTML =
       '<div class="card bank-card"><div class="uicon">' + A.upgrade('bank') + '</div><div>' +
-        '<h3 class="sub-title">' + t('Simpanan bank') + '</h3>' +
-        '<div class="big-num">' + rm(B.balance) + '</div>' +
+        '<h3 class="sub-title">' + t(B.balance < 0 ? 'Pinjaman permulaan' : 'Simpanan bank') + '</h3>' +
+        '<div class="big-num' + (B.balance < 0 ? ' neg' : '') + '">' + rm(B.balance) + '</div>' +
+        (B.balance < 0 ? '<p class="hint">' + t('Korang mula dengan pinjaman bank {v} tanpa faedah. Simpan duit di sini untuk bayar balik. Simpanan mula dapat pulangan bila baki lebih dari RM0.', { v: rm0(C.startLoan) }) + '</p>' : '') +
         '<p class="hint">' + t('Pulangan {p}% sehari atas baki dalam bank, dibayar setiap malam. Jumlah dapat setakat ini: {e}.', { p: +(rate * 100).toFixed(2), e: rm(B.earned || 0) }) + '</p>' +
         (B.balance ? '<p class="hint">' + t('Malam ini dijangka dapat {v}.', { v: rm(S.round2(B.balance * rate)) }) + '</p>' : '') +
       '</div></div>' +
-      '<div class="card"><h4>' + t('Simpan') + ' <small>' + t('(duit boleh simpan: {v})', { v: rm(free) }) + '</small></h4><div class="bank-btns">' + btns('in', free) + '</div>' +
-      '<h4>' + t('Keluarkan') + '</h4><div class="bank-btns">' + btns('out', B.balance) + '</div>' +
+      '<div class="card"><h4>' + t(B.balance < 0 ? 'Bayar balik / simpan' : 'Simpan') + ' <small>' + t('(duit boleh simpan: {v})', { v: rm(free) }) + '</small></h4><div class="bank-btns">' + btns('in', free) + '</div>' +
+      '<h4>' + t('Keluarkan') + '</h4><div class="bank-btns">' + btns('out', Math.max(0, B.balance)) + '</div>' +
       '<p class="hint">' + t('Duit untuk stok yang dah dipesan hari ini tak boleh disimpan. Duit dalam bank dikira dalam nilai kedai.') + '</p></div>' +
       '<div class="card"><h4>' + t('Hubungan dengan bank') + '</h4>' +
         C.bank.rates.map(function (r, i) {
@@ -213,7 +324,7 @@ KR.ui = (function () {
       '</div>';
   }
 
-  function plan(s) { header(s); forecast(s); products(s); upgrades(s); bankTab(s); customers(s); records(s); }
+  function plan(s) { header(s); forecast(s); products(s); upgrades(s); bankTab(s); customers(s); records(s); company(s); }
 
   function tips(r) {
     var out = [];
@@ -263,8 +374,10 @@ KR.ui = (function () {
       row(t('Hasil jualan'), '<span class="pos">' + rm(r.revenue) + '</span>') +
       row(t('Beli stok'), '<span class="loss">' + rm(-r.stockSpend) + '</span>') +
       (r.midSpend ? row(t('Tambah stok (siang)'), '<span class="loss">' + rm(-r.midSpend) + '</span>') : '') +
+      (r.autoSpend ? row(t('Pekerja stor isi semula ({n} unit)', { n: Object.keys(r.autoUnits || {}).reduce(function (a, k) { return a + r.autoUnits[k]; }, 0) }), '<span class="loss">' + rm(-r.autoSpend) + '</span>') : '') +
       row(t('Sewa dan bil'), '<span class="loss">' + rm(-r.bills) + '</span>') +
       (r.claw ? row(t('Mesin capit ({n} kali main)', { n: r.claw.plays }), '<span class="pos">' + rm(r.claw.net) + '</span>') : '') +
+      (r.tips ? row(t('Tip daripada pelanggan'), '<span class="pos">' + rm(r.tips) + '</span>') : '') +
       row(t('Untung hari ini'), '<span class="' + (r.profit >= 0 ? 'pos' : 'loss') + '">' + rm(r.profit) + '</span>', 'total') +
       row(t('Reputasi'), r.repBefore + ' → ' + r.repAfter + ' (' + (repDiff >= 0 ? '+' : '') + repDiff + ')') +
       (r.bankInterest ? row(t('Pulangan bank malam ini'), '<span class="pos">+' + rm(r.bankInterest) + '</span> <small>(' + t('baki {v}', { v: rm(r.bankBalance) }) + ')</small>') : '') +
@@ -312,6 +425,8 @@ KR.ui = (function () {
       row(t('Naik taraf dimiliki'), owned + '/' + normal.length) +
       row(t('Pencapaian'), Object.keys(s.milestones).length + '/' + C.milestones.length) +
       row(t('Rekod terbaik'), rm0(best.value) + (isNewBest ? t(' (baru!)') : '')) +
+      (S.level(s, 'ssm') ? '<p class="hint special">' + t('{c} masuk Papan Prestasi Syarikat dengan markah {v}.', { c: esc(s.shopName), v: rm0(value) }) + '</p>'
+        : '<p class="hint">' + t('Daftar SSM (Naik Taraf) supaya musim seterusnya masuk Papan Prestasi Syarikat.') + '</p>') +
       row(t('Simpanan bank'), rm(S.bank(s).balance)) +
       '<p class="hint">' + t('Sasaran bintang: {list}. Nilai kedai = duit + bank + stok + naik taraf.', { list: C.starTargets.map(rm0).join(' / ') }) + '</p>' +
       '<button class="btn primary wide" id="continueBtn">' + t('Teruskan main (mod bebas)') + '</button>' +
@@ -331,6 +446,6 @@ KR.ui = (function () {
     $('reportModal').classList.remove('hidden');
   }
 
-  return { celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
+  return { company: company, setMailView: setMailView, celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
            customers: customers, records: records, report: report, bankrupt: bankrupt };
 })();

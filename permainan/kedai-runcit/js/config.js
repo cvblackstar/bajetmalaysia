@@ -6,6 +6,9 @@ KR.config = {
   version: 1,
   saveKey: 'kedaiRuncit.save.v1',
   startCash: 200,
+  // Start-up loan: the bank starts at -RM2,000 and that money is in the till on day 1.
+  // Deposits pay it off; savings only earn once the balance is above zero. No interest on the loan.
+  startLoan: 2000,
   startRep: 50,
   baseCapacity: 150,     // max units of stock in the shop
   baseTraffic: 30,       // customers on a normal weekday, scaled by reputation (see trafficRep)
@@ -14,11 +17,14 @@ KR.config = {
   // Reputation -> share of baseTraffic: a new shop (rep 50) gets about 60%, a famous one (rep 100)
   // gets 1.5x, which is more than one person can serve, so long queues pull reputation back down.
   trafficRep: { min: 0.3, scale: 1.2, power: 2 },
-  baseServe: 35,         // customers the owner alone can serve per day
+  baseServe: 35,         // customers the owner alone can serve per day (spread over opening hours)
+  // How many customers fit inside at once (base + per extra lot + with a helper), and how long a
+  // line people will join outside. Someone only walks off when the shop is full and the line too.
+  shopRoom: { base: 5, perLot: 4, helper: 2, line: 5 },
   rent: 15,              // RM per day at full price
   // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
   // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
-  rentRamp: { start: 0.6, step: 0.2, every: 30 },
+  rentRamp: { start: 0.6, step: 0.2, every: 28 },   // every month
   // Customer tiers. Rare ones (doctors) only come at reputation 80+, unique ones (kimono) at 95+.
   // multiChance = chance they buy multi times what they planned (common 2x, rare 2x, unique 3x).
   tiers: {
@@ -26,9 +32,32 @@ KR.config = {
     rare:   { rep: 80, chance: 0.08, multi: 2, multiChance: 0.6 },
     unique: { rep: 95, chance: 0.03, multi: 3, multiChance: 0.6 }
   },
-  eventChance: 0.2,
-  paydayEvery: 30,
+  // Events (see `events` below): each morning from day 3 there's a chance of a one-day event,
+  // and from day 5 a chance a week-long one starts (only one week-long event runs at a time).
+  // Players only see which events are on once they have the Peti Surat Syarikat upgrade.
+  eventChance: 0.25,
+  weekEventChance: 0.08,
+  // Calendar: 7 days a week, 4 weeks a month (28 days). The season ends after month 3.
+  weekDays: 7,
+  monthWeeks: 4,
+  paydayEvery: 28,       // payday is day 25 of every month
   paydayOn: 25,
+  // Wholesale prices: every week each item's cost moves by a random % (market), and everything
+  // gets `inflation` dearer each week (customers' fair price rises with it).
+  // Most weeks the move is small (-small..+small); with chance `bigChance` it's a big one
+  // (between big[0] and big[1], up or down), up to -50% or +50%.
+  market: { small: 0.2, bigChance: 0.15, big: [0.3, 0.5] },
+  inflation: 0.02,
+  // Rating: normally 0-100. Advertisement adds a bonus for one week, up to `max` (120).
+  repMax: 120,
+  ads: [
+    { name: 'Iklan Risalah',       price: 100, bonus: 10, days: 7 },
+    { name: 'Iklan Radio',         price: 150, bonus: 15, days: 7 },
+    { name: 'Iklan Media Sosial',  price: 200, bonus: 20, days: 7 }
+  ],
+  // Above 100 rating, rare and unique customers sometimes leave a tip: chance (rating - 100)%,
+  // tip = share of what they bought. Not explained in the game on purpose.
+  tips: { share: 0.5 },
   midRestockMarkup: 0.1, // restocking while the shop is open costs 10% more than the morning order
   hourMs: 4000,          // playback length of one opening hour at x1 speed
   openHour: 8,           // 8 pagi
@@ -55,7 +84,7 @@ KR.config = {
 
   // Bank: money saved here earns a return every night on the balance in the bank.
   // rates[i] is the daily return at relationship level i; upgrades[i] is the price to reach level i+1.
-  bank: { rates: [0.05, 0.10, 0.20], upgrades: [500, 1200] },
+  bank: { rates: [0.025, 0.05, 0.10], upgrades: [500, 1200] },
 
   // Kad TCG (needs the 'tcg' upgrade in lot 3): a new set comes out every `every` days. On release
   // day collectors queue up for packs; the hype fades by `fade` a day. Weekends are card days too.
@@ -71,7 +100,7 @@ KR.config = {
   ],
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
-  seasonDays: 90,
+  seasonDays: 84,        // 3 months of 4 weeks
   starTargets: [3000, 7000, 12000],
 
   dayNames: ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
@@ -126,6 +155,12 @@ KR.config = {
 
   // upkeep = RM per day once bought
   upgrades: [
+    // Company: SSM registration lets the player rename the company and join the leaderboard;
+    // the mailbox (needs SSM) shows which events are on now and which have ended.
+    { id: 'ssm',      name: 'Daftar SSM',     icon: '📜', price: 60, upkeep: 0,
+      desc: 'Daftar perniagaan dengan SSM. Boleh tukar nama syarikat dan masuk Papan Prestasi Syarikat.' },
+    { id: 'petisurat', name: 'Peti Surat Syarikat', icon: '📬', price: 30, upkeep: 0, needs: 'ssm',
+      desc: 'Surat dari kerajaan, pemborong dan jiran sampai ke sini. Tahu acara apa sedang berlaku dan yang dah tamat.' },
     { id: 'peti',     name: 'Peti Sejuk',     icon: '🧊', price: 300, upkeep: 5,
       desc: 'Boleh jual ais krim. Roti dan telur kurang rosak.', perishMult: 0.5 },
     // An upgrade with levels can be bought once per level (each level's numbers add up).
@@ -139,6 +174,12 @@ KR.config = {
       desc: 'Senang bayar, pelanggan sanggup bayar 6% lebih.', willing: 0.06 },
     { id: 'papan',    name: 'Papan Tanda LED', icon: '💡', price: 450, upkeep: 2,
       desc: 'Lebih ramai nampak kedai korang, +20% pelanggan.', traffic: 0.2 },
+    // Small warehouse next to the shop (+100 stock space), then a part-timer who works from it:
+    // from 6 petang he tops each item up to the auto-restock level the player set, at the normal wholesale price.
+    { id: 'stor',     name: 'Stor Kecil',     icon: '📦', price: 50, upkeep: 10, capacity: 100,
+      desc: 'Stor kecil sebelah kedai. +100 ruang stok.' },
+    { id: 'pekerja',  name: 'Pekerja Stor (Separuh Masa)', icon: '🛒', price: 150, upkeep: 17.5, needs: 'stor', autoRestock: true,
+      desc: 'Masuk kerja pukul 6 petang. Isi semula rak dari stor ikut tahap Auto yang korang tetapkan, pada harga borong biasa.' },
     { id: 'pembantu', name: 'Pembantu Kedai', icon: '🧑‍🍳', price: 300, upkeep: 35,
       desc: 'Layan +30 pelanggan sehari.', serve: 30 },
     { id: 'lewat',    name: 'Buka Sampai 12 Malam', icon: '🌙', price: 350, upkeep: 8,
@@ -155,13 +196,43 @@ KR.config = {
   // Cash + bank needed to celebrate and offer a second branch (RM5,000 + RM2,500 for the manager).
   expandAt: 7500,
 
+  // Events. days = how long it lasts (1 = today only, 7 = a week). Effects, all optional:
+  //   traffic / willing  multiply visitors / what people will pay
+  //   costMult           multiplies every wholesale price; cost: { id: mult } for one product
+  //   boost: { id: mult } demand for a product; bills multiplies the upgrades' daily upkeep
+  //   rep                reputation added at the end of each day it runs
+  // from = who the letter is from (Peti Surat); lot = only happens once that lot is rented;
+  // weight = how often it's picked compared with the others (default 1).
   events: {
-    gaji:       { name: 'Hari Gaji', desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
-    pasarmalam: { name: 'Pasar Malam', desc: 'Pasar malam dekat kedai, ramai lalu-lalang.', traffic: 1.4 },
-    sukan:      { name: 'Hari Sukan Sekolah', desc: 'Budak sekolah cari air dan roti.', boost: { air: 2, roti: 1.5 } },
-    promosi:    { name: 'Promosi Pemborong', desc: 'Harga borong 20% lebih murah hari ini.', costMult: 0.8 }
+    gaji:       { name: 'Hari Gaji', from: 'Kalendar', days: 1, desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
+    // One day only
+    pasarmalam: { name: 'Pasar Malam', from: 'Majlis Perbandaran', days: 1, desc: 'Pasar malam dekat kedai, ramai lalu-lalang.', traffic: 1.4 },
+    sukan:      { name: 'Hari Sukan Sekolah', from: 'Sekolah Kebangsaan Taman', days: 1, desc: 'Budak sekolah cari air dan roti.', boost: { air: 2, roti: 1.5 } },
+    promosi:    { name: 'Promosi Pemborong', from: 'Pemborong', days: 1, desc: 'Harga borong 20% lebih murah hari ini.', costMult: 0.8 },
+    kenduri:    { name: 'Kenduri Kahwin', from: 'Jiran taman', days: 1, lot: 2, desc: 'Ada kenduri kahwin di taman. Tuan rumah cari beras, minyak, gula dan air.',
+                  boost: { beras: 3, minyak: 2.5, gula: 2.5, air: 1.5 } },
+    influencer: { name: 'Influencer Singgah', from: 'Media sosial', days: 1, weight: 0.6, desc: 'Seorang influencer makanan buat video di kedai korang. Ramai datang nak tengok, dan reputasi naik.',
+                  traffic: 1.3, rep: 3 },
+    bola:       { name: 'Malam Final Bola', from: 'Persatuan Penduduk', days: 1, desc: 'Pasukan negeri main final malam ni. Orang beli mi segera, air tin dan cokelat untuk tengok bola.',
+                  boost: { maggi: 1.7, airtin: 2, cokelat: 1.6 } },
+    gotong:     { name: 'Gotong-royong Taman', from: 'Persatuan Penduduk', days: 1, desc: 'Penduduk bergotong-royong bersihkan taman. Ramai cari air dan roti.',
+                  boost: { air: 2.2, roti: 1.6, airtin: 1.5 } },
+    jalan:      { name: 'Kerja Baiki Jalan', from: 'Majlis Perbandaran', days: 1, weight: 0.5, desc: 'Majlis baiki jalan depan taman. Kurang sikit orang lalu hari ini.', traffic: 0.8 },
+    // A whole week (temporary policies and seasons)
+    subsidi:    { name: 'Subsidi Minyak Masak', from: 'Kerajaan', days: 7, lot: 2, desc: 'Kerajaan beri subsidi minyak masak selama seminggu. Harga borong minyak 30% lebih murah.',
+                  cost: { minyak: 0.7 }, boost: { minyak: 1.3 } },
+    bantuan:    { name: 'Bantuan Tunai Kerajaan', from: 'Kerajaan', days: 7, desc: 'Bantuan tunai masuk akaun rakyat minggu ini. Lebih ramai keluar belanja dan sanggup bayar lebih sikit.',
+                  traffic: 1.1, willing: 1.08 },
+    rebat:      { name: 'Rebat Bil Elektrik', from: 'Kerajaan', days: 7, desc: 'Rebat bil elektrik untuk peniaga kecil selama seminggu. Kos harian naik taraf separuh harga.', bills: 0.5 },
+    cuti:       { name: 'Cuti Sekolah', from: 'Kalendar sekolah', days: 7, desc: 'Seminggu cuti sekolah. Budak-budak cari ais krim, cokelat dan mainan.',
+                  traffic: 1.05, boost: { aiskrim: 1.8, cokelat: 1.6, mainan: 2, tcg: 1.3 } },
+    kempen:     { name: 'Kempen Sokong Kedai Kejiranan', from: 'Kerajaan', days: 7, desc: 'Kempen seminggu galakkan orang beli di kedai dekat rumah. Lebih ramai singgah.', traffic: 1.12 },
+    diesel:     { name: 'Kos Penghantaran Naik', from: 'Pemborong', days: 7, weight: 0.6, desc: 'Harga diesel naik sementara. Pemborong caj 8% lebih untuk semua barang selama seminggu.', costMult: 1.08 }
   },
-  randomEvents: ['pasarmalam', 'sukan', 'promosi'],
+  randomEvents: ['pasarmalam', 'sukan', 'promosi', 'kenduri', 'influencer', 'bola', 'gotong', 'jalan'],
+  weekEvents: ['subsidi', 'bantuan', 'rebat', 'cuti', 'kempen', 'diesel'],
+  // Company Performance Leaderboard: the shop value at the end of each season (needs SSM).
+  boardKey: 'kedaiRuncit.board.v1',
 
   // Milestones pay a one-off cash reward. check(s, r) gets the state and today's report.
   milestones: [
