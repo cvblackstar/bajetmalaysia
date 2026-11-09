@@ -20,7 +20,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` directly or through `permain
 | Shop row and town layout | The three lots are one linked row of shophouses built in `buildRow()` (`scene3d.js`): shared party walls with wide arches once lots are rented, one roof, sign bands per lot and a covered kaki lima. Two back roads run behind the row so every house and the klinik, bank and flats face a road; the kilang sits further left across the road. |
 | Queue and room | `shopRoom` in `config.js`: how many customers fit inside (more lots, a helper) and how long a line people join. In `sim.js` a customer only walks off when the shop is full and the line is too long at that moment; the till serves `serveCap` customers spread over the opening hours. |
 | `vendor/three.module.min.js` | three.js r158 (MIT, see `vendor/three.LICENSE`), loaded in the background with `import()`. |
-| `js/ui.js` | Renders the state into the page: Stok tab grouped by lot, Naik Taraf, Bank, Pelanggan, Rekod. |
+| `js/ui.js` | Renders the state into the page: Stok tab grouped by lot, Naik Taraf, Bank, Pelanggan, Rekod, Syarikat (Peti Surat and leaderboard). |
 | `js/main.js` | Wires buttons, plays the day animation, saves. |
 
 Shop lots: lot 1 sells everyday items; renting lot 2 adds kitchen basics (rice, oil, sugar, umbrellas);
@@ -29,6 +29,13 @@ every 14 days and brings card collectors. The Bank tab holds savings that earn a
 (`bank` in `config.js`). Cars on the main road are a mix of ones built in code (`makeCar` in `scene3d.js`) and Kenney's, and stop
 at the zebra crossing for people coming from across the road. Rare customers have a light blue
 outline, unique ones a purple glow (`AURA` in `models3d.js`).
+
+Events: each morning there is a chance of a one-day event (pasar malam, kenduri, final bola...) and, now and
+then, a week-long one such as a government subsidy or school holidays (`events`, `randomEvents`,
+`weekEvents` in `config.js`; the log is `state.events`). Players only see which events are on after buying
+Daftar SSM (RM60, unlocks the Syarikat tab, renaming the company and the Company Performance Leaderboard)
+and then Peti Surat Syarikat (RM30, letters for events happening now and ones that have ended). The
+leaderboard keeps finished seasons in this browser (`state.addToBoard`) until the online one is ready.
 
 Later plans plug into `platform.js`: Supabase leaderboard (`leaderboard.submit/top`),
 a donation button (`donationUrl`), and the CrazyGames SDK (`sdk.*`). Hosting on Vercel needs no changes.

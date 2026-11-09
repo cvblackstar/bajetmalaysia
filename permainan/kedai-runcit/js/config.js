@@ -29,7 +29,11 @@ KR.config = {
     rare:   { rep: 80, chance: 0.08, multi: 2, multiChance: 0.6 },
     unique: { rep: 95, chance: 0.03, multi: 3, multiChance: 0.6 }
   },
-  eventChance: 0.2,
+  // Events (see `events` below): each morning from day 3 there's a chance of a one-day event,
+  // and from day 5 a chance a week-long one starts (only one week-long event runs at a time).
+  // Players only see which events are on once they have the Peti Surat Syarikat upgrade.
+  eventChance: 0.25,
+  weekEventChance: 0.08,
   paydayEvery: 30,
   paydayOn: 25,
   midRestockMarkup: 0.1, // restocking while the shop is open costs 10% more than the morning order
@@ -129,6 +133,12 @@ KR.config = {
 
   // upkeep = RM per day once bought
   upgrades: [
+    // Company: SSM registration lets the player rename the company and join the leaderboard;
+    // the mailbox (needs SSM) shows which events are on now and which have ended.
+    { id: 'ssm',      name: 'Daftar SSM',     icon: '📜', price: 60, upkeep: 0,
+      desc: 'Daftar perniagaan dengan SSM. Boleh tukar nama syarikat dan masuk Papan Prestasi Syarikat.' },
+    { id: 'petisurat', name: 'Peti Surat Syarikat', icon: '📬', price: 30, upkeep: 0, needs: 'ssm',
+      desc: 'Surat dari kerajaan, pemborong dan jiran sampai ke sini. Tahu acara apa sedang berlaku dan yang dah tamat.' },
     { id: 'peti',     name: 'Peti Sejuk',     icon: '🧊', price: 300, upkeep: 5,
       desc: 'Boleh jual ais krim. Roti dan telur kurang rosak.', perishMult: 0.5 },
     // An upgrade with levels can be bought once per level (each level's numbers add up).
@@ -158,13 +168,43 @@ KR.config = {
   // Cash + bank needed to celebrate and offer a second branch (RM5,000 + RM2,500 for the manager).
   expandAt: 7500,
 
+  // Events. days = how long it lasts (1 = today only, 7 = a week). Effects, all optional:
+  //   traffic / willing  multiply visitors / what people will pay
+  //   costMult           multiplies every wholesale price; cost: { id: mult } for one product
+  //   boost: { id: mult } demand for a product; bills multiplies the upgrades' daily upkeep
+  //   rep                reputation added at the end of each day it runs
+  // from = who the letter is from (Peti Surat); lot = only happens once that lot is rented;
+  // weight = how often it's picked compared with the others (default 1).
   events: {
-    gaji:       { name: 'Hari Gaji', desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
-    pasarmalam: { name: 'Pasar Malam', desc: 'Pasar malam dekat kedai, ramai lalu-lalang.', traffic: 1.4 },
-    sukan:      { name: 'Hari Sukan Sekolah', desc: 'Budak sekolah cari air dan roti.', boost: { air: 2, roti: 1.5 } },
-    promosi:    { name: 'Promosi Pemborong', desc: 'Harga borong 20% lebih murah hari ini.', costMult: 0.8 }
+    gaji:       { name: 'Hari Gaji', from: 'Kalendar', days: 1, desc: 'Orang ramai baru dapat gaji, lebih sanggup belanja.', traffic: 1.15, willing: 1.15 },
+    // One day only
+    pasarmalam: { name: 'Pasar Malam', from: 'Majlis Perbandaran', days: 1, desc: 'Pasar malam dekat kedai, ramai lalu-lalang.', traffic: 1.4 },
+    sukan:      { name: 'Hari Sukan Sekolah', from: 'Sekolah Kebangsaan Taman', days: 1, desc: 'Budak sekolah cari air dan roti.', boost: { air: 2, roti: 1.5 } },
+    promosi:    { name: 'Promosi Pemborong', from: 'Pemborong', days: 1, desc: 'Harga borong 20% lebih murah hari ini.', costMult: 0.8 },
+    kenduri:    { name: 'Kenduri Kahwin', from: 'Jiran taman', days: 1, lot: 2, desc: 'Ada kenduri kahwin di taman. Tuan rumah cari beras, minyak, gula dan air.',
+                  boost: { beras: 3, minyak: 2.5, gula: 2.5, air: 1.5 } },
+    influencer: { name: 'Influencer Singgah', from: 'Media sosial', days: 1, weight: 0.6, desc: 'Seorang influencer makanan buat video di kedai korang. Ramai datang nak tengok, dan reputasi naik.',
+                  traffic: 1.3, rep: 3 },
+    bola:       { name: 'Malam Final Bola', from: 'Persatuan Penduduk', days: 1, desc: 'Pasukan negeri main final malam ni. Orang beli mi segera, air tin dan cokelat untuk tengok bola.',
+                  boost: { maggi: 1.7, airtin: 2, cokelat: 1.6 } },
+    gotong:     { name: 'Gotong-royong Taman', from: 'Persatuan Penduduk', days: 1, desc: 'Penduduk bergotong-royong bersihkan taman. Ramai cari air dan roti.',
+                  boost: { air: 2.2, roti: 1.6, airtin: 1.5 } },
+    jalan:      { name: 'Kerja Baiki Jalan', from: 'Majlis Perbandaran', days: 1, weight: 0.5, desc: 'Majlis baiki jalan depan taman. Kurang sikit orang lalu hari ini.', traffic: 0.8 },
+    // A whole week (temporary policies and seasons)
+    subsidi:    { name: 'Subsidi Minyak Masak', from: 'Kerajaan', days: 7, lot: 2, desc: 'Kerajaan beri subsidi minyak masak selama seminggu. Harga borong minyak 30% lebih murah.',
+                  cost: { minyak: 0.7 }, boost: { minyak: 1.3 } },
+    bantuan:    { name: 'Bantuan Tunai Kerajaan', from: 'Kerajaan', days: 7, desc: 'Bantuan tunai masuk akaun rakyat minggu ini. Lebih ramai keluar belanja dan sanggup bayar lebih sikit.',
+                  traffic: 1.1, willing: 1.08 },
+    rebat:      { name: 'Rebat Bil Elektrik', from: 'Kerajaan', days: 7, desc: 'Rebat bil elektrik untuk peniaga kecil selama seminggu. Kos harian naik taraf separuh harga.', bills: 0.5 },
+    cuti:       { name: 'Cuti Sekolah', from: 'Kalendar sekolah', days: 7, desc: 'Seminggu cuti sekolah. Budak-budak cari ais krim, cokelat dan mainan.',
+                  traffic: 1.05, boost: { aiskrim: 1.8, cokelat: 1.6, mainan: 2, tcg: 1.3 } },
+    kempen:     { name: 'Kempen Sokong Kedai Kejiranan', from: 'Kerajaan', days: 7, desc: 'Kempen seminggu galakkan orang beli di kedai dekat rumah. Lebih ramai singgah.', traffic: 1.12 },
+    diesel:     { name: 'Kos Penghantaran Naik', from: 'Pemborong', days: 7, weight: 0.6, desc: 'Harga diesel naik sementara. Pemborong caj 8% lebih untuk semua barang selama seminggu.', costMult: 1.08 }
   },
-  randomEvents: ['pasarmalam', 'sukan', 'promosi'],
+  randomEvents: ['pasarmalam', 'sukan', 'promosi', 'kenduri', 'influencer', 'bola', 'gotong', 'jalan'],
+  weekEvents: ['subsidi', 'bantuan', 'rebat', 'cuti', 'kempen', 'diesel'],
+  // Company Performance Leaderboard: the 90-day shop value of each season (needs SSM).
+  boardKey: 'kedaiRuncit.board.v1',
 
   // Milestones pay a one-off cash reward. check(s, r) gets the state and today's report.
   milestones: [

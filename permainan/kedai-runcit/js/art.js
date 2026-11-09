@@ -142,6 +142,18 @@ KR.art = (function () {
       '<rect x="5" y="36" width="38" height="6" rx="1" fill="#cfd8f2" ' + OL + '/>' +
       '<circle cx="24" cy="29" r="5" fill="#ffd23f" ' + OL + '/><path d="M24 26.5v5" stroke="#3a2a1f" stroke-width="1.4"/>'
   };
+  // SSM certificate and the company mailbox
+  upgrades.ssm =
+    '<rect x="7" y="6" width="34" height="36" rx="2" fill="#fffdf6" ' + OL + '/>' +
+    '<path d="M13 13h22M13 18h22M13 23h14" stroke="#9c7445" stroke-width="1.8" stroke-linecap="round"/>' +
+    '<circle cx="32" cy="33" r="6" fill="#c0453a" ' + OL + '/><path d="M29 38l-2 7 5-3 5 3-2-7" fill="#c0453a" ' + OL + '/>' +
+    '<path d="M30 33l1.5 1.5 3-3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>';
+  upgrades.petisurat =
+    '<path d="M22 30v16" stroke="#6d4a2a" stroke-width="4" stroke-linecap="round"/>' +
+    '<path d="M8 30V18a9 9 0 0 1 9-9h16a9 9 0 0 1 9 9v12z" fill="#2f7f80" ' + OL + '/>' +
+    '<path d="M8 18a9 9 0 0 1 18 0v12" fill="#256566" ' + OL + '/>' +
+    '<rect x="11" y="17" width="12" height="8" rx="1" fill="#fffdf6" ' + OL + '/><path d="M11 17l6 4.5 6-4.5" fill="none" ' + OL + '/>' +
+    '<path d="M36 22V8h7v5h-7" fill="#c0453a" ' + OL + '/>';
   upgrades.tcg = products.tcg;
 
   // People: a seeded mix of skin tones, clothes and headwear.

@@ -328,3 +328,33 @@ body { min-height: 100vh; background: radial-gradient(1200px 500px at 50% -200px
   .tabs::-webkit-scrollbar { display: none; }
   .tab { flex: none; white-space: nowrap; padding: 8px 12px; }
 }
+
+/* Company: SSM badge, Peti Surat letters, leaderboard */
+.ssm-badge { display: inline-block; vertical-align: 2px; font-size: 10px; font-weight: 800; letter-spacing: .05em; padding: 1px 6px; border-radius: 999px; background: #fff; color: var(--green-d); }
+.event-tag.week { background: #e3eefb; color: #1d5fa5; }
+.mail-line { margin-top: 4px !important; }
+button.link { border: 0; background: none; padding: 0; color: var(--green); font-weight: 700; text-decoration: underline; font-size: 13px; }
+.mail-locked { display: flex; gap: 12px; align-items: center; }
+.mail-locked .uicon { width: 44px; height: 44px; flex: none; }
+.mail .sub-title, .mail-locked .sub-title, #board .sub-title { margin-top: 0; }
+.subtabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.subtab { flex: 1; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.subtab.active { background: #e3f1ea; color: var(--green-d); border-color: var(--green); }
+.letter { border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 10px; padding: 9px 12px; margin-bottom: 8px; background: #fffaf0; }
+.letter.week { border-left-color: #2f7fd1; background: #f5f9ff; }
+.letter.past { opacity: .7; background: var(--paper); border-left-color: #c9c2ae; }
+.letter .lhead { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.letter strong { display: block; margin-top: 2px; }
+.letter p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.new-tag { font-style: normal; font-size: 10px; background: var(--red); color: #fff; border-radius: 999px; padding: 1px 6px; vertical-align: 2px; }
+table.board { width: 100%; border-collapse: collapse; }
+table.board td { padding: 7px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+table.board td small { display: block; color: var(--muted); font-size: 11px; }
+table.board .rank { width: 26px; font-weight: 800; color: var(--muted); text-align: center; }
+table.board .stars { white-space: nowrap; width: 60px; }
+table.board .stars .sprite { width: 16px; height: 16px; display: inline-block; }
+table.board .val { text-align: right; font-weight: 800; white-space: nowrap; }
+table.board tr.now { background: #eef7f1; }
+.company-name label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.company-name input { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
+#tab-syarikat { display: grid; gap: 8px; }

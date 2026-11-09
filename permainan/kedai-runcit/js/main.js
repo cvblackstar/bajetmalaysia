@@ -79,17 +79,31 @@
     if ((kind === 'in' ? S.deposit(state, n) : S.withdraw(state, n)) > 0) { SFX.coin(); save(); UI.plan(state); }
   });
 
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x.dataset.tab === name); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.add('hidden'); });
+    $('tab-' + name).classList.remove('hidden');
+    var tb = document.querySelector('.tab[data-tab="' + name + '"]');
+    if (tb && tb.parentNode.scrollWidth > tb.parentNode.clientWidth) tb.parentNode.scrollLeft = tb.offsetLeft - 12;   // phones: keep the tab in view
+    if (name === 'syarikat' && S.unreadMail(state)) { S.readMail(state); save(); setTimeout(function () { UI.company(state); }, 1500); }   // let "Baru" show for a moment
+  }
   document.querySelectorAll('.tab').forEach(function (t) {
-    t.addEventListener('click', function () {
-      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x === t); });
-      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.add('hidden'); });
-      $('tab-' + t.dataset.tab).classList.remove('hidden');
-    });
+    t.addEventListener('click', function () { showTab(t.dataset.tab); });
+  });
+  $('forecast').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { SFX.click(); UI.setMailView('aktif'); UI.company(state); showTab(b.dataset.goto); }
+  });
+  $('mailbox').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-mail]');
+    if (b) { SFX.click(); UI.setMailView(b.dataset.mail); UI.company(state); }
   });
 
+  // Only a company registered with SSM can change its name.
   $('nameInput').addEventListener('change', function () {
+    if (!S.level(state, 'ssm')) return;
     state.shopName = this.value.trim().slice(0, 28) || 'Kedai Runcit Bajet';
-    save(); UI.header(state);
+    save(); UI.header(state); UI.company(state);
   });
 
   $('resetBtn').addEventListener('click', function () {
@@ -102,6 +116,7 @@
     state.seenIntro = true;
     S.startDay(state); save();
     $('reportModal').classList.add('hidden');
+    showTab('stok');
     showPlan();
   }
 
@@ -263,10 +278,10 @@
   function renderRestock() {
     $('restockList').innerHTML = S.unlockedProducts(state).map(function (p) {
       return '<div class="restock-row" data-id="' + p.id + '"><span class="ricon">' + A.product(p.id) + '</span>' +
-        '<span class="rname">' + t(p.name) + '<small>' + t('Stok: {n} | {c} seunit', { n: state.stock[p.id], c: UI.rm(S.restockCost(p.id, 1)) }) + '</small></span>' +
+        '<span class="rname">' + t(p.name) + '<small>' + t('Stok: {n} | {c} seunit', { n: state.stock[p.id], c: UI.rm(S.restockCost(state, p.id, 1)) }) + '</small></span>' +
         [5, 10].map(function (n) {
           return '<button class="btn small" data-n="' + n + '"' + (S.canRestock(state, p.id, n) ? '' : ' disabled') + '>+' + n +
-            ' (' + UI.rm(S.restockCost(p.id, n)) + ')</button>';
+            ' (' + UI.rm(S.restockCost(state, p.id, n)) + ')</button>';
         }).join('') + '</div>';
     }).join('');
     $('restockCash').textContent = UI.rm(state.cash);
@@ -336,7 +351,10 @@
   function endSeason() {
     var value = S.shopValue(state), best = KR.state.loadBest(), isNew = value > best.value;
     if (isNew) { best = { value: value, stars: S.starsFor(value), day: state.day - 1 }; KR.state.saveBest(best); }
-    P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    if (S.level(state, 'ssm')) {          // registered companies go on the Company Performance Leaderboard
+      KR.state.addToBoard({ name: state.shopName, value: value, stars: S.starsFor(value), date: new Date().toISOString().slice(0, 10) });
+      P.leaderboard.submit({ shopName: state.shopName, value: value, stars: S.starsFor(value), season: true });
+    }
     P.sdk.happytime();
     SFX.kaching();
     showPlanQuiet();

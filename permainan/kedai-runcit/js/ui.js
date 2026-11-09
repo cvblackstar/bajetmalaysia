@@ -16,7 +16,7 @@ KR.ui = (function () {
 
   function header(s) {
     $('dayLabel').textContent = t('Hari {d} · {name}', { d: s.day, name: dayName(s.day) });
-    $('shopName').textContent = s.shopName;
+    $('shopName').innerHTML = esc(s.shopName) + (S.level(s, 'ssm') ? ' <span class="ssm-badge" title="' + t('Berdaftar dengan SSM') + '">SSM</span>' : '');
     $('cash').textContent = rm(s.cash);
     $('cash').classList.toggle('neg', s.cash < 0);
     $('rep').textContent = s.rep;
@@ -45,7 +45,8 @@ KR.ui = (function () {
   }
 
   function forecast(s) {
-    var f = s.forecast, w = C.weathers[f.weather], ev = f.event ? C.events[f.event] : null;
+    var f = s.forecast, w = C.weathers[f.weather], mail = !!S.level(s, 'petisurat');
+    var on = mail ? S.activeEvents(s) : [];       // without the mailbox, events stay a surprise
     var rent = S.rentToday(s), mult = S.rentMult(s.day), R = C.rentRamp;
     var until = Math.ceil(s.day / R.every) * R.every;
     $('forecast').innerHTML =
@@ -54,7 +55,8 @@ KR.ui = (function () {
       '<p>' + t('Kos harian {c}: sewa {r}, bil {b}. Ramalan cuaca tak selalu tepat.',
         { c: rm(S.dailyCosts(s)), r: rm(rent), b: rm(S.round2(S.dailyCosts(s) - rent)) }) + '</p>' +
       (mult < 1 ? '<p class="rent-note">' + t('Sewa diskaun: bayar {p}% sampai hari {d}.', { p: Math.round(mult * 100), d: until }) + '</p>' : '') +
-      (ev ? '<span class="event-tag">' + esc(t(ev.name)) + '</span> <p>' + esc(t(ev.desc)) + '</p>' : '') +
+      (on.length ? '<p class="mail-line">' + on.map(function (e) { return '<span class="event-tag' + (e.to > e.from ? ' week' : '') + '">' + esc(t(C.events[e.id].name)) + '</span>'; }).join(' ') +
+        ' <button class="link" data-goto="syarikat">' + t('Baca di Peti Surat') + '</button></p>' : '') +
       (S.tcgOn(s) ? (S.tcgRelease(s) ? '<span class="event-tag tcg">' + t('Set TCG baru keluar hari ini!') + '</span> <p>' + t('Peminat kad akan datang beratur. Pastikan stok pek booster cukup.') + '</p>'
         : '<p class="rent-note">' + t('Set TCG baru seterusnya dalam {n} hari.', { n: C.tcg.every - S.tcgDays(s) }) + '</p>') : '') +
       '</div>';
@@ -152,7 +154,62 @@ KR.ui = (function () {
       return '<div class="milestone' + (s.milestones[m.id] ? ' done' : '') + '"><strong>' + t(m.name) + '</strong>' +
         '<span>' + t(m.desc) + t(' Ganjaran {v}.', { v: rm0(m.reward) }) + '</span></div>';
     }).join('');
-    $('nameInput').value = s.shopName;
+    $('nameHint').textContent = S.level(s, 'ssm') ? t('Tukar nama syarikat di tab Syarikat.') : t('Daftar SSM (Naik Taraf) untuk tukar nama syarikat.');
+  }
+
+  // ---------- Syarikat tab (after SSM): Peti Surat, leaderboard and company name ----------
+  var mailView = 'aktif';
+  function setMailView(v) { mailView = v; }
+  function daysText(s, e) {
+    if (e.from === e.to) return e.to < s.day ? t('Hari {d}', { d: e.from }) : t('Hari ini sahaja');
+    if (e.to < s.day) return t('Hari {a} hingga {b}', { a: e.from, b: e.to });
+    var left = e.to - s.day + 1;
+    return t('Hari {a} hingga {b} · tinggal {n} hari', { a: e.from, b: e.to, n: left });
+  }
+  function letter(s, e, past) {
+    var ev = C.events[e.id];
+    return '<div class="letter' + (past ? ' past' : '') + (e.to > e.from ? ' week' : '') + (!past && !e.seen ? ' new' : '') + '">' +
+      '<div class="lhead"><span class="from">' + t('Daripada: {f}', { f: t(ev.from || 'Pemberitahuan') }) + '</span><span class="when">' + daysText(s, e) + '</span></div>' +
+      '<strong>' + esc(t(ev.name)) + (!past && !e.seen ? ' <em class="new-tag">' + t('Baru') + '</em>' : '') + '</strong>' +
+      '<p>' + esc(t(ev.desc)) + '</p></div>';
+  }
+  function mailbox(s) {
+    if (!S.level(s, 'petisurat')) {
+      $('mailbox').innerHTML = '<div class="card mail-locked"><div class="uicon">' + A.upgrade('petisurat') + '</div><div><h3 class="sub-title">' + t('Peti Surat Syarikat') + '</h3>' +
+        '<p class="hint">' + t('Belum ada peti surat. Beli Peti Surat Syarikat di Naik Taraf untuk tahu acara apa sedang berlaku.') + '</p></div></div>';
+      return;
+    }
+    var act = S.activeEvents(s), past = S.pastEvents(s);
+    var list = mailView === 'aktif' ? act : past;
+    $('mailbox').innerHTML = '<div class="card mail"><h3 class="sub-title">' + t('Peti Surat Syarikat') + '</h3>' +
+      '<div class="subtabs"><button class="subtab' + (mailView === 'aktif' ? ' active' : '') + '" data-mail="aktif">' + t('Sedang berlaku ({n})', { n: act.length }) + '</button>' +
+      '<button class="subtab' + (mailView === 'tamat' ? ' active' : '') + '" data-mail="tamat">' + t('Sudah tamat ({n})', { n: past.length }) + '</button></div>' +
+      (list.length ? list.map(function (e) { return letter(s, e, mailView !== 'aktif'); }).join('')
+        : '<p class="hint">' + t(mailView === 'aktif' ? 'Tiada acara hari ini. Hari biasa di taman.' : 'Belum ada acara yang tamat.') + '</p>') +
+      '</div>';
+  }
+  function board(s) {
+    var rows = KR.state.loadBoard().map(function (b) { return { name: b.name, value: b.value, stars: b.stars, note: t('Musim tamat') }; });
+    var inSeason = !s.seasonDone && s.day <= C.seasonDays, value = S.shopValue(s);
+    if (inSeason) rows.push({ name: s.shopName, value: value, stars: S.starsFor(value), note: t('Musim ini, hari {d}', { d: s.day }), now: true });
+    rows.sort(function (a, b) { return b.value - a.value; });
+    $('board').innerHTML = '<h3 class="sub-title">' + t('Papan Prestasi Syarikat') + '</h3>' +
+      '<p class="hint">' + t('Markah = nilai kedai pada hari ke-{n}. Buat masa ini papan ini tunjuk musim yang dimainkan di peranti ini. Nanti ia akan tunjuk markah {n} hari semua pemain.', { n: C.seasonDays }) + '</p>' +
+      (rows.length ? '<table class="board">' + rows.map(function (r, i) {
+        return '<tr class="' + (r.now ? 'now' : '') + '"><td class="rank">' + (i + 1) + '</td><td><strong>' + esc(r.name) + '</strong><small>' + r.note + '</small></td>' +
+          '<td class="stars">' + starsHtml(r.stars) + '</td><td class="val">' + rm0(r.value) + '</td></tr>';
+      }).join('') + '</table>' : '<p class="hint">' + t('Habiskan musim {n} hari untuk masuk papan.', { n: C.seasonDays }) + '</p>');
+  }
+  function company(s) {
+    var reg = !!S.level(s, 'ssm'), tab = document.querySelector('.tab[data-tab="syarikat"]');
+    if (tab) {
+      tab.classList.toggle('hidden', !reg);
+      var n = S.unreadMail(s);
+      if (n) tab.setAttribute('data-badge', n); else tab.removeAttribute('data-badge');
+    }
+    if (!reg) return;
+    mailbox(s); board(s);
+    if (document.activeElement !== $('nameInput')) $('nameInput').value = s.shopName;
   }
 
   // Customer statistics: how many served, split by common / rare / unique.
@@ -228,7 +285,7 @@ KR.ui = (function () {
       '</div>';
   }
 
-  function plan(s) { header(s); forecast(s); products(s); upgrades(s); bankTab(s); customers(s); records(s); }
+  function plan(s) { header(s); forecast(s); products(s); upgrades(s); bankTab(s); customers(s); records(s); company(s); }
 
   function tips(r) {
     var out = [];
@@ -327,6 +384,8 @@ KR.ui = (function () {
       row(t('Naik taraf dimiliki'), owned + '/' + normal.length) +
       row(t('Pencapaian'), Object.keys(s.milestones).length + '/' + C.milestones.length) +
       row(t('Rekod terbaik'), rm0(best.value) + (isNewBest ? t(' (baru!)') : '')) +
+      (S.level(s, 'ssm') ? '<p class="hint special">' + t('{c} masuk Papan Prestasi Syarikat dengan markah {v}.', { c: esc(s.shopName), v: rm0(value) }) + '</p>'
+        : '<p class="hint">' + t('Daftar SSM (Naik Taraf) supaya musim seterusnya masuk Papan Prestasi Syarikat.') + '</p>') +
       row(t('Simpanan bank'), rm(S.bank(s).balance)) +
       '<p class="hint">' + t('Sasaran bintang: {list}. Nilai kedai = duit + bank + stok + naik taraf.', { list: C.starTargets.map(rm0).join(' / ') }) + '</p>' +
       '<button class="btn primary wide" id="continueBtn">' + t('Teruskan main (mod bebas)') + '</button>' +
@@ -346,6 +405,6 @@ KR.ui = (function () {
     $('reportModal').classList.remove('hidden');
   }
 
-  return { celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
+  return { company: company, setMailView: setMailView, celebrate: celebrate, bankTab: bankTab, $: $, seasonEnd: seasonEnd, goal: goal, rm: rm, plan: plan, header: header, products: products, upgrades: upgrades,
            customers: customers, records: records, report: report, bankrupt: bankrupt };
 })();

@@ -32,6 +32,8 @@ KR.state = (function () {
       today: null,         // a day in progress (see sim.openDay)
       managerOn: true,     // the store manager runs the day (once hired)
       celebrated: false,   // the RM7,500 celebration has been shown
+      events: [],          // events so far: { id, from, to, seen } (see sim events)
+      rolledDay: 0,        // the day today's events were rolled (so a reload doesn't roll again)
       seenIntro: false
     };
   }
@@ -60,5 +62,14 @@ KR.state = (function () {
   function loadBest() { return KR.platform.storage.load(C.bestKey) || { value: 0, stars: 0 }; }
   function saveBest(b) { return KR.platform.storage.save(C.bestKey, b); }
 
-  return { fresh: fresh, load: load, save: save, reset: reset, loadBest: loadBest, saveBest: saveBest };
+  // Company Performance Leaderboard (this browser for now): one entry per finished season,
+  // { name, value, stars, date }, best first. Later the same entries go online (platform.leaderboard).
+  function loadBoard() { var b = KR.platform.storage.load(C.boardKey); return Array.isArray(b) ? b : []; }
+  function addToBoard(entry) {
+    var b = loadBoard().concat([entry]).sort(function (x, y) { return y.value - x.value; }).slice(0, 20);
+    KR.platform.storage.save(C.boardKey, b);
+    return b;
+  }
+
+  return { fresh: fresh, load: load, save: save, reset: reset, loadBest: loadBest, saveBest: saveBest, loadBoard: loadBoard, addToBoard: addToBoard };
 })();
