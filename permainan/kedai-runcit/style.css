@@ -358,3 +358,23 @@ table.board tr.now { background: #eef7f1; }
 .company-name label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
 .company-name input { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
 #tab-syarikat { display: grid; gap: 8px; }
+
+/* Weekly prices, advertising */
+.week-note { color: var(--muted); font-size: 12px !important; }
+.mkt { display: inline-block; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 0 6px; margin-left: 2px; }
+.mkt.up { background: #fde4e1; color: #a5352b; }
+.mkt.down { background: #dff3e7; color: #19714a; }
+.mkt.big { outline: 1.5px solid currentColor; }
+.ad-plus { font-size: 11px; font-weight: 700; color: #f4c6ff; }
+#repBar.boost { background: linear-gradient(90deg, var(--gold), #b06ce0); }
+.ad-panel { margin-bottom: 8px; border: 1px solid #ecd2f3; background: linear-gradient(180deg, #fff9fd, var(--paper)); }
+.ad-head { display: flex; gap: 12px; align-items: flex-start; }
+.ad-head .uicon { width: 40px; height: 40px; flex: none; }
+.ad-head h4 { margin: 0; }
+.ad-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.ad-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.ad-btns .btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; }
+.ad-btns .btn small { font-weight: 600; font-size: 11px; opacity: .9; }
+.ad-btns .btn.primary { background: #8a3fb8; box-shadow: 0 2px 0 #5f2a80; }
+.ad-on { margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; background: #f3e6fa; color: #5f2a80; font-weight: 700; font-size: 13px; }
+@media (max-width: 520px) { .ad-btns { grid-template-columns: 1fr; } }

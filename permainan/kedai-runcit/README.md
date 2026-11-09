@@ -30,6 +30,13 @@ every 14 days and brings card collectors. The Bank tab holds savings that earn a
 at the zebra crossing for people coming from across the road. Rare customers have a light blue
 outline, unique ones a purple glow (`AURA` in `models3d.js`).
 
+Calendar: 7-day weeks, 4-week months; the season (and the leaderboard score) ends after month 3, day 84.
+Every week each item's wholesale cost moves by a random % (`market` in `config.js`: usually up to 20%,
+15% of the time a big move up to +-50%) and everything gets 2% dearer (`inflation`, also raises the
+customers' fair price). Reputation stays 0-100; the Iklan Kedai adverts (`ads`) add +10/15/20 for a week,
+up to 120. Above 100, rare and unique customers may tip (`tips`, chance = rating - 100 %), shown in the
+day report only.
+
 Events: each morning there is a chance of a one-day event (pasar malam, kenduri, final bola...) and, now and
 then, a week-long one such as a government subsidy or school holidays (`events`, `randomEvents`,
 `weekEvents` in `config.js`; the log is `state.events`). Players only see which events are on after buying

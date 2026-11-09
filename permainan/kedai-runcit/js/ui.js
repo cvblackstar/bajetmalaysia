@@ -15,12 +15,14 @@ KR.ui = (function () {
   function dayName(d) { return t(S.dayName(d)); }
 
   function header(s) {
-    $('dayLabel').textContent = t('Hari {d} · {name}', { d: s.day, name: dayName(s.day) });
+    $('dayLabel').textContent = t('Bulan {m} · Minggu {w} · Hari {d} · {name}', { m: S.monthOf(s.day), w: S.weekInMonth(s.day), d: s.day, name: dayName(s.day) });
     $('shopName').innerHTML = esc(s.shopName) + (S.level(s, 'ssm') ? ' <span class="ssm-badge" title="' + t('Berdaftar dengan SSM') + '">SSM</span>' : '');
     $('cash').textContent = rm(s.cash);
     $('cash').classList.toggle('neg', s.cash < 0);
-    $('rep').textContent = s.rep;
-    $('repBar').style.width = s.rep + '%';
+    var rating = S.rating(s), bonus = S.adBonus(s);
+    $('rep').innerHTML = rating + (bonus ? ' <small class="ad-plus">' + t('+{n} iklan', { n: bonus }) + '</small>' : '');
+    $('repBar').style.width = Math.min(100, rating) + '%';
+    $('repBar').classList.toggle('boost', !!bonus);
     var used = S.totalUnits(s.stock) + S.totalUnits(s.order);
     $('cap').textContent = used + '/' + S.capacity(s);
     goal(s);
@@ -54,6 +56,8 @@ KR.ui = (function () {
       '<h3>' + t('Ramalan: {w}', { w: t(w.name) }) + '</h3>' +
       '<p>' + t('Kos harian {c}: sewa {r}, bil {b}. Ramalan cuaca tak selalu tepat.',
         { c: rm(S.dailyCosts(s)), r: rm(rent), b: rm(S.round2(S.dailyCosts(s) - rent)) }) + '</p>' +
+      '<p class="week-note">' + (S.weekOf(s.day) ? t('Harga borong berubah setiap minggu, dan semua barang naik {i}% seminggu (inflasi).', { i: Math.round(C.inflation * 100) })
+        : t('Harga borong berubah setiap minggu. Semak harga sebelum beli stok.')) + '</p>' +
       (mult < 1 ? '<p class="rent-note">' + t('Sewa diskaun: bayar {p}% sampai hari {d}.', { p: Math.round(mult * 100), d: until }) + '</p>' : '') +
       (on.length ? '<p class="mail-line">' + on.map(function (e) { return '<span class="event-tag' + (e.to > e.from ? ' week' : '') + '">' + esc(t(C.events[e.id].name)) + '</span>'; }).join(' ') +
         ' <button class="link" data-goto="syarikat">' + t('Baca di Peti Surat') + '</button></p>' : '') +
@@ -87,12 +91,14 @@ KR.ui = (function () {
         return '<div class="product locked"><div class="picon">' + A.product(p.id) + '</div>' +
           '<div><div class="pname">' + t(p.name) + '</div><div class="pmeta"><span class="lock">🔒</span> ' + need + '</div></div><div></div></div>';
       }
-      var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost);
+      var cost = S.buyCost(s, p), price = s.prices[p.id], unit = S.round2(price - cost), mk = S.marketMult(s, p.id);
+      var chip = Math.abs(mk - 1) > 0.001 ? ' <span class="mkt ' + (mk > 1 ? 'up' : 'down') + (Math.abs(mk - 1) >= C.market.big[0] - 0.001 ? ' big' : '') + '">' +
+        (mk > 1 ? '▲' : '▼') + Math.round(Math.abs(mk - 1) * 100) + '% ' + t('minggu ini') + '</span>' : '';
       var order = s.order[p.id] || 0, left = S.daysLeft(s, p.id), dem = s.lastDemand && s.lastDemand[p.id];
       return '<div class="product" data-id="' + p.id + '">' +
         '<div class="picon">' + A.product(p.id) + '</div>' +
         '<div><div class="pname">' + t(p.name) + '</div>' +
-        '<div class="pmeta">' + t('Borong {c} · Harga biasa {r}', { c: rm(cost), r: rm(p.ref) }) + (p.perish >= 0.2 ? t(' · cepat rosak') : '') +
+        '<div class="pmeta">' + t('Borong {c} · Harga biasa {r}', { c: rm(cost), r: rm(S.refPrice(s, p)) }) + chip + (p.perish >= 0.2 ? t(' · cepat rosak') : '') +
           (p.expiry ? t(' · tahan {n} hari', { n: p.expiry }) + (left != null ? t(' (stok lama luput dalam {n} hari)', { n: left }) : '') : '') + '</div>' +
           (dem ? '<div class="demand">' + t('Semalam') + ': <b>' + t('laku {n}', { n: dem.sold }) + '</b>' +
             (dem.out ? ' · <b class="out">' + t('habis {n}', { n: dem.out }) + '</b>' : '') +
@@ -112,7 +118,21 @@ KR.ui = (function () {
         '</div></div>';
   }
 
+  // Advertisement: pay once for a week of extra rating (the only way above 100).
+  function ads(s) {
+    var on = S.adOn(s);
+    $('adPanel').innerHTML = '<div class="ad-head"><div class="uicon">' + A.upgrade('iklan') + '</div><div><h4>' + t('Iklan Kedai') + '</h4>' +
+      '<p>' + t('Bayar sekali, reputasi naik selama seminggu. Hanya iklan boleh bawa reputasi melebihi 100 (sampai {m}).', { m: C.repMax }) + '</p></div></div>' +
+      (on ? '<p class="ad-on">' + t('{a} sedang berjalan: +{b} reputasi, tamat hari {d} (tinggal {n} hari).',
+          { a: t(C.ads[on.tier].name), b: C.ads[on.tier].bonus, d: on.until, n: on.until - s.day + 1 }) + '</p>'
+        : '<div class="ad-btns">' + C.ads.map(function (a, i) {
+          return '<button class="btn' + (s.cash >= a.price ? ' primary' : '') + '" data-ad="' + i + '"' + (s.cash < a.price ? ' disabled' : '') + '><strong>' + t(a.name) + '</strong>' +
+            '<small>' + t('+{b} reputasi, {n} hari', { b: a.bonus, n: a.days }) + ' · ' + rm0(a.price) + '</small></button>';
+        }).join('') + '</div>');
+  }
+
   function upgrades(s) {
+    ads(s);
     // Not bought yet first (ones you can buy now before ones that need a lot), owned ones last.
     function rank(u) { return !S.nextLevel(s, u.id) ? 2 : S.upgradeOpen(s, u) ? 0 : 1; }
     var list = C.upgrades.filter(function (u) { return S.upgradeVisible(s, u); });
@@ -144,7 +164,8 @@ KR.ui = (function () {
       '<table><tr><td>' + t('Hari dibuka') + '</td><td>' + (s.day - 1) + '</td></tr>' +
       '<tr><td>' + t('Untung keseluruhan') + '</td><td>' + rm(s.stats.totalProfit) + '</td></tr>' +
       '<tr><td>' + t('Hari paling untung') + '</td><td>' + rm(s.stats.bestDay) + '</td></tr>' +
-      '<tr><td>' + t('Pelanggan dilayan') + '</td><td>' + s.stats.customers + '</td></tr></table>' +
+      '<tr><td>' + t('Pelanggan dilayan') + '</td><td>' + s.stats.customers + '</td></tr>' +
+      (s.stats.tips ? '<tr><td>' + t('Jumlah tip') + '</td><td>' + rm(s.stats.tips) + '</td></tr>' : '') + '</table>' +
       (h.length ? '<p class="hint">' + t('Untung 14 hari terakhir') + '</p><div class="spark">' + h.map(function (v) {
         return '<i class="' + (v < 0 ? 'loss' : '') + '" style="height:' + Math.max(4, Math.abs(v) / max * 100) + '%" title="' + rm(v) + '"></i>';
       }).join('') + '</div>' : '');
@@ -337,6 +358,7 @@ KR.ui = (function () {
       (r.midSpend ? row(t('Tambah stok (siang)'), '<span class="loss">' + rm(-r.midSpend) + '</span>') : '') +
       row(t('Sewa dan bil'), '<span class="loss">' + rm(-r.bills) + '</span>') +
       (r.claw ? row(t('Mesin capit ({n} kali main)', { n: r.claw.plays }), '<span class="pos">' + rm(r.claw.net) + '</span>') : '') +
+      (r.tips ? row(t('Tip daripada pelanggan'), '<span class="pos">' + rm(r.tips) + '</span>') : '') +
       row(t('Untung hari ini'), '<span class="' + (r.profit >= 0 ? 'pos' : 'loss') + '">' + rm(r.profit) + '</span>', 'total') +
       row(t('Reputasi'), r.repBefore + ' → ' + r.repAfter + ' (' + (repDiff >= 0 ? '+' : '') + repDiff + ')') +
       (r.bankInterest ? row(t('Pulangan bank malam ini'), '<span class="pos">+' + rm(r.bankInterest) + '</span> <small>(' + t('baki {v}', { v: rm(r.bankBalance) }) + ')</small>') : '') +

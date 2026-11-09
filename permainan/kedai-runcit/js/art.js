@@ -154,6 +154,11 @@ KR.art = (function () {
     '<path d="M8 18a9 9 0 0 1 18 0v12" fill="#256566" ' + OL + '/>' +
     '<rect x="11" y="17" width="12" height="8" rx="1" fill="#fffdf6" ' + OL + '/><path d="M11 17l6 4.5 6-4.5" fill="none" ' + OL + '/>' +
     '<path d="M36 22V8h7v5h-7" fill="#c0453a" ' + OL + '/>';
+  upgrades.iklan =
+    '<path d="M6 20h8l18-10v28L14 28H6z" fill="#e86f9a" ' + OL + '/>' +
+    '<path d="M10 28l3 12h6l-3-12" fill="#c0453a" ' + OL + '/>' +
+    '<path d="M37 16c3 2 4 5 4 8s-1 6-4 8" fill="none" stroke="#3a2a1f" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<path d="M36 21c1 1 1.5 2 1.5 3s-.5 2-1.5 3" fill="none" stroke="#3a2a1f" stroke-width="2.2" stroke-linecap="round"/>';
   upgrades.tcg = products.tcg;
 
   // People: a seeded mix of skin tones, clothes and headwear.

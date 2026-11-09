@@ -21,7 +21,7 @@ KR.config = {
   rent: 15,              // RM per day at full price
   // New shops get cheap rent: 60% for the first 30 days, then +20% every 30 days, up to 100%.
   // Applies to the shop's rent and the rent of any extra lots (levels with a 'rent' field).
-  rentRamp: { start: 0.6, step: 0.2, every: 30 },
+  rentRamp: { start: 0.6, step: 0.2, every: 28 },   // every month
   // Customer tiers. Rare ones (doctors) only come at reputation 80+, unique ones (kimono) at 95+.
   // multiChance = chance they buy multi times what they planned (common 2x, rare 2x, unique 3x).
   tiers: {
@@ -34,8 +34,27 @@ KR.config = {
   // Players only see which events are on once they have the Peti Surat Syarikat upgrade.
   eventChance: 0.25,
   weekEventChance: 0.08,
-  paydayEvery: 30,
+  // Calendar: 7 days a week, 4 weeks a month (28 days). The season ends after month 3.
+  weekDays: 7,
+  monthWeeks: 4,
+  paydayEvery: 28,       // payday is day 25 of every month
   paydayOn: 25,
+  // Wholesale prices: every week each item's cost moves by a random % (market), and everything
+  // gets `inflation` dearer each week (customers' fair price rises with it).
+  // Most weeks the move is small (-small..+small); with chance `bigChance` it's a big one
+  // (between big[0] and big[1], up or down), up to -50% or +50%.
+  market: { small: 0.2, bigChance: 0.15, big: [0.3, 0.5] },
+  inflation: 0.02,
+  // Rating: normally 0-100. Advertisement adds a bonus for one week, up to `max` (120).
+  repMax: 120,
+  ads: [
+    { name: 'Iklan Risalah',       price: 100, bonus: 10, days: 7 },
+    { name: 'Iklan Radio',         price: 150, bonus: 15, days: 7 },
+    { name: 'Iklan Media Sosial',  price: 200, bonus: 20, days: 7 }
+  ],
+  // Above 100 rating, rare and unique customers sometimes leave a tip: chance (rating - 100)%,
+  // tip = share of what they bought. Not explained in the game on purpose.
+  tips: { share: 0.5 },
   midRestockMarkup: 0.1, // restocking while the shop is open costs 10% more than the morning order
   hourMs: 4000,          // playback length of one opening hour at x1 speed
   openHour: 8,           // 8 pagi
@@ -78,7 +97,7 @@ KR.config = {
   ],
 
   // Season goal: shop value (cash + stock at cost + upgrades at price) after seasonDays.
-  seasonDays: 90,
+  seasonDays: 84,        // 3 months of 4 weeks
   starTargets: [3000, 7000, 12000],
 
   dayNames: ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
@@ -203,7 +222,7 @@ KR.config = {
   },
   randomEvents: ['pasarmalam', 'sukan', 'promosi', 'kenduri', 'influencer', 'bola', 'gotong', 'jalan'],
   weekEvents: ['subsidi', 'bantuan', 'rebat', 'cuti', 'kempen', 'diesel'],
-  // Company Performance Leaderboard: the 90-day shop value of each season (needs SSM).
+  // Company Performance Leaderboard: the shop value at the end of each season (needs SSM).
   boardKey: 'kedaiRuncit.board.v1',
 
   // Milestones pay a one-off cash reward. check(s, r) gets the state and today's report.

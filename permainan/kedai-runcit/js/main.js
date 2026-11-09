@@ -52,7 +52,7 @@
       else for (var i = 0; i < n && S.canOrder(state, id, 1); i++) state.order[id]++;
     } else {
       var p = S.product(id);
-      state.prices[id] = Math.min(p.ref * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
+      state.prices[id] = Math.min(S.refPrice(state, p) * 3, Math.max(0.1, S.round2(state.prices[id] + n)));
     }
     UI.header(state); UI.products(state); UI.bankTab(state); save();
   });
@@ -68,6 +68,11 @@
       if (b.dataset.up === 'pengurus') { state.managerOn = true; managerMorning(); }
       save(); UI.plan(state); renderManager();
     }
+  });
+
+  $('adPanel').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-ad]');
+    if (b && S.buyAd(state, +b.dataset.ad)) { SFX.kaching(); save(); UI.plan(state); }
   });
 
   $('bankPanel').addEventListener('click', function (e) {
@@ -224,7 +229,7 @@
 
   function spawn3d(entry) {
     S3.spawn({
-      seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: state.rep, tier: entry.tier,
+      seed: entry.regular ? S.regular(entry.regular).seed : Math.floor(Math.random() * 1000), fromLeft: Math.random() < 0.5, rep: S.rating(state), tier: entry.tier,
       from: entry.from, back: entry.back, regular: !!entry.regular,
       across: !entry.from && Math.random() < 0.3,                // some live across the road and use the zebra crossing
       lot: entry.wants && entry.wants.length ? S.lotOf(S.product(entry.wants[0].id)) - 1 : 0,   // browse in the lot that sells it

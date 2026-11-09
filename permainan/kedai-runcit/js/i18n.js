@@ -11,6 +11,14 @@ KR.i18n = (function () {
   var EN = {
     // Header and tabs
     'Hari {d} · {name}': 'Day {d} · {name}',
+    'Bulan {m} · Minggu {w} · Hari {d} · {name}': 'Month {m} · Week {w} · Day {d} · {name}',
+    '+{n} iklan': '+{n} ad', 'minggu ini': 'this week', 'Jumlah tip': 'Total tips', 'Tip daripada pelanggan': 'Tips from customers',
+    'Harga borong berubah setiap minggu, dan semua barang naik {i}% seminggu (inflasi).': 'Wholesale prices change every week, and everything gets {i}% dearer each week (inflation).',
+    'Harga borong berubah setiap minggu. Semak harga sebelum beli stok.': 'Wholesale prices change every week. Check them before you buy stock.',
+    'Iklan Kedai': 'Shop Advertising', 'Iklan Risalah': 'Flyers', 'Iklan Radio': 'Radio Ad', 'Iklan Media Sosial': 'Social Media Ad',
+    'Bayar sekali, reputasi naik selama seminggu. Hanya iklan boleh bawa reputasi melebihi 100 (sampai {m}).': 'Pay once and your reputation goes up for a week. Only advertising can take reputation above 100 (up to {m}).',
+    '{a} sedang berjalan: +{b} reputasi, tamat hari {d} (tinggal {n} hari).': '{a} is running: +{b} reputation, ends on day {d} ({n} days left).',
+    '+{b} reputasi, {n} hari': '+{b} reputation, {n} days',
     'Duit': 'Cash', 'Reputasi': 'Reputation', 'Stok': 'Stock',
     'Bunyi: buka': 'Sound: on', 'Bunyi: tutup': 'Sound: off', 'Grafik: 3D': 'Graphics: 3D', 'Grafik: 2D': 'Graphics: 2D',
     'Bahasa: BM': 'Language: EN',
@@ -25,8 +33,8 @@ KR.i18n = (function () {
       'The shop pauses for a moment. Daytime stock costs 10% more than the morning order, but goes straight on the shelf. Cash:',
     'Sambung berniaga': 'Back to business',
     'Selamat datang, tauke!': 'Welcome, boss!',
-    'Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 90 hari untuk dapat sampai 3 bintang. Sewa murah untuk bulan pertama. Setiap pagi:':
-      'You just took over a small corner shop with RM200. Goal: grow the shop\'s value over 90 days to earn up to 3 stars. Rent is cheap in the first month. Every morning:',
+    'Korang baru ambil alih kedai runcit kecil dengan modal RM200. Sasaran: besarkan nilai kedai dalam 3 bulan (84 hari) untuk dapat sampai 3 bintang. Sewa murah untuk bulan pertama. Setiap pagi:':
+      'You just took over a small corner shop with RM200. Goal: grow the shop\'s value over 3 months (84 days) to earn up to 3 stars. Rent is cheap in the first month. Every morning:',
     'Tengok ramalan cuaca dan acara hari ini.': 'Check the weather forecast and today\'s event.',
     'Beli stok dari pemborong. Ruang kedai terhad.': 'Buy stock from the wholesaler. Shelf space is limited.',
     'Tetapkan harga. Terlalu mahal, pelanggan lari. Terlalu murah, untung nipis.': 'Set prices. Too high and customers walk away. Too low and the margin is thin.',
