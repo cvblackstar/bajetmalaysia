@@ -6,7 +6,6 @@
     <title>Bajet MY — Faham Duit. Urus Duit. Rancang Hidup.</title>
     <meta name="description" content="Bajet MY membantu rakyat Malaysia memahami bajet, hutang, rumah, kereta, simpanan dan kewangan melalui panduan dan kalkulator mudah.">
     <link rel="stylesheet" href="style.css?v=20260923-2">
-    <link rel="stylesheet" href="hero-background.css?v=20260923-2">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -55,79 +54,104 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9164251614891507"
      crossorigin="anonymous"></script>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="theme-glass.css?v=20261118">
+<link rel="stylesheet" href="theme-home.css?v=20261118">
+<script src="site-ui.js?v=20261118" data-skin="home"></script>
 </head>
 <body>
 <header class="site-header">
     <div class="header-inner">
-        <a href="index.html" class="logo">BAJET MY</a>
+        <a href="index.html" class="logo">Bajet MY</a>
         <nav class="main-nav">
             <a href="index.html">Utama</a>
             <a href="#kalkulator">Kalkulator</a>
             <a href="panduan.html">Panduan</a>
+            <a href="#apps">Apps</a>
             <a href="tentang-kami.html">Tentang Kami</a>
         </nav>
     </div>
 </header>
-<main>
-<section class="hero"><div class="container">
-    <div class="hero-badge">🇲🇾 Untuk rakyat Malaysia</div>
-    <h1>Faham Duit.<br>Urus Duit.<br><span>Rancang Hidup.</span></h1>
-    <p>Panduan kewangan dan kalkulator mudah untuk membantu anda memahami bagaimana duit anda digunakan.</p>
-    <div class="hero-buttons">
-        <a href="gaji-bersih.html" class="button primary">🧮 Kira Gaji Bersih</a>
-        <a href="panduan.html" class="button secondary">📚 Belajar Tentang Duit</a>
+<main class="home">
+<section class="h-hero">
+    <div>
+        <span class="h-badge">🇲🇾 Untuk rakyat Malaysia</span>
+        <h1>Urus duit, <mark>senang je.</mark></h1>
+        <p>Kalkulator, panduan dan permainan untuk faham duit korang, plus apps kecil yang memudahkan hidup.</p>
+        <div class="h-search"><input id="homeSearch" type="search" placeholder="Cari apa-apa… cuba “rumah” atau “hutang”" autocomplete="off" aria-label="Cari kalkulator, panduan atau apps"><kbd aria-hidden="true">/</kbd><div class="h-results" id="homeResults" hidden></div></div>
+        <div class="h-recent" id="homeRecent" hidden>Baru guna: <span id="homeRecentList"></span></div>
     </div>
-</div></section>
-<section id="kalkulator" class="section"><div class="container">
-    <div class="section-heading"><span class="eyebrow">KALKULATOR</span><h2>Kira Sebelum Buat Keputusan</h2><p>Gunakan kalkulator kami untuk memahami angka kewangan anda dengan lebih mudah.</p></div>
-    <div class="calculator-grid">
-        <a href="gaji-bersih.html" class="calculator-card"><div class="calculator-icon">💰</div><h3>Gaji Bersih</h3><p>Berapa sebenarnya gaji yang tinggal selepas potongan wajib?</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="dsr.html" class="calculator-card"><div class="calculator-icon">💳</div><h3>DSR</h3><p>Kira nisbah komitmen hutang berbanding pendapatan.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="kwsp.html" class="calculator-card"><div class="calculator-icon">🏦</div><h3>Simpanan KWSP</h3><p>Anggarkan simpanan persaraan anda berdasarkan caruman.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="housing.html" class="calculator-card"><div class="calculator-icon">🏠</div><h3>Pinjaman Rumah</h3><p>Anggarkan bayaran bulanan dan jumlah faedah/profit.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="car.html" class="calculator-card"><div class="calculator-icon">🚗</div><h3>Pinjaman Kereta</h3><p>Lihat anggaran bayaran bulanan sebelum membeli kereta.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="fuel.html" class="calculator-card"><div class="calculator-icon">⛽</div><h3>Kecekapan Minyak</h3><p>Bandingkan penggunaan dan kos RON95 antara dua kereta.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="emergency.html" class="calculator-card"><div class="calculator-icon">🛟</div><h3>Dana Kecemasan</h3><p>Berapa banyak simpanan kecemasan yang patut anda ada?</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="budget.html" class="calculator-card"><div class="calculator-icon">📊</div><h3>Bajet Bulanan</h3><p>Lihat ke mana duit anda pergi setiap bulan.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="pakw.html" class="calculator-card"><div class="calculator-icon">🧾</div><h3>Duit Sara Hidup</h3><p>Anggarkan perbelanjaan bulanan yang diperlukan berdasarkan lokasi dan saiz isi rumah.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="pelaburan.html" class="calculator-card"><div class="calculator-icon">📈</div><h3>Pertumbuhan Pelaburan</h3><p>Anggarkan pertumbuhan pelaburan anda — sesuai untuk ASB, unit trust dan lain-lain.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="kos-beli-rumah.html" class="calculator-card"><div class="calculator-icon">🔑</div><h3>Kos Beli Rumah</h3><p>Deposit, duti setem dan yuran guaman — berapa tunai perlu disediakan.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="jual-rumah.html" class="calculator-card"><div class="calculator-icon">🏷️</div><h3>Untung Jual Rumah</h3><p>Jual rumah subsale untung atau rugi selepas pinjaman, kos jual dan RPGT.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="bayar-hutang.html" class="calculator-card"><div class="calculator-icon">⛓️</div><h3>Bebas Hutang</h3><p>Bila hutang anda selesai, dan berapa jimat dengan bayaran tambahan.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="pendapatan-youtube.html" class="calculator-card"><div class="calculator-icon">▶️</div><h3>Pendapatan YouTube</h3><p>Tampal pautan saluran dan anggarkan pendapatan iklan dalam ringgit.</p><span class="card-link">Kira sekarang →</span></a>
-        <a href="kumpulan-pendapatan.html" class="calculator-card"><div class="calculator-icon">🎯</div><h3>B40 / M40 / T20</h3><p>Semak kumpulan pendapatan isi rumah anda mengikut negeri dan Malaysia.</p><span class="card-link">Semak sekarang →</span></a>
+    <div style="position:relative">
+        <span class="h-sticker" style="right:-6px;top:-34px" aria-hidden="true">⭐</span>
+        <span class="h-sticker" style="left:-16px;bottom:-26px;animation-delay:-1.5s" aria-hidden="true">💸</span>
+        <div class="h-receipt">
+            <label for="miniGross">Gaji kasar sebulan (RM)</label>
+            <input id="miniGross" type="number" inputmode="numeric" min="0" value="3500">
+            <div class="h-row"><span>KWSP 11%</span><span id="miniKwsp">-</span></div>
+            <div class="h-row"><span>PERKESO + SIP</span><span id="miniSocso">-</span></div>
+            <div class="h-net-l">Masuk akaun (sebelum PCB)</div>
+            <div class="h-net" id="miniNet" aria-live="polite">RM0.00</div>
+            <a class="h-more" href="gaji-bersih.html">Kira penuh dengan PCB →</a>
+        </div>
     </div>
-</div></section>
-<section id="permainan" class="section"><div class="container">
-    <div class="section-heading"><span class="eyebrow">PERMAINAN</span><h2>Belajar Sambil Main</h2><p>Cuba urus duit dalam permainan yang santai, tanpa risiko duit sebenar.</p></div>
-    <div class="calculator-grid">
-        <a href="permainan-kewangan.html" class="calculator-card"><div class="calculator-icon">🌸</div><h3>Cozy Financial Tycoon</h3><p>Buat gig, latih skill, simpan di bank dan buka bisnes sampai jadi tycoon.</p><span class="card-link">Main sekarang →</span></a>
+</section>
+
+<section class="h-sec reveal" id="kalkulator">
+    <div class="h-head"><h2>Kalkulator</h2><span class="h-tag" style="background:var(--s-o)">15 alat percuma</span><p>Kira sebelum buat keputusan. Masukkan angka korang sendiri, dapat jawapan terus.</p></div>
+    <div class="h-grid">
+        <a href="gaji-bersih.html" class="h-card feat" data-recent><span class="h-ico" aria-hidden="true">💰</span><h3>Gaji Bersih</h3><p>Berapa sebenarnya gaji yang tinggal selepas potongan wajib?</p></a>
+        <a href="dsr.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">💳</span><h3>DSR</h3><p>Kira nisbah komitmen hutang berbanding pendapatan.</p></a>
+        <a href="kwsp.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🏦</span><h3>Simpanan KWSP</h3><p>Anggarkan simpanan persaraan anda berdasarkan caruman.</p></a>
+        <a href="housing.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🏠</span><h3>Pinjaman Rumah</h3><p>Anggarkan bayaran bulanan dan jumlah faedah/profit.</p></a>
+        <a href="car.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🚗</span><h3>Pinjaman Kereta</h3><p>Lihat anggaran bayaran bulanan sebelum membeli kereta.</p></a>
+        <a href="fuel.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">⛽</span><h3>Kecekapan Minyak</h3><p>Bandingkan penggunaan dan kos RON95 antara dua kereta.</p></a>
+        <a href="emergency.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🛟</span><h3>Dana Kecemasan</h3><p>Berapa banyak simpanan kecemasan yang patut anda ada?</p></a>
+        <a href="budget.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">📊</span><h3>Bajet Bulanan</h3><p>Lihat ke mana duit anda pergi setiap bulan.</p></a>
+        <a href="pakw.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🧾</span><h3>Duit Sara Hidup</h3><p>Anggarkan perbelanjaan bulanan yang diperlukan berdasarkan lokasi dan saiz isi rumah.</p></a>
+        <a href="pelaburan.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">📈</span><h3>Pertumbuhan Pelaburan</h3><p>Anggarkan pertumbuhan pelaburan anda — sesuai untuk ASB, unit trust dan lain-lain.</p></a>
+        <a href="kos-beli-rumah.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🔑</span><h3>Kos Beli Rumah</h3><p>Deposit, duti setem dan yuran guaman — berapa tunai perlu disediakan.</p></a>
+        <a href="jual-rumah.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🏷️</span><h3>Untung Jual Rumah</h3><p>Jual rumah subsale untung atau rugi selepas pinjaman, kos jual dan RPGT.</p></a>
+        <a href="bayar-hutang.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">⛓️</span><h3>Bebas Hutang</h3><p>Bila hutang anda selesai, dan berapa jimat dengan bayaran tambahan.</p></a>
+        <a href="pendapatan-youtube.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">▶️</span><h3>Pendapatan YouTube</h3><p>Tampal pautan saluran dan anggarkan pendapatan iklan dalam ringgit.</p></a>
+        <a href="kumpulan-pendapatan.html" class="h-card" data-recent><span class="h-ico" aria-hidden="true">🎯</span><h3>B40 / M40 / T20</h3><p>Semak kumpulan pendapatan isi rumah anda mengikut negeri dan Malaysia.</p></a>
     </div>
-</div></section>
-<section id="panduan" class="section light-section"><div class="container">
-    <div class="section-heading"><span class="eyebrow">PANDUAN</span><h2>Belajar Tentang Duit</h2><p>Kewangan tak semestinya susah. Kita pecahkan kepada perkara yang mudah difahami.</p></div>
-    <div class="topic-grid">
-        <div class="topic"><div class="topic-icon">💰</div><div><h3>Bajet</h3><p>Cara merancang pendapatan dan perbelanjaan bulanan.</p></div></div>
-        <div class="topic"><div class="topic-icon">💳</div><div><h3>Hutang</h3><p>Fahami pinjaman rumah, kereta, kad kredit dan DSR.</p></div></div>
-        <div class="topic"><div class="topic-icon">🏠</div><div><h3>Rumah</h3><p>Fahami kos sebenar membeli dan memiliki rumah.</p></div></div>
-        <div class="topic"><div class="topic-icon">🚗</div><div><h3>Kereta</h3><p>Bukan sekadar ansuran — fahami kos sebenar memiliki kereta.</p></div></div>
-        <div class="topic"><div class="topic-icon">📈</div><div><h3>Simpanan</h3><p>Fahami dana kecemasan, KWSP dan cara membina simpanan.</p></div></div>
-        <div class="topic"><div class="topic-icon">📊</div><div><h3>Pelaburan</h3><p>Kenali risiko, pulangan, compounding dan asas pelaburan.</p></div></div>
+</section>
+
+<section class="h-sec reveal" id="panduan">
+    <div class="h-head"><h2>Berita &amp; Panduan</h2><span class="h-tag" style="background:var(--s-l)">Terkini</span><p>Berita duit terkini dan panduan langkah demi langkah dalam bahasa yang senang faham.</p></div>
+    <div class="h-news" id="homeNews"><a href="panduan.html" class="glow"><span class="d">Panduan</span><b>Lihat semua berita dan panduan</b><span>Bajet, hutang, rumah, simpanan, persaraan dan cara elak scam.</span></a></div>
+    <a class="h-link" href="panduan.html">📚 Semua berita &amp; panduan →</a>
+</section>
+
+<section class="h-sec reveal" id="permainan">
+    <div class="h-head"><h2>Main sambil belajar</h2><p>Cuba urus duit dalam permainan yang santai, tanpa risiko duit sebenar.</p></div>
+    <div class="h-grid">
+        <a href="permainan-kewangan.html" class="h-card game" data-recent><span class="h-ico" aria-hidden="true">🌸</span><h3>Cozy Financial Tycoon</h3><p>Buat gig, latih skill, simpan di bank dan buka bisnes sampai jadi tycoon.</p></a>
     </div>
-    <div class="hero-buttons" style="margin-top:2rem;justify-content:center;"><a href="panduan.html" class="button primary">📚 Lihat Semua Panduan →</a></div>
-</div></section>
-<section id="tentang-kami" class="section"><div class="container">
-    <div class="section-heading"><span class="eyebrow">TENTANG KAMI</span><h2>Kenapa Bajet MY?</h2><p>Bajet MY dibina dengan satu tujuan mudah: membantu lebih ramai rakyat Malaysia memahami kewangan mereka dan membuat keputusan dengan lebih yakin.</p></div>
-    <div class="topic-grid">
-        <div class="topic"><div class="topic-icon">📚</div><div><h3>Meningkatkan literasi kewangan</h3><p>Kami mahu menjadikan ilmu kewangan lebih mudah difahami dan lebih dekat dengan kehidupan harian — daripada mengurus gaji dan hutang sehingga merancang simpanan dan persaraan.</p></div></div>
-        <div class="topic"><div class="topic-icon">🧮</div><div><h3>Semua alat di satu tempat</h3><p>Daripada gaji bersih, DSR dan bajet bulanan hingga pinjaman, dana kecemasan dan KWSP, kami cuba menghimpunkan kalkulator kewangan yang praktikal supaya lebih mudah dicapai dan digunakan.</p></div></div>
-        <div class="topic"><div class="topic-icon">🤝</div><div><h3>Menyumbang kepada masyarakat</h3><p>Bajet MY diwujudkan sebagai usaha kecil untuk berkongsi ilmu dan alat yang berguna kepada masyarakat. Kami percaya pemahaman kewangan yang lebih baik boleh membantu seseorang merancang masa depan dengan lebih baik.</p></div></div>
+</section>
+
+<section class="h-sec reveal" id="apps">
+    <div class="h-head"><h2>Apps</h2><span class="h-tag" style="background:var(--s-y)">Akan datang</span><p>Apps kecil dari pembina Bajet MY. Kini dalam ujian tertutup.</p></div>
+    <div class="h-apps">
+        <div class="h-app"><span class="badge">Ujian tertutup</span><span class="h-app-ico" aria-hidden="true">🌳</span><div><h3>Salasilah <small>Family Tree</small></h3><p>Bina dan simpan salasilah keluarga, dari datuk nenek hingga cucu cicit.</p></div></div>
+        <div class="h-app"><span class="badge">Ujian tertutup</span><span class="h-app-ico" aria-hidden="true">🔤</span><div><h3>Sekilas <small>Screen Translator</small></h3><p>Terjemah apa sahaja di skrin telefon dengan sekali sentuh.</p></div></div>
     </div>
-    <div class="hero-buttons" style="margin-top:2rem;justify-content:center;"><a href="tentang-kami.html" class="button primary">Baca Tentang Kami &amp; Data →</a></div>
-</div></section>
-<section class="principle"><div class="container"><div class="principle-box"><div class="principle-icon">💡</div><h2>Kami terangkan.<br>Anda buat keputusan.</h2><p>Bajet MY menyediakan maklumat kewangan untuk tujuan pendidikan dan rujukan umum. Kami membantu anda memahami angka supaya anda boleh membuat keputusan sendiri. Angka yang dipaparkan adalah anggaran dan tidak semestinya tepat.</p></div></div></section>
+</section>
+
+<section class="h-sec reveal" id="tentang-kami">
+    <div class="h-head"><h2>Kenapa Bajet MY?</h2><p>Dibina dengan satu tujuan mudah: membantu lebih ramai rakyat Malaysia memahami kewangan mereka dan membuat keputusan dengan lebih yakin.</p></div>
+    <div class="h-about">
+        <div><span aria-hidden="true">📚</span><b>Literasi kewangan</b><p>Ilmu kewangan yang mudah difahami dan dekat dengan kehidupan harian, daripada gaji dan hutang hingga simpanan dan persaraan.</p></div>
+        <div><span aria-hidden="true">🧮</span><b>Semua alat di satu tempat</b><p>Kalkulator kewangan yang praktikal, daripada gaji bersih, DSR dan bajet bulanan hingga pinjaman, dana kecemasan dan KWSP.</p></div>
+        <div><span aria-hidden="true">🤝</span><b>Untuk masyarakat</b><p>Usaha kecil untuk berkongsi ilmu dan alat yang berguna, supaya lebih ramai boleh merancang masa depan dengan lebih baik.</p></div>
+    </div>
+    <a class="h-link" href="tentang-kami.html">Baca Tentang Kami &amp; Data →</a>
+</section>
+
+<section class="h-principle reveal"><h2>Kami terangkan. Korang buat keputusan.</h2><p>Bajet MY menyediakan maklumat kewangan untuk tujuan pendidikan dan rujukan umum. Angka yang dipaparkan adalah anggaran dan tidak semestinya tepat.</p></section>
 </main>
 <footer class="site-footer"><div class="footer-inner"><p class="footer-brand">BAJET MY</p><p>Faham Duit. Urus Duit. Rancang Hidup.</p><p>Maklumat di laman ini adalah untuk tujuan pendidikan dan rujukan umum sahaja.</p><p>© 2026 Bajet MY</p></div><p class="footer-policies"><a href="tentang-kami.html#hubungi-kami">Hubungi Kami</a><a href="disclaimer.html">Penafian</a><a href="privacy.html">Privasi</a><a href="affiliate-disclosure.html">Pendedahan Affiliate</a></p>
 </footer>
+<script src="home.js" defer></script>
 </body>
 </html>
