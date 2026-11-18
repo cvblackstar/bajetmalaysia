@@ -1,0 +1,83 @@
+/* Tema "Sticker Pop": halaman kalkulator. Dimuatkan selepas style.css dan menindih kelas sedia ada. */
+:root{--s-bg:#fff6e5;--s-ink:#1a1a1a;--s-paper:#fff;--s-muted:#4b4b4b;--s-y:#ffd23f;--s-p:#ff8fb1;--s-b:#7ab8ff;--s-g:#5fd39b;--s-o:#ff9f4a;
+  --s-bd:2.5px solid var(--s-ink);--s-sh:4px 4px 0 var(--s-ink);
+  --navy:var(--s-ink);--text:var(--s-ink);--muted:var(--s-muted);--border:var(--s-ink);--background:var(--s-bg);--green:#0b7a4f;--green-light:#d9f6e8}
+body{background-color:var(--s-bg);background-image:radial-gradient(rgba(26,26,26,.12) 1.2px,transparent 1.2px);background-size:22px 22px;color:var(--s-ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:500}
+h1,h2,h3,h4,.logo,.footer-brand{font-family:"Bricolage Grotesque","Plus Jakarta Sans",sans-serif;letter-spacing:-.02em}
+
+/* Kepala */
+.site-header{background:var(--s-y);color:var(--s-ink);border-bottom:var(--s-bd);box-shadow:none}
+.header-inner{padding:10px 16px;min-height:64px}
+.site-header .logo{color:var(--s-ink);background:var(--s-paper);border:var(--s-bd);border-radius:12px;padding:2px 12px;box-shadow:3px 3px 0 var(--s-ink);transform:rotate(-2deg);font-size:1.3rem;text-decoration:none}
+.main-nav{gap:8px}
+.main-nav a{color:var(--s-ink);font-weight:800;border:var(--s-bd);border-radius:999px;padding:5px 13px;background:var(--s-paper);text-decoration:none;transition:transform .15s,box-shadow .15s}
+.main-nav a:hover{color:var(--s-ink);transform:translate(-2px,-2px);box-shadow:var(--s-sh)}
+
+/* Tajuk halaman */
+.section{background:transparent}
+.section-heading h1,.section-heading h2{color:var(--s-ink);font-size:clamp(2rem,5vw,3rem);line-height:1.05}
+.section-heading p{color:var(--s-muted);font-weight:600}
+.eyebrow{background:var(--s-p);color:var(--s-ink);border:var(--s-bd);border-radius:999px;padding:3px 12px;letter-spacing:.06em;transform:rotate(-2deg)}
+
+/* Kad borang & keputusan */
+.calculator-form-card,.calculator-result-card{background:var(--s-paper);border:var(--s-bd);border-radius:22px;box-shadow:6px 6px 0 var(--s-ink)}
+.calculator-result-card{top:86px}
+.calculator-form-card h2,.calculator-result-card h2{color:var(--s-ink);display:inline-block;background:var(--s-y);border:var(--s-bd);border-radius:12px;padding:2px 12px;box-shadow:3px 3px 0 var(--s-ink);font-size:1.2rem}
+.calculator-result-card h2{background:var(--s-g)}
+.form-group label{color:var(--s-ink);font-weight:800}
+.form-group small{color:var(--s-muted)}
+.form-group input[type=number],.form-group input[type=month],.form-group input[type=text],.form-group select,.input-wrapper{border:var(--s-bd);border-radius:12px;background:var(--s-paper);color:var(--s-ink);font-weight:700}
+.form-group input:focus,.form-group select:focus,.input-wrapper:focus-within{outline:none;box-shadow:3px 3px 0 var(--s-ink);border-color:var(--s-ink)}
+.input-wrapper span{background:var(--s-y);color:var(--s-ink);border-right:var(--s-bd);font-weight:800}
+.input-wrapper .suffix{border-left:var(--s-bd)}
+.form-section-title{color:var(--s-ink)}
+.checkbox-label{font-weight:700}
+input[type=checkbox],input[type=radio]{accent-color:var(--s-ink)}
+.button.primary,.calculate-button{background:var(--s-ink);color:var(--s-paper);border:var(--s-bd);border-radius:14px;box-shadow:4px 4px 0 var(--s-p);font-weight:800}
+.button.primary:hover,.calculate-button:hover{background:var(--s-ink);transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--s-p)}
+.button.secondary{background:var(--s-paper);color:var(--s-ink);border:var(--s-bd);box-shadow:3px 3px 0 var(--s-ink)}
+.calc-form-error{border:var(--s-bd);border-radius:12px;background:#ffe0e6;color:var(--s-ink);font-weight:700}
+
+.take-home{background:var(--s-g);border:var(--s-bd);border-radius:18px;box-shadow:4px 4px 0 var(--s-ink)}
+.take-home span{color:var(--s-ink);font-weight:800}
+.take-home strong{color:var(--s-ink);font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
+.take-home.loss{background:#ffc9d6}
+.take-home.loss strong{color:#9b1c3a}
+.result-row{border-bottom:2px dashed rgba(26,26,26,.25)}
+.result-row span{color:var(--s-muted)}.result-row strong{color:var(--s-ink)}
+.result-row.total-row{border-top:var(--s-bd);border-bottom:0}
+.pcb-notice{background:var(--s-b);border:var(--s-bd);border-radius:16px;box-shadow:3px 3px 0 var(--s-ink);color:var(--s-ink)}
+.pcb-notice strong{color:var(--s-ink)}.pcb-notice p{color:var(--s-ink)}
+.progress-track,.segment-bar{border:2px solid var(--s-ink);background:var(--s-paper)}
+.progress-fill{background:var(--s-p)}
+.dsr-gauge{border:2px solid var(--s-ink)}
+
+/* Simpan & kongsi senario */
+.calculator-data-tools{background:var(--s-paper);border:var(--s-bd);border-radius:16px;box-shadow:3px 3px 0 var(--s-ink)}
+.calculator-data-actions button{border:var(--s-bd);border-radius:12px;font-weight:800;box-shadow:3px 3px 0 var(--s-ink)}
+.share-primary{background:var(--s-y);color:var(--s-ink)}
+
+/* Penerangan di bawah kalkulator */
+.light-section{background:transparent}
+.topic{background:var(--s-paper);border:var(--s-bd);border-radius:18px;box-shadow:var(--s-sh)}
+.topic-icon{background:var(--s-y);border:var(--s-bd);border-radius:14px;width:52px;height:52px;display:grid;place-items:center}
+.topic h3{color:var(--s-ink)}.topic p{color:var(--s-muted)}
+.principle-box{background:var(--s-paper);border:var(--s-bd);border-radius:22px;box-shadow:6px 6px 0 var(--s-ink);color:var(--s-ink)}
+.principle-box h2{color:var(--s-ink)}.principle-box p{color:var(--s-muted)}
+.principle-box .eyebrow{transform:none}
+
+/* Kaki */
+.site-footer{background:var(--s-y);color:var(--s-ink);border-top:var(--s-bd)}
+.site-footer p,.footer-brand,.footer-policies a{color:var(--s-ink)}
+
+/* Navigasi bawah (telefon) */
+.bottom-nav{display:none}
+@media(max-width:860px){
+  .main-nav{display:none}
+  .bottom-nav{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:90;background:var(--s-paper);border:var(--s-bd);border-radius:20px;box-shadow:var(--s-sh);justify-content:space-around;padding:6px}
+  .bottom-nav a{display:flex;flex-direction:column;align-items:center;font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:12px;color:var(--s-ink);text-decoration:none}
+  .bottom-nav a b{font-size:1.25rem;line-height:1.2}.bottom-nav a.on{background:var(--s-y);border:2px solid var(--s-ink)}
+  body{padding-bottom:84px}
+  .calculator-form-card,.calculator-result-card{box-shadow:4px 4px 0 var(--s-ink)}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
