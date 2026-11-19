@@ -13,7 +13,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const here = location.pathname.replace(/\/index\.html$/, "/");
-    const section = /\/artikel\/|panduan\.html|article\.html/.test(here) ? "panduan" : here.endsWith("/") ? "utama" : skin === "sticker" ? "kalkulator" : "";
+    const section = /\/artikel\/|panduan\.html|article\.html/.test(here) ? "panduan" : /permainan/.test(here) ? "permainan" : here.endsWith("/") ? "utama" : skin === "sticker" ? "kalkulator" : "";
 
     document.querySelectorAll(".main-nav a").forEach(a => {
       const target = new URL(a.getAttribute("href"), location.href);
@@ -30,7 +30,7 @@
     }
 
     if (!document.querySelector(".bottom-nav")) {
-      const items = [["utama", "🏠", "Utama", "index.html"], ["kalkulator", "🧮", "Kalkulator", "index.html#kalkulator"], ["panduan", "📚", "Panduan", "panduan.html"], ["apps", "📱", "Apps", "index.html#apps"]];
+      const items = [["utama", "🏠", "Utama", "index.html"], ["kalkulator", "🧮", "Kalkulator", "index.html#kalkulator"], ["permainan", "🎮", "Main", "permainan.html"], ["panduan", "📚", "Panduan", "panduan.html"], ["apps", "📱", "Apps", "index.html#apps"]];
       const nav = document.createElement("nav");
       nav.className = "bottom-nav"; nav.setAttribute("aria-label", "Navigasi utama");
       nav.innerHTML = items.map(([key, ico, label, href]) => `<a href="${base}${href}"${key === section ? ' class="on" aria-current="page"' : ""}><b aria-hidden="true">${ico}</b>${label}</a>`).join("");

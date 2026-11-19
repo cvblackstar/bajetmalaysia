@@ -10,6 +10,8 @@ const root = process.cwd();
 const SITE = 'https://bajetmy.my/';
 const EXCLUDE = new Set(['404.html', 'article.html']);
 const FIRST = ['index.html'];
+// Halaman dalam subfolder yang patut diindeks (contoh: permainan penuh skrin).
+const EXTRA = ['permainan/kedai-runcit/'];
 
 function lastCommitDate(file) {
   try {
@@ -28,6 +30,7 @@ const articles = JSON.parse(fs.readFileSync(path.join(root, 'data', 'articles.js
 
 const urls = [
   ...pages.map(page => ({ loc: page === 'index.html' ? SITE : SITE + page, lastmod: lastCommitDate(page) })),
+  ...EXTRA.map(dir => ({ loc: SITE + dir, lastmod: lastCommitDate(dir) })),
   ...articles.map(article => ({ loc: `${SITE}artikel/${article.slug}.html`, lastmod: article.updated || article.published }))
 ];
 
